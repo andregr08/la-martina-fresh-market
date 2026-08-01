@@ -1,13 +1,23 @@
 ﻿"use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  Banknote,
   Boxes,
+  CreditCard,
   Loader2,
   PackageOpen,
   ReceiptText,
   RefreshCw,
+  Smartphone,
   TrendingUp,
   WalletCards,
 } from "lucide-react"
@@ -29,8 +39,10 @@ type Period = "today" | "week" | "month"
 
 type Sale = {
   id: string
+  folio: string
   total: number
   discount: number
+  payment_method: string
   sold_at: string
   status: string
 }
@@ -51,6 +63,11 @@ type Expense = {
   expense_date: string
 }
 
+type Waste = {
+  total_loss: number
+  recorded_at: string
+}
+
 type Product = {
   id: string
   name: string
@@ -58,7 +75,6 @@ type Product = {
   current_stock: number
   minimum_stock: number
   purchase_price: number
-  active: boolean
 }
 
 type ChartPoint = {
@@ -78,6 +94,14 @@ function money(value: number) {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency: "MXN",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0))
+}
+
+function preciseMoney(value: number) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
   }).format(Number(value || 0))
 }
 
@@ -87,25 +111,56 @@ function quantity(value: number, unit: string) {
   })} ${unit}`
 }
 
-function getStartDate(period: Period) {
+function getStartDate(period: Period, previous = false) {
   const now = new Date()
   const start = new Date(now)
 
   if (period === "today") {
     start.setHours(0, 0, 0, 0)
+
+    if (previous) {
+      start.setDate(start.getDate() - 1)
+    }
   }
 
   if (period === "week") {
-    start.setDate(now.getDate() - 6)
+    start.setDate(now.getDate() - (previous ? 13 : 6))
     start.setHours(0, 0, 0, 0)
   }
 
   if (period === "month") {
-    start.setDate(1)
+    if (previous) {
+      start.setMonth(now.getMonth() - 1, 1)
+    } else {
+      start.setDate(1)
+    }
+
     start.setHours(0, 0, 0, 0)
   }
 
   return start
+}
+
+function getPreviousEndDate(period: Period) {
+  const now = new Date()
+  const end = new Date(now)
+
+  if (period === "today") {
+    end.setDate(now.getDate() - 1)
+    end.setHours(23, 59, 59, 999)
+  }
+
+  if (period === "week") {
+    end.setDate(now.getDate() - 7)
+    end.setHours(23, 59, 59, 999)
+  }
+
+  if (period === "month") {
+    end.setDate(0)
+    end.setHours(23, 59, 59, 999)
+  }
+
+  return end
 }
 
 function chartLabel(dateValue: string, period: Period) {
@@ -124,13 +179,81 @@ function chartLabel(dateValue: string, period: Period) {
   })
 }
 
+function percentChange(current: number, previous: number) {
+  if (previous === 0) {
+    return current > 0 ? 100 : 0
+  }
+
+  return ((current - previous) / previous) * 100
+}
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  change,
+}: {
+  title: string
+  value: string
+  subtitle?: string
+  icon: React.ComponentType<{ className?: string }>
+  change?: number
+}) {
+  const positive = Number(change ?? 0) >= 0
+
+  return (
+    <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
+          <Icon className="h-5 w-5" />
+        </div>
+
+        {typeof change === "number" && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+              positive
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-red-50 text-red-700"
+            }`}
+          >
+            {positive ? (
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            ) : (
+              <ArrowDownRight className="h-3.5 w-3.5" />
+            )}
+
+            {Math.abs(change).toFixed(1)}%
+          </span>
+        )}
+      </div>
+
+      <p className="mt-5 text-sm font-medium text-slate-500">
+        {title}
+      </p>
+
+      <p className="mt-2 text-[28px] font-semibold tracking-tight text-[#172018]">
+        {value}
+      </p>
+
+      {subtitle && (
+        <p className="mt-2 text-xs text-slate-500">
+          {subtitle}
+        </p>
+      )}
+    </article>
+  )
+}
+
 export default function DashboardPage() {
   const supabase = createClient()
 
   const [period, setPeriod] = useState<Period>("week")
   const [sales, setSales] = useState<Sale[]>([])
+  const [previousSales, setPreviousSales] = useState<Sale[]>([])
   const [saleItems, setSaleItems] = useState<SaleItem[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [waste, setWaste] = useState<Waste[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -140,19 +263,46 @@ export default function DashboardPage() {
     setError("")
 
     const startDate = getStartDate(period).toISOString()
+    const previousStart = getStartDate(period, true).toISOString()
+    const previousEnd = getPreviousEndDate(period).toISOString()
 
     const [
       salesResponse,
+      previousSalesResponse,
       itemsResponse,
       expensesResponse,
+      wasteResponse,
       productsResponse,
     ] = await Promise.all([
       supabase
         .from("sales")
-        .select("id, total, discount, sold_at, status")
+        .select(`
+          id,
+          folio,
+          total,
+          discount,
+          payment_method,
+          sold_at,
+          status
+        `)
         .eq("status", "completed")
         .gte("sold_at", startDate)
         .order("sold_at"),
+
+      supabase
+        .from("sales")
+        .select(`
+          id,
+          folio,
+          total,
+          discount,
+          payment_method,
+          sold_at,
+          status
+        `)
+        .eq("status", "completed")
+        .gte("sold_at", previousStart)
+        .lte("sold_at", previousEnd),
 
       supabase
         .from("sale_items")
@@ -179,6 +329,11 @@ export default function DashboardPage() {
         .gte("expense_date", startDate),
 
       supabase
+        .from("waste_records")
+        .select("total_loss, recorded_at")
+        .gte("recorded_at", startDate),
+
+      supabase
         .from("products")
         .select(`
           id,
@@ -186,8 +341,7 @@ export default function DashboardPage() {
           unit,
           current_stock,
           minimum_stock,
-          purchase_price,
-          active
+          purchase_price
         `)
         .eq("active", true)
         .order("name"),
@@ -195,8 +349,10 @@ export default function DashboardPage() {
 
     const firstError =
       salesResponse.error ||
+      previousSalesResponse.error ||
       itemsResponse.error ||
       expensesResponse.error ||
+      wasteResponse.error ||
       productsResponse.error
 
     if (firstError) {
@@ -206,10 +362,14 @@ export default function DashboardPage() {
     }
 
     setSales((salesResponse.data ?? []) as Sale[])
+    setPreviousSales(
+      (previousSalesResponse.data ?? []) as Sale[],
+    )
     setSaleItems(
       (itemsResponse.data ?? []) as unknown as SaleItem[],
     )
     setExpenses((expensesResponse.data ?? []) as Expense[])
+    setWaste((wasteResponse.data ?? []) as Waste[])
     setProducts((productsResponse.data ?? []) as Product[])
     setLoading(false)
   }, [period, supabase])
@@ -227,10 +387,14 @@ export default function DashboardPage() {
     [sales],
   )
 
-  const salesCount = sales.length
-
-  const averageTicket =
-    salesCount > 0 ? salesTotal / salesCount : 0
+  const previousSalesTotal = useMemo(
+    () =>
+      previousSales.reduce(
+        (total, sale) => total + Number(sale.total || 0),
+        0,
+      ),
+    [previousSales],
+  )
 
   const grossProfit = useMemo(
     () =>
@@ -250,7 +414,24 @@ export default function DashboardPage() {
     [expenses],
   )
 
-  const netProfit = grossProfit - expenseTotal
+  const wasteTotal = useMemo(
+    () =>
+      waste.reduce(
+        (total, item) => total + Number(item.total_loss || 0),
+        0,
+      ),
+    [waste],
+  )
+
+  const netProfit = grossProfit - expenseTotal - wasteTotal
+
+  const averageTicket =
+    sales.length > 0 ? salesTotal / sales.length : 0
+
+  const previousAverageTicket =
+    previousSales.length > 0
+      ? previousSalesTotal / previousSales.length
+      : 0
 
   const inventoryValue = useMemo(
     () =>
@@ -275,9 +456,10 @@ export default function DashboardPage() {
         })
         .sort(
           (a, b) =>
-            Number(a.current_stock) - Number(b.current_stock),
+            Number(a.current_stock) -
+            Number(b.current_stock),
         )
-        .slice(0, 8),
+        .slice(0, 6),
     [products],
   )
 
@@ -323,7 +505,7 @@ export default function DashboardPage() {
       )
     })
 
-    const rows: ChartPoint[] = Array.from(grouped.entries()).map(
+    return Array.from(grouped.entries()).map(
       ([key, value]) => {
         const parts = key.split("-").map(Number)
 
@@ -345,36 +527,65 @@ export default function DashboardPage() {
         }
       },
     )
-
-    return rows
   }, [sales, period])
+
+  const paymentSummary = useMemo(() => {
+    return sales.reduce(
+      (totals, sale) => {
+        const amount = Number(sale.total || 0)
+
+        if (sale.payment_method === "cash") {
+          totals.cash += amount
+        }
+
+        if (sale.payment_method === "card") {
+          totals.card += amount
+        }
+
+        if (sale.payment_method === "transfer") {
+          totals.transfer += amount
+        }
+
+        return totals
+      },
+      {
+        cash: 0,
+        card: 0,
+        transfer: 0,
+      },
+    )
+  }, [sales])
 
   return (
     <AppShell
       title="Dashboard"
-      description="Resumen general de La Martina Fresh Market."
+      description="Resumen ejecutivo de la operación del local."
     >
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex w-fit rounded-xl border border-[#dde2da] bg-white p-1 shadow-sm">
           {[
             ["today", "Hoy"],
             ["week", "7 días"],
             ["month", "Este mes"],
           ].map(([value, label]) => (
-            <Button
+            <button
               key={value}
               type="button"
-              variant={period === value ? "default" : "outline"}
               onClick={() => setPeriod(value as Period)}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                period === value
+                  ? "bg-[#102019] text-white"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
             >
               {label}
-            </Button>
+            </button>
           ))}
         </div>
 
@@ -383,6 +594,7 @@ export default function DashboardPage() {
           variant="outline"
           onClick={() => void loadDashboard()}
           disabled={loading}
+          className="rounded-xl"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -394,172 +606,305 @@ export default function DashboardPage() {
       </div>
 
       {loading ? (
-        <div className="flex min-h-96 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+        <div className="flex min-h-[520px] items-center justify-center rounded-[24px] border border-[#dde2da] bg-white">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-[#1f6a3a]" />
+            <p className="text-sm text-slate-500">
+              Calculando indicadores...
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-6">
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <TrendingUp className="h-5 w-5 text-slate-500" />
+            <StatCard
+              title="Ventas del periodo"
+              value={money(salesTotal)}
+              subtitle={`${sales.length} ventas registradas`}
+              icon={TrendingUp}
+              change={percentChange(
+                salesTotal,
+                previousSalesTotal,
+              )}
+            />
 
-              <p className="mt-4 text-sm text-slate-500">
-                Total vendido
-              </p>
+            <StatCard
+              title="Utilidad neta"
+              value={money(netProfit)}
+              subtitle={`Gastos ${money(
+                expenseTotal,
+              )} · Mermas ${money(wasteTotal)}`}
+              icon={WalletCards}
+            />
 
-              <p className="mt-2 text-2xl font-semibold">
-                {money(salesTotal)}
-              </p>
-            </article>
+            <StatCard
+              title="Ticket promedio"
+              value={money(averageTicket)}
+              subtitle="Promedio por operación"
+              icon={ReceiptText}
+              change={percentChange(
+                averageTicket,
+                previousAverageTicket,
+              )}
+            />
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <ReceiptText className="h-5 w-5 text-slate-500" />
-
-              <p className="mt-4 text-sm text-slate-500">
-                Ventas realizadas
-              </p>
-
-              <p className="mt-2 text-2xl font-semibold">
-                {salesCount}
-              </p>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Ticket promedio: {money(averageTicket)}
-              </p>
-            </article>
-
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <WalletCards className="h-5 w-5 text-slate-500" />
-
-              <p className="mt-4 text-sm text-slate-500">
-                Utilidad estimada
-              </p>
-
-              <p
-                className={`mt-2 text-2xl font-semibold ${
-                  netProfit < 0 ? "text-red-700" : ""
-                }`}
-              >
-                {money(netProfit)}
-              </p>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Gastos: {money(expenseTotal)}
-              </p>
-            </article>
-
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <Boxes className="h-5 w-5 text-slate-500" />
-
-              <p className="mt-4 text-sm text-slate-500">
-                Valor del inventario
-              </p>
-
-              <p className="mt-2 text-2xl font-semibold">
-                {money(inventoryValue)}
-              </p>
-            </article>
+            <StatCard
+              title="Valor de inventario"
+              value={money(inventoryValue)}
+              subtitle={`${products.length} productos activos`}
+              icon={Boxes}
+            />
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div>
-              <h2 className="text-lg font-semibold">
-                Evolución de ventas
+          <section className="grid gap-6 xl:grid-cols-[1.55fr_0.75fr]">
+            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-500">
+                    Rendimiento
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#172018]">
+                    Evolución de ventas
+                  </h2>
+                </div>
+
+                <div className="rounded-xl bg-[#e8f3eb] px-3 py-2 text-sm font-semibold text-[#1f6a3a]">
+                  {preciseMoney(salesTotal)}
+                </div>
+              </div>
+
+              <div className="mt-6 h-[330px]">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                  >
+                    <LineChart data={chartData}>
+                      <CartesianGrid
+                        strokeDasharray="4 4"
+                        vertical={false}
+                        stroke="#e6ebe3"
+                      />
+
+                      <XAxis
+                        dataKey="label"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fill: "#7a857b",
+                          fontSize: 12,
+                        }}
+                      />
+
+                      <YAxis
+                        tickFormatter={(value) =>
+                          `$${Number(value).toLocaleString(
+                            "es-MX",
+                          )}`
+                        }
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fill: "#7a857b",
+                          fontSize: 12,
+                        }}
+                      />
+
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "14px",
+                          border: "1px solid #dde2da",
+                          boxShadow:
+                            "0 12px 30px rgba(16,24,18,.10)",
+                        }}
+                        formatter={(value) => [
+                          preciseMoney(Number(value)),
+                          "Ventas",
+                        ]}
+                      />
+
+                      <Line
+                        type="monotone"
+                        dataKey="sales"
+                        stroke="#1f6a3a"
+                        strokeWidth={3}
+                        dot={{
+                          r: 4,
+                          fill: "#ffffff",
+                          strokeWidth: 3,
+                        }}
+                        activeDot={{
+                          r: 6,
+                          fill: "#1f6a3a",
+                        }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef1eb] text-slate-400">
+                      <TrendingUp className="h-6 w-6" />
+                    </div>
+
+                    <p className="mt-4 text-sm font-medium text-slate-700">
+                      Sin ventas en este periodo
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      La gráfica aparecerá al registrar operaciones.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </article>
+
+            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
+              <p className="text-sm font-medium text-slate-500">
+                Distribución
+              </p>
+
+              <h2 className="mt-1 text-xl font-semibold tracking-tight">
+                Métodos de pago
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Ventas del periodo seleccionado
-              </p>
-            </div>
+              <div className="mt-6 space-y-4">
+                {[
+                  {
+                    name: "Efectivo",
+                    value: paymentSummary.cash,
+                    icon: Banknote,
+                  },
+                  {
+                    name: "Tarjeta",
+                    value: paymentSummary.card,
+                    icon: CreditCard,
+                  },
+                  {
+                    name: "Transferencia",
+                    value: paymentSummary.transfer,
+                    icon: Smartphone,
+                  },
+                ].map((item) => {
+                  const Icon = item.icon
+                  const percentage =
+                    salesTotal > 0
+                      ? (item.value / salesTotal) * 100
+                      : 0
 
-            <div className="mt-6 h-80">
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                    />
+                  return (
+                    <div
+                      key={item.name}
+                      className="rounded-2xl border border-[#e6eae4] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ed] text-[#1f6a3a]">
+                            <Icon className="h-5 w-5" />
+                          </div>
 
-                    <XAxis
-                      dataKey="label"
-                      tickLine={false}
-                      axisLine={false}
-                    />
+                          <div>
+                            <p className="text-sm font-medium">
+                              {item.name}
+                            </p>
 
-                    <YAxis
-                      tickFormatter={(value) =>
-                        `$${Number(value).toLocaleString("es-MX")}`
-                      }
-                      tickLine={false}
-                      axisLine={false}
-                    />
+                            <p className="mt-0.5 text-xs text-slate-500">
+                              {percentage.toFixed(1)}% del total
+                            </p>
+                          </div>
+                        </div>
 
-                    <Tooltip
-                      formatter={(value) => [
-                        money(Number(value)),
-                        "Ventas",
-                      ]}
-                    />
+                        <p className="font-semibold">
+                          {money(item.value)}
+                        </p>
+                      </div>
 
-                    <Line
-                      type="monotone"
-                      dataKey="sales"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">
-                  No existen ventas en este periodo.
-                </div>
-              )}
-            </div>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#edf0eb]">
+                        <div
+                          className="h-full rounded-full bg-[#1f6a3a]"
+                          style={{
+                            width: `${Math.min(
+                              percentage,
+                              100,
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </article>
           </section>
 
           <section className="grid gap-6 xl:grid-cols-2">
-            <article className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="text-lg font-semibold">
-                Productos más vendidos
-              </h2>
+            <article className="rounded-[24px] border border-[#dde2da] bg-white shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
+              <div className="border-b border-[#e6eae4] px-6 py-5">
+                <p className="text-sm font-medium text-slate-500">
+                  Rendimiento comercial
+                </p>
 
-              <div className="mt-5 divide-y divide-slate-100">
-                {topProducts.map((product) => (
+                <h2 className="mt-1 text-lg font-semibold">
+                  Productos más vendidos
+                </h2>
+              </div>
+
+              <div className="divide-y divide-[#edf0eb] px-6">
+                {topProducts.map((product, index) => (
                   <div
                     key={product.id}
                     className="flex items-center justify-between gap-4 py-4"
                   >
-                    <div>
-                      <p className="font-medium">{product.name}</p>
+                    <div className="flex min-w-0 items-center gap-4">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#eef3ed] text-sm font-semibold text-[#1f6a3a]">
+                        {index + 1}
+                      </div>
 
-                      <p className="mt-1 text-sm text-slate-500">
-                        {quantity(product.quantity, product.unit)}
-                      </p>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">
+                          {product.name}
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          {quantity(
+                            product.quantity,
+                            product.unit,
+                          )}{" "}
+                          vendidos
+                        </p>
+                      </div>
                     </div>
 
-                    <p className="font-semibold">
+                    <p className="shrink-0 font-semibold">
                       {money(product.amount)}
                     </p>
                   </div>
                 ))}
 
                 {topProducts.length === 0 && (
-                  <div className="flex min-h-44 items-center justify-center text-sm text-slate-500">
-                    Todavía no existen ventas.
+                  <div className="flex min-h-56 flex-col items-center justify-center text-center">
+                    <PackageOpen className="h-7 w-7 text-slate-300" />
+
+                    <p className="mt-3 text-sm text-slate-500">
+                      Todavía no hay productos vendidos.
+                    </p>
                   </div>
                 )}
               </div>
             </article>
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="text-lg font-semibold">
-                Alertas de inventario
-              </h2>
+            <article className="rounded-[24px] border border-[#dde2da] bg-white shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
+              <div className="border-b border-[#e6eae4] px-6 py-5">
+                <p className="text-sm font-medium text-slate-500">
+                  Atención requerida
+                </p>
 
-              <div className="mt-5 divide-y divide-slate-100">
+                <h2 className="mt-1 text-lg font-semibold">
+                  Alertas de inventario
+                </h2>
+              </div>
+
+              <div className="divide-y divide-[#edf0eb] px-6">
                 {lowStockProducts.map((product) => {
                   const isOut =
                     Number(product.current_stock || 0) <= 0
@@ -569,31 +914,43 @@ export default function DashboardPage() {
                       key={product.id}
                       className="flex items-center justify-between gap-4 py-4"
                     >
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-
-                        <p className="mt-1 text-sm text-slate-500">
-                          Existencia:{" "}
-                          {quantity(
-                            product.current_stock,
-                            product.unit,
+                      <div className="flex min-w-0 items-center gap-4">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                            isOut
+                              ? "bg-red-50 text-red-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {isOut ? (
+                            <PackageOpen className="h-5 w-5" />
+                          ) : (
+                            <AlertTriangle className="h-5 w-5" />
                           )}
-                        </p>
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">
+                            {product.name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            Existencia:{" "}
+                            {quantity(
+                              product.current_stock,
+                              product.unit,
+                            )}
+                          </p>
+                        </div>
                       </div>
 
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs ${
+                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
                           isOut
                             ? "bg-red-50 text-red-700"
                             : "bg-amber-50 text-amber-700"
                         }`}
                       >
-                        {isOut ? (
-                          <PackageOpen className="h-3.5 w-3.5" />
-                        ) : (
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                        )}
-
                         {isOut ? "Agotado" : "Stock bajo"}
                       </span>
                     </div>
@@ -601,12 +958,99 @@ export default function DashboardPage() {
                 })}
 
                 {lowStockProducts.length === 0 && (
-                  <div className="flex min-h-44 items-center justify-center text-sm text-slate-500">
-                    No existen alertas de inventario.
+                  <div className="flex min-h-56 flex-col items-center justify-center text-center">
+                    <Boxes className="h-7 w-7 text-slate-300" />
+
+                    <p className="mt-3 text-sm text-slate-500">
+                      No hay alertas de inventario.
+                    </p>
                   </div>
                 )}
               </div>
             </article>
+          </section>
+
+          <section className="rounded-[24px] border border-[#dde2da] bg-white shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
+            <div className="flex items-center justify-between border-b border-[#e6eae4] px-6 py-5">
+              <div>
+                <p className="text-sm font-medium text-slate-500">
+                  Actividad reciente
+                </p>
+
+                <h2 className="mt-1 text-lg font-semibold">
+                  Últimas ventas
+                </h2>
+              </div>
+
+              <span className="rounded-full bg-[#eef3ed] px-3 py-1 text-xs font-medium text-[#1f6a3a]">
+                {sales.length} operaciones
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left">
+                <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  <tr>
+                    <th className="px-6 py-4">Folio</th>
+                    <th className="px-6 py-4">Fecha</th>
+                    <th className="px-6 py-4">Método</th>
+                    <th className="px-6 py-4">Descuento</th>
+                    <th className="px-6 py-4 text-right">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-[#edf0eb]">
+                  {[...sales]
+                    .reverse()
+                    .slice(0, 8)
+                    .map((sale) => (
+                      <tr
+                        key={sale.id}
+                        className="transition hover:bg-[#fafbf8]"
+                      >
+                        <td className="px-6 py-4 font-medium">
+                          {sale.folio}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-slate-500">
+                          {new Date(
+                            sale.sold_at,
+                          ).toLocaleString("es-MX")}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm">
+                          {sale.payment_method === "cash"
+                            ? "Efectivo"
+                            : sale.payment_method === "card"
+                              ? "Tarjeta"
+                              : "Transferencia"}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-slate-500">
+                          {preciseMoney(sale.discount)}
+                        </td>
+
+                        <td className="px-6 py-4 text-right font-semibold">
+                          {preciseMoney(sale.total)}
+                        </td>
+                      </tr>
+                    ))}
+
+                  {sales.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-6 py-16 text-center text-sm text-slate-500"
+                      >
+                        Todavía no existen ventas en este periodo.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
       )}
