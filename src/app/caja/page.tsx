@@ -27,6 +27,7 @@ import { createClient } from "@/lib/supabase/client"
 type CashRegister = {
   id: string
   opened_at: string
+  opened_by_name: string | null
   closed_at: string | null
   opening_amount: number
   expected_amount: number | null
@@ -89,6 +90,7 @@ export default function CajaPage() {
   const [movements, setMovements] = useState<CashMovement[]>([])
 
   const [openingAmount, setOpeningAmount] = useState("")
+  const [openingEmployeeName, setOpeningEmployeeName] = useState("")
   const [openingNotes, setOpeningNotes] = useState("")
   const [countedAmount, setCountedAmount] = useState("")
   const [closingNotes, setClosingNotes] = useState("")
@@ -264,9 +266,17 @@ export default function CajaPage() {
     setMessage("")
 
     const numericAmount = Number(openingAmount)
+    const employeeName = openingEmployeeName.trim()
 
     if (!Number.isFinite(numericAmount) || numericAmount < 0) {
       setError("El fondo inicial no es válido.")
+      return
+    }
+
+    if (!employeeName) {
+      setError(
+        "Escribe el nombre del empleado que abre la caja.",
+      )
       return
     }
 
@@ -278,6 +288,7 @@ export default function CajaPage() {
         p_opening_amount: numericAmount,
         p_notes: openingNotes.trim() || null,
         p_branch_id: null,
+        p_employee_name: employeeName,
       },
     )
 
@@ -289,6 +300,7 @@ export default function CajaPage() {
 
     setMessage("Caja abierta correctamente.")
     setOpeningAmount("")
+    setOpeningEmployeeName("")
     setOpeningNotes("")
 
     await loadCashRegister()
@@ -462,7 +474,15 @@ export default function CajaPage() {
                   Operación activa
                 </h2>
 
-                <p className="mt-2 text-sm text-white/65">
+                <p className="mt-2 text-sm text-white/75">
+                  Abierta por:{" "}
+                  <span className="font-semibold text-white">
+                    {register.opened_by_name ||
+                      "Empleado no registrado"}
+                  </span>
+                </p>
+
+                <p className="mt-1 text-sm text-white/65">
                   Apertura:{" "}
                   {register.opened_at &&
                   !Number.isNaN(
