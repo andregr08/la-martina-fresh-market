@@ -79,6 +79,230 @@ function formatQuantity(value: number) {
   })
 }
 
+
+type WeightMode = "kg" | "g"
+
+type ProductSaleCardProps = {
+  product: Product
+  inCartQuantity: number
+  onAdd: (product: Product, quantityKg: number) => void
+}
+
+function ProductSaleCard({
+  product,
+  inCartQuantity,
+  onAdd,
+}: ProductSaleCardProps) {
+  const [mode, setMode] = useState<WeightMode>("kg")
+  const [amount, setAmount] = useState("1")
+
+  const stock = Number(product.current_stock || 0)
+  const price = Number(product.sale_price || 0)
+  const numericAmount = Math.max(Number(amount || 0), 0)
+
+  const quantityKg =
+    mode === "g"
+      ? numericAmount / 1000
+      : numericAmount
+
+  const increment = mode === "g" ? 50 : 1
+  const minimum = mode === "g" ? 50 : 0.001
+
+  const unavailable =
+    stock <= 0 ||
+    price <= 0
+
+  const exceedsStock =
+    quantityKg > stock
+
+  function changeMode(nextMode: WeightMode) {
+    setMode(nextMode)
+    setAmount(nextMode === "g" ? "50" : "1")
+  }
+
+  function changeAmount(nextAmount: number) {
+    setAmount(
+      String(
+        Math.max(
+          nextAmount,
+          minimum,
+        ),
+      ),
+    )
+  }
+
+  function addToCart() {
+    if (
+      unavailable ||
+      quantityKg <= 0 ||
+      exceedsStock
+    ) {
+      return
+    }
+
+    onAdd(
+      product,
+      Number(quantityKg.toFixed(3)),
+    )
+
+    setAmount(mode === "g" ? "50" : "1")
+  }
+
+  return (
+    <article className="relative rounded-xl border border-[#e0e5dd] bg-white p-3 transition hover:border-[#9db4a3] hover:shadow-sm">
+      {inCartQuantity > 0 && (
+        <span className="absolute right-3 top-3 flex h-7 min-w-7 items-center justify-center rounded-full bg-[#1f6a3a] px-2 text-xs font-semibold text-white">
+          {formatQuantity(inCartQuantity)}
+        </span>
+      )}
+
+      <div className="pr-10">
+        <p className="font-semibold leading-5 text-[#172018]">
+          {product.name}
+        </p>
+
+        <p className="mt-1 text-xs text-slate-400">
+          {product.sku ?? "Sin SKU"} ?{" "}
+          {product.category?.name ??
+            "Sin categor?a"}
+        </p>
+      </div>
+
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <div>
+          <p className="text-base font-semibold text-[#1f6a3a]">
+            {money(price)}
+          </p>
+
+          <p className="mt-0.5 text-xs text-slate-400">
+            por {product.unit}
+          </p>
+        </div>
+
+        <p
+          className={
+            stock > 0
+              ? "text-xs text-slate-500"
+              : "text-xs font-medium text-red-600"
+          }
+        >
+          {stock > 0
+            ? `${formatQuantity(stock)} ${product.unit}`
+            : "Agotado"}
+        </p>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-[#f5f7f3] p-1">
+        <button
+          type="button"
+          onClick={() => changeMode("kg")}
+          className={`h-9 rounded-lg text-sm font-semibold transition ${
+            mode === "kg"
+              ? "bg-[#102019] text-white shadow-sm"
+              : "text-slate-500 hover:bg-white"
+          }`}
+        >
+          Kilogramos
+        </button>
+
+        <button
+          type="button"
+          onClick={() => changeMode("g")}
+          className={`h-9 rounded-lg text-sm font-semibold transition ${
+            mode === "g"
+              ? "bg-[#102019] text-white shadow-sm"
+              : "text-slate-500 hover:bg-white"
+          }`}
+        >
+          Gramos
+        </button>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            changeAmount(
+              numericAmount - increment,
+            )
+          }
+          disabled={unavailable}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dfe4dc] bg-white hover:bg-[#f5f7f3] disabled:opacity-40"
+        >
+          <Minus className="h-4 w-4" />
+        </button>
+
+        <div className="relative min-w-0 flex-1">
+          <input
+            type="number"
+            min={minimum}
+            step={mode === "g" ? 50 : 0.001}
+            value={amount}
+            disabled={unavailable}
+            onChange={(event) =>
+              setAmount(event.target.value)
+            }
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                addToCart()
+              }
+            }}
+            className="h-10 w-full rounded-xl border border-[#dfe4dc] bg-white px-3 pr-12 text-center text-sm font-semibold outline-none focus:border-[#1f6a3a] focus:ring-4 focus:ring-[#1f6a3a]/10 disabled:bg-slate-50"
+          />
+
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+            {mode}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            changeAmount(
+              numericAmount + increment,
+            )
+          }
+          disabled={unavailable}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dfe4dc] bg-white hover:bg-[#f5f7f3] disabled:opacity-40"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+
+      {mode === "g" &&
+        numericAmount > 0 && (
+          <p className="mt-2 text-center text-xs text-slate-400">
+            {formatQuantity(numericAmount)} g ={" "}
+            {formatQuantity(quantityKg)} kg
+          </p>
+        )}
+
+      {exceedsStock && (
+        <p className="mt-2 text-xs font-medium text-red-600">
+          La cantidad supera la existencia disponible.
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={addToCart}
+        disabled={
+          unavailable ||
+          quantityKg <= 0 ||
+          exceedsStock
+        }
+        className="mt-3 flex h-10 w-full items-center justify-center rounded-xl bg-[#102019] text-sm font-semibold text-white hover:bg-[#174f2d] disabled:cursor-not-allowed disabled:bg-slate-300"
+      >
+        {stock <= 0
+          ? "Producto agotado"
+          : price <= 0
+            ? "Sin precio de venta"
+            : "Agregar al carrito"}
+      </button>
+    </article>
+  )
+}
+
 export default function PuntoDeVentaPage() {
   const supabase = useMemo(() => createClient(), [])
   const { settings } = useBusinessSettings()
@@ -220,37 +444,74 @@ export default function PuntoDeVentaPage() {
       ? Math.max(received - total, 0)
       : 0
 
-  function addProduct(product: Product) {
+  function addProduct(
+    product: Product,
+    quantityKg: number,
+  ) {
     setError("")
     setMessage("")
     setLastSale(null)
 
-    if (Number(product.current_stock) <= 0) {
-      setError(`${product.name} est? agotado.`)
+    const stock =
+      Number(product.current_stock || 0)
+
+    const price =
+      Number(product.sale_price || 0)
+
+    if (stock <= 0) {
+      setError(
+        `${product.name} est? agotado.`,
+      )
       return
     }
 
-    if (Number(product.sale_price) <= 0) {
+    if (price <= 0) {
       setError(
         `${product.name} no tiene precio de venta.`,
       )
       return
     }
 
+    if (
+      !Number.isFinite(quantityKg) ||
+      quantityKg <= 0
+    ) {
+      setError(
+        "La cantidad debe ser mayor a cero.",
+      )
+      return
+    }
+
+    let quantityExceeded = false
+
     setCart((current) => {
       const existing = current.find(
-        (item) => item.product_id === product.id,
+        (item) =>
+          item.product_id === product.id,
       )
+
+      const currentQuantity =
+        existing?.quantity ?? 0
+
+      const nextQuantity =
+        Number(
+          (
+            currentQuantity +
+            quantityKg
+          ).toFixed(3),
+        )
+
+      if (nextQuantity > stock) {
+        quantityExceeded = true
+        return current
+      }
 
       if (existing) {
         return current.map((item) =>
           item.product_id === product.id
             ? {
                 ...item,
-                quantity: Math.min(
-                  item.quantity + 1,
-                  item.available_stock,
-                ),
+                quantity: nextQuantity,
               }
             : item,
         )
@@ -262,15 +523,31 @@ export default function PuntoDeVentaPage() {
           product_id: product.id,
           name: product.name,
           unit: product.unit,
-          quantity: 1,
-          unit_price: Number(product.sale_price),
-          available_stock: Number(product.current_stock),
+          quantity: Number(
+            quantityKg.toFixed(3),
+          ),
+          unit_price: price,
+          available_stock: stock,
         },
       ]
     })
 
-    setSearch("")
-    searchRef.current?.focus()
+    window.setTimeout(() => {
+      if (quantityExceeded) {
+        setError(
+          `No puedes agregar m?s de ${formatQuantity(
+            stock,
+          )} ${product.unit} de ${product.name}.`,
+        )
+        return
+      }
+
+      setMessage(
+        `${formatQuantity(
+          quantityKg,
+        )} kg de ${product.name} agregado a la venta.`,
+      )
+    }, 0)
   }
 
   function updateQuantity(
@@ -452,58 +729,27 @@ export default function PuntoDeVentaPage() {
               </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {filteredProducts.map((product) => {
-                  const inCart = cart.find(
-                    (item) =>
-                      item.product_id === product.id,
-                  )
+                {filteredProducts.map(
+                  (product) => {
+                    const inCart =
+                      cart.find(
+                        (item) =>
+                          item.product_id ===
+                          product.id,
+                      )
 
-                  return (
-                    <button
-                      key={product.id}
-                      type="button"
-                      onClick={() =>
-                        addProduct(product)
-                      }
-                      className="group relative min-h-36 rounded-2xl border border-[#e0e5dd] bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-[#9db4a3] hover:shadow-lg"
-                    >
-                      {inCart && (
-                        <span className="absolute right-3 top-3 flex h-7 min-w-7 items-center justify-center rounded-full bg-[#1f6a3a] px-2 text-xs font-semibold text-white">
-                          {formatQuantity(inCart.quantity)}
-                        </span>
-                      )}
-
-                      <p className="pr-10 font-semibold leading-5 text-[#172018]">
-                        {product.name}
-                      </p>
-
-                      <p className="mt-1 text-xs text-slate-400">
-                        {product.sku ?? "Sin SKU"} ·{" "}
-                        {product.category?.name ??
-                          "Sin categoría"}
-                      </p>
-
-                      <div className="mt-6 flex items-end justify-between gap-3">
-                        <div>
-                          <p className="text-xl font-semibold tracking-tight text-[#1f6a3a]">
-                            {money(product.sale_price)}
-                          </p>
-
-                          <p className="mt-0.5 text-xs text-slate-400">
-                            por {product.unit}
-                          </p>
-                        </div>
-
-                        <p className="text-xs text-slate-500">
-                          {formatQuantity(
-                            product.current_stock,
-                          )}{" "}
-                          {product.unit}
-                        </p>
-                      </div>
-                    </button>
-                  )
-                })}
+                    return (
+                      <ProductSaleCard
+                        key={product.id}
+                        product={product}
+                        inCartQuantity={
+                          inCart?.quantity ?? 0
+                        }
+                        onAdd={addProduct}
+                      />
+                    )
+                  },
+                )}
 
                 {filteredProducts.length === 0 && (
                   <div className="col-span-full flex min-h-80 flex-col items-center justify-center text-center">
