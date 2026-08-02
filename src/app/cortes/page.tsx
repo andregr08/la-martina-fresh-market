@@ -1,6 +1,11 @@
 ﻿"use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   Banknote,
   CheckCircle2,
@@ -56,8 +61,26 @@ function statusLabel(status: string) {
   return status === "open" ? "Abierta" : "Cerrada"
 }
 
+function movementLabel(value: string) {
+  if (value === "opening") return "Apertura"
+  if (value === "sale") return "Venta"
+  if (value === "expense") return "Gasto"
+  if (value === "refund") return "Devolución"
+  if (value === "adjustment") return "Ajuste"
+
+  return value
+}
+
+function paymentLabel(value: string) {
+  if (value === "cash") return "Efectivo"
+  if (value === "card") return "Tarjeta"
+  if (value === "transfer") return "Transferencia"
+
+  return value
+}
+
 export default function CortesPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const [registers, setRegisters] = useState<CashRegister[]>([])
   const [selectedRegister, setSelectedRegister] =
@@ -197,124 +220,168 @@ export default function CortesPage() {
       description="Historial de aperturas, cierres, faltantes y sobrantes."
     >
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
+      <div className="mb-6 flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void loadRegisters()}
+          disabled={loading}
+          className="rounded-xl"
+        >
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${
+              loading ? "animate-spin" : ""
+            }`}
+          />
+          Actualizar
+        </Button>
+      </div>
+
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5">
-          <WalletCards className="h-5 w-5 text-slate-500" />
-          <p className="mt-4 text-sm text-slate-500">Cortes registrados</p>
-          <p className="mt-2 text-2xl font-semibold">{summary.count}</p>
+        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
+            <WalletCards className="h-5 w-5" />
+          </div>
+
+          <p className="mt-5 text-sm font-medium text-slate-500">
+            Cortes registrados
+          </p>
+
+          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+            {summary.count}
+          </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5">
-          <Clock3 className="h-5 w-5 text-slate-500" />
-          <p className="mt-4 text-sm text-slate-500">Cajas abiertas</p>
-          <p className="mt-2 text-2xl font-semibold">{summary.open}</p>
+        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
+            <Clock3 className="h-5 w-5" />
+          </div>
+
+          <p className="mt-5 text-sm font-medium text-emerald-700">
+            Cajas abiertas
+          </p>
+
+          <p className="mt-2 text-[28px] font-semibold tracking-tight text-emerald-950">
+            {summary.open}
+          </p>
         </article>
 
-        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <CheckCircle2 className="h-5 w-5 text-emerald-700" />
-          <p className="mt-4 text-sm text-emerald-700">Sobrantes acumulados</p>
-          <p className="mt-2 text-2xl font-semibold text-emerald-900">
+        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+
+          <p className="mt-5 text-sm font-medium text-emerald-700">
+            Sobrantes acumulados
+          </p>
+
+          <p className="mt-2 text-[28px] font-semibold tracking-tight text-emerald-950">
             {money(summary.surplus)}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-red-200 bg-red-50 p-5">
-          <Banknote className="h-5 w-5 text-red-700" />
-          <p className="mt-4 text-sm text-red-700">Faltantes acumulados</p>
-          <p className="mt-2 text-2xl font-semibold text-red-900">
+        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
+            <Banknote className="h-5 w-5" />
+          </div>
+
+          <p className="mt-5 text-sm font-medium text-red-700">
+            Faltantes acumulados
+          </p>
+
+          <p className="mt-2 text-[28px] font-semibold tracking-tight text-red-950">
             {money(summary.shortage)}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white">
-        <div className="flex flex-col gap-4 border-b border-slate-200 p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Historial de cortes</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {filteredRegisters.length} resultados
-            </p>
-          </div>
+      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">
+                Historial de cortes
+              </h2>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative min-w-72">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar por usuario o ID"
-                className="pl-9"
-              />
+              <p className="mt-1 text-sm text-slate-500">
+                {filteredRegisters.length} resultados
+              </p>
             </div>
 
-            <select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
-            >
-              <option value="Todos">Todos</option>
-              <option value="open">Abiertas</option>
-              <option value="closed">Cerradas</option>
-            </select>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative min-w-72">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void loadRegisters()}
-              disabled={loading}
-            >
-              <RefreshCw
-                className={`mr-2 h-4 w-4 ${
-                  loading ? "animate-spin" : ""
-                }`}
-              />
-              Actualizar
-            </Button>
+                <input
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
+                  placeholder="Buscar usuario o ID"
+                  className="h-10 w-full rounded-xl border border-[#dce2d9] bg-[#f8f9f6] pl-9 pr-3 text-sm outline-none focus:border-[#1f6a3a] focus:bg-white"
+                />
+              </div>
+
+              <select
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value)
+                }
+                className="h-10 rounded-xl border border-[#dce2d9] bg-white px-3 text-sm outline-none"
+              >
+                <option value="Todos">Todos</option>
+                <option value="open">Abiertas</option>
+                <option value="closed">Cerradas</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex min-h-72 items-center justify-center">
-            <Loader2 className="h-7 w-7 animate-spin text-slate-500" />
+          <div className="flex min-h-96 items-center justify-center">
+            <Loader2 className="h-7 w-7 animate-spin text-[#1f6a3a]" />
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-left">
-              <thead className="border-b border-slate-200 bg-slate-50 text-sm text-slate-500">
+            <table className="w-full min-w-[1180px] text-left">
+              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-5 py-4 font-medium">Apertura</th>
-                  <th className="px-5 py-4 font-medium">Cierre</th>
-                  <th className="px-5 py-4 font-medium">Abrió</th>
-                  <th className="px-5 py-4 font-medium">Cerró</th>
-                  <th className="px-5 py-4 font-medium">Fondo inicial</th>
-                  <th className="px-5 py-4 font-medium">Esperado</th>
-                  <th className="px-5 py-4 font-medium">Contado</th>
-                  <th className="px-5 py-4 font-medium">Diferencia</th>
-                  <th className="px-5 py-4 font-medium">Estado</th>
-                  <th className="px-5 py-4 font-medium">Acción</th>
+                  <th className="px-6 py-4">Apertura</th>
+                  <th className="px-6 py-4">Cierre</th>
+                  <th className="px-6 py-4">Abrió</th>
+                  <th className="px-6 py-4">Cerró</th>
+                  <th className="px-6 py-4">Fondo</th>
+                  <th className="px-6 py-4">Esperado</th>
+                  <th className="px-6 py-4">Contado</th>
+                  <th className="px-6 py-4">Diferencia</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4">Acción</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#edf0eb]">
                 {filteredRegisters.map((register) => {
                   const difference = Number(
                     register.difference_amount ?? 0,
                   )
 
                   return (
-                    <tr key={register.id} className="hover:bg-slate-50">
-                      <td className="px-5 py-4 text-sm">
-                        {new Date(register.opened_at).toLocaleString(
-                          "es-MX",
-                        )}
+                    <tr
+                      key={register.id}
+                      className="transition hover:bg-[#fafbf8]"
+                    >
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {new Date(
+                          register.opened_at,
+                        ).toLocaleString("es-MX")}
                       </td>
 
-                      <td className="px-5 py-4 text-sm">
+                      <td className="px-6 py-4 text-sm text-slate-500">
                         {register.closed_at
                           ? new Date(
                               register.closed_at,
@@ -322,28 +389,28 @@ export default function CortesPage() {
                           : "—"}
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4 text-sm">
                         {register.opener?.full_name ?? "Usuario"}
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4 text-sm">
                         {register.closer?.full_name ?? "—"}
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4 text-sm">
                         {money(register.opening_amount)}
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4 text-sm">
                         {money(register.expected_amount)}
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4 text-sm">
                         {money(register.counted_amount)}
                       </td>
 
                       <td
-                        className={`px-5 py-4 font-semibold ${
+                        className={`px-6 py-4 font-semibold ${
                           difference < 0
                             ? "text-red-700"
                             : difference > 0
@@ -351,12 +418,13 @@ export default function CortesPage() {
                               : ""
                         }`}
                       >
+                        {difference > 0 ? "+" : ""}
                         {money(difference)}
                       </td>
 
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4">
                         <span
-                          className={`rounded-full px-3 py-1 text-xs ${
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                             register.status === "open"
                               ? "bg-emerald-50 text-emerald-700"
                               : "bg-slate-100 text-slate-700"
@@ -366,15 +434,17 @@ export default function CortesPage() {
                         </span>
                       </td>
 
-                      <td className="px-5 py-4">
-                        <Button
+                      <td className="px-6 py-4">
+                        <button
                           type="button"
-                          variant="outline"
-                          onClick={() => void openDetail(register)}
+                          onClick={() =>
+                            void openDetail(register)
+                          }
+                          className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#dce2d9] bg-white px-3 text-xs font-medium text-slate-700 hover:bg-[#f5f7f3]"
                         >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver movimientos
-                        </Button>
+                          <Eye className="h-4 w-4" />
+                          Movimientos
+                        </button>
                       </td>
                     </tr>
                   )
@@ -384,9 +454,13 @@ export default function CortesPage() {
                   <tr>
                     <td
                       colSpan={10}
-                      className="px-5 py-14 text-center text-sm text-slate-500"
+                      className="px-6 py-20 text-center"
                     >
-                      No existen cortes con esos filtros.
+                      <WalletCards className="mx-auto h-8 w-8 text-slate-300" />
+
+                      <p className="mt-4 text-sm font-medium text-slate-600">
+                        No se encontraron cortes
+                      </p>
                     </td>
                   </tr>
                 )}
@@ -397,72 +471,83 @@ export default function CortesPage() {
       </section>
 
       {selectedRegister && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <section className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+          <section className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[24px] bg-white shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#e6eae4] bg-white px-6 py-5">
               <div>
-                <h2 className="text-xl font-semibold">
+                <p className="text-sm font-medium text-slate-500">
                   Movimientos de caja
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Apertura:{" "}
+                </p>
+
+                <h2 className="mt-1 text-xl font-semibold">
                   {new Date(
                     selectedRegister.opened_at,
                   ).toLocaleString("es-MX")}
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  {statusLabel(selectedRegister.status)} ·{" "}
+                  {selectedRegister.opener?.full_name ?? "Usuario"}
                 </p>
               </div>
 
-              <Button
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => {
                   setSelectedRegister(null)
                   setMovements([])
                 }}
+                className="rounded-xl border border-[#dce2d9] p-2 text-slate-500 hover:bg-[#f5f7f3]"
               >
                 <X className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
 
             {detailLoading ? (
-              <div className="flex min-h-56 items-center justify-center">
-                <Loader2 className="h-7 w-7 animate-spin" />
+              <div className="flex min-h-80 items-center justify-center">
+                <Loader2 className="h-7 w-7 animate-spin text-[#1f6a3a]" />
               </div>
             ) : (
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full min-w-[700px] text-left">
-                  <thead className="border-b border-slate-200 text-sm text-slate-500">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left">
+                  <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                     <tr>
-                      <th className="py-3 font-medium">Fecha</th>
-                      <th className="py-3 font-medium">Movimiento</th>
-                      <th className="py-3 font-medium">Método</th>
-                      <th className="py-3 font-medium">Descripción</th>
-                      <th className="py-3 font-medium">Importe</th>
+                      <th className="px-6 py-4">Fecha</th>
+                      <th className="px-6 py-4">Movimiento</th>
+                      <th className="px-6 py-4">Método</th>
+                      <th className="px-6 py-4">Descripción</th>
+                      <th className="px-6 py-4 text-right">
+                        Importe
+                      </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[#edf0eb]">
                     {movements.map((movement) => (
                       <tr key={movement.id}>
-                        <td className="py-4 text-sm">
+                        <td className="px-6 py-4 text-sm text-slate-500">
                           {new Date(
                             movement.created_at,
                           ).toLocaleString("es-MX")}
                         </td>
 
-                        <td className="py-4">
-                          {movement.movement_type}
+                        <td className="px-6 py-4 text-sm font-medium">
+                          {movementLabel(
+                            movement.movement_type,
+                          )}
                         </td>
 
-                        <td className="py-4">
-                          {movement.payment_method}
+                        <td className="px-6 py-4 text-sm">
+                          {paymentLabel(
+                            movement.payment_method,
+                          )}
                         </td>
 
-                        <td className="py-4">
+                        <td className="px-6 py-4 text-sm text-slate-500">
                           {movement.description ?? "—"}
                         </td>
 
-                        <td className="py-4 font-semibold">
+                        <td className="px-6 py-4 text-right font-semibold">
                           {money(movement.amount)}
                         </td>
                       </tr>
@@ -472,7 +557,7 @@ export default function CortesPage() {
                       <tr>
                         <td
                           colSpan={5}
-                          className="py-14 text-center text-sm text-slate-500"
+                          className="px-6 py-20 text-center text-sm text-slate-500"
                         >
                           Esta caja no tiene movimientos.
                         </td>
