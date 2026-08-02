@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
   useCallback,
@@ -339,9 +340,16 @@ export function AppShell({
     <>
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#174f2d]">
-            LM
-          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#174f2d] overflow-hidden bg-white">
+    <Image
+      src="/icons/logo-sidebar.png"
+      alt="La Martina"
+      width={160}
+      height={160}
+      priority
+      className="h-full w-full object-cover"
+    />
+  </div>
 
           <div>
             <p className="font-semibold tracking-tight text-white">
