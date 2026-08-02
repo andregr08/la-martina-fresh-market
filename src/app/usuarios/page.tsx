@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -147,7 +147,11 @@ export default function UsuariosPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadUsers()
+    const timer = window.setTimeout(() => {
+      void loadUsers()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadUsers])
 
   const filteredUsers = useMemo(() => {

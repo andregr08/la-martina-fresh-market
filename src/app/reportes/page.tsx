@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -327,7 +327,11 @@ export default function ReportesPage() {
   }, [endDate, startDate, supabase])
 
   useEffect(() => {
-    void loadReport()
+    const timer = window.setTimeout(() => {
+      void loadReport()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadReport])
 
   const salesTotal = useMemo(

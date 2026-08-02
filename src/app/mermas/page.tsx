@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -144,7 +144,11 @@ export default function MermasPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadData()
+    const timer = window.setTimeout(() => {
+      void loadData()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadData])
 
   const selectedProduct = products.find(

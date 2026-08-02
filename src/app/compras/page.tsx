@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -144,7 +144,11 @@ export default function ComprasPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadPurchases()
+    const timer = window.setTimeout(() => {
+      void loadPurchases()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadPurchases])
 
   const filteredPurchases = useMemo(() => {

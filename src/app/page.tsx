@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -75,11 +75,6 @@ type Product = {
   current_stock: number
   minimum_stock: number
   purchase_price: number
-}
-
-type ChartPoint = {
-  label: string
-  sales: number
 }
 
 type TopProduct = {
@@ -375,7 +370,11 @@ export default function DashboardPage() {
   }, [period, supabase])
 
   useEffect(() => {
-    void loadDashboard()
+    const timer = window.setTimeout(() => {
+      void loadDashboard()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadDashboard])
 
   const salesTotal = useMemo(
@@ -559,7 +558,7 @@ export default function DashboardPage() {
   return (
     <AppShell
       title="Dashboard"
-      description="Resumen ejecutivo de la operación del local."
+      description="Resumen ejecutivo de la operaciÃ³n del local."
     >
       {error && (
         <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -571,7 +570,7 @@ export default function DashboardPage() {
         <div className="inline-flex w-fit rounded-xl border border-[#dde2da] bg-white p-1 shadow-sm">
           {[
             ["today", "Hoy"],
-            ["week", "7 días"],
+            ["week", "7 dÃ­as"],
             ["month", "Este mes"],
           ].map(([value, label]) => (
             <button
@@ -633,14 +632,14 @@ export default function DashboardPage() {
               value={money(netProfit)}
               subtitle={`Gastos ${money(
                 expenseTotal,
-              )} · Mermas ${money(wasteTotal)}`}
+              )} Â· Mermas ${money(wasteTotal)}`}
               icon={WalletCards}
             />
 
             <StatCard
               title="Ticket promedio"
               value={money(averageTicket)}
-              subtitle="Promedio por operación"
+              subtitle="Promedio por operaciÃ³n"
               icon={ReceiptText}
               change={percentChange(
                 averageTicket,
@@ -665,7 +664,7 @@ export default function DashboardPage() {
                   </p>
 
                   <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#172018]">
-                    Evolución de ventas
+                    EvoluciÃ³n de ventas
                   </h2>
                 </div>
 
@@ -752,7 +751,7 @@ export default function DashboardPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      La gráfica aparecerá al registrar operaciones.
+                      La grÃ¡fica aparecerÃ¡ al registrar operaciones.
                     </p>
                   </div>
                 )}
@@ -761,11 +760,11 @@ export default function DashboardPage() {
 
             <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
               <p className="text-sm font-medium text-slate-500">
-                Distribución
+                DistribuciÃ³n
               </p>
 
               <h2 className="mt-1 text-xl font-semibold tracking-tight">
-                Métodos de pago
+                MÃ©todos de pago
               </h2>
 
               <div className="mt-6 space-y-4">
@@ -845,7 +844,7 @@ export default function DashboardPage() {
                 </p>
 
                 <h2 className="mt-1 text-lg font-semibold">
-                  Productos más vendidos
+                  Productos mÃ¡s vendidos
                 </h2>
               </div>
 
@@ -886,7 +885,7 @@ export default function DashboardPage() {
                     <PackageOpen className="h-7 w-7 text-slate-300" />
 
                     <p className="mt-3 text-sm text-slate-500">
-                      Todavía no hay productos vendidos.
+                      TodavÃ­a no hay productos vendidos.
                     </p>
                   </div>
                 )}
@@ -896,7 +895,7 @@ export default function DashboardPage() {
             <article className="rounded-[24px] border border-[#dde2da] bg-white shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
               <div className="border-b border-[#e6eae4] px-6 py-5">
                 <p className="text-sm font-medium text-slate-500">
-                  Atención requerida
+                  AtenciÃ³n requerida
                 </p>
 
                 <h2 className="mt-1 text-lg font-semibold">
@@ -978,7 +977,7 @@ export default function DashboardPage() {
                 </p>
 
                 <h2 className="mt-1 text-lg font-semibold">
-                  Últimas ventas
+                  Ãšltimas ventas
                 </h2>
               </div>
 
@@ -993,7 +992,7 @@ export default function DashboardPage() {
                   <tr>
                     <th className="px-6 py-4">Folio</th>
                     <th className="px-6 py-4">Fecha</th>
-                    <th className="px-6 py-4">Método</th>
+                    <th className="px-6 py-4">MÃ©todo</th>
                     <th className="px-6 py-4">Descuento</th>
                     <th className="px-6 py-4 text-right">
                       Total
@@ -1044,7 +1043,7 @@ export default function DashboardPage() {
                         colSpan={5}
                         className="px-6 py-16 text-center text-sm text-slate-500"
                       >
-                        Todavía no existen ventas en este periodo.
+                        TodavÃ­a no existen ventas en este periodo.
                       </td>
                     </tr>
                   )}

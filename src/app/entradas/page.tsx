@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -17,11 +17,9 @@ import {
   ShoppingBasket,
   Trash2,
   Truck,
-  WalletCards,
 } from "lucide-react"
 
 import { AppShell } from "@/components/layout/app-shell"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 
@@ -64,13 +62,6 @@ function money(value: number) {
     style: "currency",
     currency: "MXN",
   }).format(Number(value || 0))
-}
-
-function formatQuantity(value: number) {
-  return Number(value || 0).toLocaleString("es-MX", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
-  })
 }
 
 export default function EntradasPage() {
@@ -158,7 +149,11 @@ export default function EntradasPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadData()
+    const timer = window.setTimeout(() => {
+      void loadData()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadData])
 
   const filteredProducts = useMemo(() => {
@@ -343,7 +338,7 @@ export default function EntradasPage() {
   return (
     <AppShell
       title="Entradas"
-      description="Recepción de mercancía, costos y actualización de inventario."
+      description="RecepciÃ³n de mercancÃ­a, costos y actualizaciÃ³n de inventario."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -377,7 +372,7 @@ export default function EntradasPage() {
                 onChange={(event) =>
                   setSearch(event.target.value)
                 }
-                placeholder="Buscar producto, SKU o categoría"
+                placeholder="Buscar producto, SKU o categorÃ­a"
                 className="h-12 w-full rounded-2xl border border-[#dce2d9] bg-[#f8f9f6] pl-12 pr-4 text-sm outline-none focus:border-[#1f6a3a] focus:bg-white focus:ring-4 focus:ring-[#1f6a3a]/10"
               />
             </div>
@@ -408,9 +403,9 @@ export default function EntradasPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-400">
-                      {product.sku ?? "Sin SKU"} ·{" "}
+                      {product.sku ?? "Sin SKU"} Â·{" "}
                       {product.category?.name ??
-                        "Sin categoría"}
+                        "Sin categorÃ­a"}
                     </p>
 
                     <div className="mt-5 flex items-end justify-between gap-3">
@@ -483,7 +478,7 @@ export default function EntradasPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-400">
-                      {item.sku ?? "Sin SKU"} · {item.unit}
+                      {item.sku ?? "Sin SKU"} Â· {item.unit}
                     </p>
                   </div>
 
@@ -581,7 +576,7 @@ export default function EntradasPage() {
                 <ShoppingBasket className="h-8 w-8 text-slate-300" />
 
                 <p className="mt-4 font-medium">
-                  Entrada vacía
+                  Entrada vacÃ­a
                 </p>
 
                 <p className="mt-1 text-sm text-slate-400">
@@ -622,7 +617,7 @@ export default function EntradasPage() {
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div>
                 <p className="mb-1.5 text-xs font-medium text-slate-500">
-                  Método de pago
+                  MÃ©todo de pago
                 </p>
 
                 <select
@@ -637,7 +632,7 @@ export default function EntradasPage() {
                   <option value="transfer">
                     Transferencia
                   </option>
-                  <option value="credit">Crédito</option>
+                  <option value="credit">CrÃ©dito</option>
                 </select>
               </div>
 
@@ -665,7 +660,7 @@ export default function EntradasPage() {
                 <Truck className="h-4 w-4 text-[#1f6a3a]" />
 
                 <p className="text-sm font-semibold">
-                  Costos logísticos
+                  Costos logÃ­sticos
                 </p>
               </div>
 
@@ -761,12 +756,12 @@ export default function EntradasPage() {
 
             <div className="mt-4 rounded-2xl bg-[#f5f7f3] p-4">
               <div className="flex justify-between text-sm text-slate-500">
-                <span>Mercancía</span>
+                <span>MercancÃ­a</span>
                 <span>{money(merchandiseSubtotal)}</span>
               </div>
 
               <div className="mt-2 flex justify-between text-sm text-slate-500">
-                <span>Logística</span>
+                <span>LogÃ­stica</span>
                 <span>{money(logisticsTotal)}</span>
               </div>
 

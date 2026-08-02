@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -20,7 +20,6 @@ import {
 
 import { AppShell } from "@/components/layout/app-shell"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 
 type CashRegister = {
@@ -65,7 +64,7 @@ function movementLabel(value: string) {
   if (value === "opening") return "Apertura"
   if (value === "sale") return "Venta"
   if (value === "expense") return "Gasto"
-  if (value === "refund") return "Devolución"
+  if (value === "refund") return "DevoluciÃ³n"
   if (value === "adjustment") return "Ajuste"
 
   return value
@@ -131,7 +130,11 @@ export default function CortesPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadRegisters()
+    const timer = window.setTimeout(() => {
+      void loadRegisters()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadRegisters])
 
   const filteredRegisters = useMemo(() => {
@@ -353,14 +356,14 @@ export default function CortesPage() {
                 <tr>
                   <th className="px-6 py-4">Apertura</th>
                   <th className="px-6 py-4">Cierre</th>
-                  <th className="px-6 py-4">Abrió</th>
-                  <th className="px-6 py-4">Cerró</th>
+                  <th className="px-6 py-4">AbriÃ³</th>
+                  <th className="px-6 py-4">CerrÃ³</th>
                   <th className="px-6 py-4">Fondo</th>
                   <th className="px-6 py-4">Esperado</th>
                   <th className="px-6 py-4">Contado</th>
                   <th className="px-6 py-4">Diferencia</th>
                   <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Acción</th>
+                  <th className="px-6 py-4">AcciÃ³n</th>
                 </tr>
               </thead>
 
@@ -386,7 +389,7 @@ export default function CortesPage() {
                           ? new Date(
                               register.closed_at,
                             ).toLocaleString("es-MX")
-                          : "—"}
+                          : "â€”"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
@@ -394,7 +397,7 @@ export default function CortesPage() {
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        {register.closer?.full_name ?? "—"}
+                        {register.closer?.full_name ?? "â€”"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
@@ -486,7 +489,7 @@ export default function CortesPage() {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  {statusLabel(selectedRegister.status)} ·{" "}
+                  {statusLabel(selectedRegister.status)} Â·{" "}
                   {selectedRegister.opener?.full_name ?? "Usuario"}
                 </p>
               </div>
@@ -514,8 +517,8 @@ export default function CortesPage() {
                     <tr>
                       <th className="px-6 py-4">Fecha</th>
                       <th className="px-6 py-4">Movimiento</th>
-                      <th className="px-6 py-4">Método</th>
-                      <th className="px-6 py-4">Descripción</th>
+                      <th className="px-6 py-4">MÃ©todo</th>
+                      <th className="px-6 py-4">DescripciÃ³n</th>
                       <th className="px-6 py-4 text-right">
                         Importe
                       </th>
@@ -544,7 +547,7 @@ export default function CortesPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-500">
-                          {movement.description ?? "—"}
+                          {movement.description ?? "â€”"}
                         </td>
 
                         <td className="px-6 py-4 text-right font-semibold">

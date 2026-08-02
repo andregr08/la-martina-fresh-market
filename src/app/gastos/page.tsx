@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -158,7 +158,11 @@ export default function GastosPage() {
   }, [categoryId, supabase])
 
   useEffect(() => {
-    void loadData()
+    const timer = window.setTimeout(() => {
+      void loadData()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadData])
 
   const filteredExpenses = useMemo(() => {

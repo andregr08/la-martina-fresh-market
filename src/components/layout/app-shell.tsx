@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -45,7 +45,7 @@ type MenuSection =
   | "General"
   | "Ventas"
   | "Inventario"
-  | "Administración"
+  | "AdministraciÃ³n"
 
 type MenuItem = {
   name: string
@@ -133,42 +133,42 @@ const menu: MenuItem[] = [
     href: "/gastos",
     icon: Store,
     roles: ["admin", "cashier", "finance"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
     name: "Mermas",
     href: "/mermas",
     icon: Trash2,
     roles: ["admin", "warehouse", "finance", "partner"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
     name: "Reportes",
     href: "/reportes",
     icon: BarChart3,
     roles: ["admin", "finance", "partner"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
     name: "Usuarios",
     href: "/usuarios",
     icon: Users,
     roles: ["admin"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
-    name: "Auditoría",
+    name: "AuditorÃ­a",
     href: "/auditoria",
     icon: FileClock,
     roles: ["admin"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
-    name: "Configuración",
+    name: "ConfiguraciÃ³n",
     href: "/configuracion",
     icon: Settings,
     roles: ["admin"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
 ]
 
@@ -176,13 +176,13 @@ const sections: MenuSection[] = [
   "General",
   "Ventas",
   "Inventario",
-  "Administración",
+  "AdministraciÃ³n",
 ]
 
 const roleNames: Record<UserRole, string> = {
   admin: "Administrador",
   cashier: "Caja",
-  warehouse: "Almacén",
+  warehouse: "AlmacÃ©n",
   finance: "Finanzas",
   partner: "Socio",
 }
@@ -232,7 +232,7 @@ export function AppShell({
     if (error || !data) {
       setProfileError(
         error?.message ??
-          "No se encontró el perfil del usuario.",
+          "No se encontrÃ³ el perfil del usuario.",
       )
       setLoadingProfile(false)
       return
@@ -252,11 +252,19 @@ export function AppShell({
   }, [router, supabase])
 
   useEffect(() => {
-    void loadProfile()
+    const timer = window.setTimeout(() => {
+      void loadProfile()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadProfile])
 
   useEffect(() => {
-    setMobileOpen(false)
+    const timer = window.setTimeout(() => {
+      setMobileOpen(false)
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [pathname])
 
   const allowedMenu = useMemo(() => {
@@ -320,7 +328,7 @@ export function AppShell({
             onClick={handleLogout}
             className="mt-6 rounded-xl bg-[#102019] px-5 py-2.5 text-sm font-medium text-white"
           >
-            Cerrar sesión
+            Cerrar sesiÃ³n
           </button>
         </section>
       </main>
@@ -446,7 +454,7 @@ export function AppShell({
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/55 transition hover:bg-white/8 hover:text-white"
         >
           <LogOut className="h-[18px] w-[18px]" />
-          Cerrar sesión
+          Cerrar sesiÃ³n
         </button>
       </div>
     </>
@@ -462,7 +470,7 @@ export function AppShell({
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            aria-label="Cerrar menú"
+            aria-label="Cerrar menÃº"
             onClick={() => setMobileOpen(false)}
             className="absolute inset-0 bg-black/45 backdrop-blur-sm"
           />
@@ -531,14 +539,14 @@ export function AppShell({
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Tu rol de{" "}
                 {role ? roleNames[role] : "usuario"} no tiene
-                permiso para consultar este módulo.
+                permiso para consultar este mÃ³dulo.
               </p>
 
               <Link
                 href={allowedMenu[0]?.href ?? "/login"}
                 className="mt-6 inline-flex rounded-xl bg-[#102019] px-5 py-2.5 text-sm font-medium text-white"
               >
-                Ir a un módulo autorizado
+                Ir a un mÃ³dulo autorizado
               </Link>
             </section>
           )}

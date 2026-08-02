@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useState } from "react"
 
@@ -62,7 +62,11 @@ export function useBusinessSettings() {
   }, [supabase])
 
   useEffect(() => {
-    void loadSettings()
+    const timer = window.setTimeout(() => {
+      void loadSettings()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadSettings])
 
   return {

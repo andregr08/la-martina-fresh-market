@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import {
@@ -103,7 +103,11 @@ export default function InventarioPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadInventory()
+    const timer = window.setTimeout(() => {
+      void loadInventory()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadInventory])
 
   const categories = useMemo(() => {

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -171,7 +171,11 @@ export default function VentasPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadSales()
+    const timer = window.setTimeout(() => {
+      void loadSales()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadSales])
 
   const filteredSales = useMemo(() => {

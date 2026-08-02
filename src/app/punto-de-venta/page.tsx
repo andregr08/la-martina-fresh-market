@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   useCallback,
@@ -10,7 +10,6 @@ import {
 import {
   Banknote,
   CheckCircle2,
-  ChevronRight,
   CreditCard,
   Loader2,
   Minus,
@@ -29,7 +28,6 @@ import {
   TicketBranding,
   TicketFooter,
 } from "@/components/tickets/ticket-branding"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useBusinessSettings } from "@/hooks/use-business-settings"
 import { createClient } from "@/lib/supabase/client"
@@ -135,7 +133,11 @@ export default function PuntoDeVentaPage() {
   }, [supabase])
 
   useEffect(() => {
-    void loadProducts()
+    const timer = window.setTimeout(() => {
+      void loadProducts()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [loadProducts])
 
   useEffect(() => {
@@ -300,7 +302,7 @@ export default function PuntoDeVentaPage() {
     if (cart.length === 0) return
 
     const confirmed = window.confirm(
-      "¿Deseas limpiar la venta actual?",
+      "Â¿Deseas limpiar la venta actual?",
     )
 
     if (!confirmed) return
@@ -385,7 +387,7 @@ export default function PuntoDeVentaPage() {
   return (
     <AppShell
       title="Punto de venta"
-      description="Venta rápida al público general."
+      description="Venta rÃ¡pida al pÃºblico general."
     >
       {error && (
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 print:hidden">
@@ -472,9 +474,9 @@ export default function PuntoDeVentaPage() {
                       </p>
 
                       <p className="mt-1 text-xs text-slate-400">
-                        {product.sku ?? "Sin SKU"} ·{" "}
+                        {product.sku ?? "Sin SKU"} Â·{" "}
                         {product.category?.name ??
-                          "Sin categoría"}
+                          "Sin categorÃ­a"}
                       </p>
 
                       <div className="mt-6 flex items-end justify-between gap-3">
@@ -638,7 +640,7 @@ export default function PuntoDeVentaPage() {
                 </div>
 
                 <p className="mt-4 font-medium">
-                  Venta vacía
+                  Venta vacÃ­a
                 </p>
 
                 <p className="mt-1 text-sm text-slate-400">
@@ -831,7 +833,7 @@ export default function PuntoDeVentaPage() {
                   <div className="flex justify-between">
                     <span>
                       {formatQuantity(item.quantity)}{" "}
-                      {item.unit} ×{" "}
+                      {item.unit} Ã—{" "}
                       {money(item.unit_price)}
                     </span>
 
