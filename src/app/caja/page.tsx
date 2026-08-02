@@ -112,15 +112,23 @@ export default function CajaPage() {
       return
     }
 
-    if (!data) {
+    const openRegister = (
+      Array.isArray(data)
+        ? data[0] ?? null
+        : data ?? null
+    ) as CashRegister | null
+
+    const hasValidRegister =
+      Boolean(openRegister?.id) &&
+      openRegister?.id !== "undefined"
+
+    if (!hasValidRegister || !openRegister) {
       setRegister(null)
       setSummary(null)
       setMovements([])
       setLoading(false)
       return
     }
-
-    const openRegister = data as CashRegister
 
     setRegister(openRegister)
 
@@ -456,9 +464,16 @@ export default function CajaPage() {
 
                 <p className="mt-2 text-sm text-white/65">
                   Apertura:{" "}
-                  {new Date(
-                    register.opened_at,
-                  ).toLocaleString("es-MX")}
+                  {register.opened_at &&
+                  !Number.isNaN(
+                    new Date(
+                      register.opened_at,
+                    ).getTime(),
+                  )
+                    ? new Date(
+                        register.opened_at,
+                      ).toLocaleString("es-MX")
+                    : "Sin fecha registrada"}
                 </p>
               </div>
 
