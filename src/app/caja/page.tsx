@@ -76,7 +76,7 @@ function movementLabel(value: string) {
   if (value === "opening") return "Apertura"
   if (value === "sale") return "Venta"
   if (value === "expense") return "Gasto"
-  if (value === "refund") return "Devolución"
+  if (value === "refund") return "DevoluciÃ³n"
   if (value === "adjustment") return "Ajuste"
 
   return value
@@ -269,7 +269,7 @@ export default function CajaPage() {
     const employeeName = openingEmployeeName.trim()
 
     if (!Number.isFinite(numericAmount) || numericAmount < 0) {
-      setError("El fondo inicial no es válido.")
+      setError("El fondo inicial no es vÃ¡lido.")
       return
     }
 
@@ -319,14 +319,14 @@ export default function CajaPage() {
       !Number.isFinite(numericCounted) ||
       numericCounted < 0
     ) {
-      setError("El efectivo contado no es válido.")
+      setError("El efectivo contado no es vÃ¡lido.")
       return
     }
 
     const confirmed = window.confirm(
-      `Se cerrará la caja con ${money(
+      `Se cerrarÃ¡ la caja con ${money(
         numericCounted,
-      )} contados. ¿Deseas continuar?`,
+      )} contados. Â¿Deseas continuar?`,
     )
 
     if (!confirmed) return
@@ -359,7 +359,7 @@ export default function CajaPage() {
   return (
     <AppShell
       title="Caja"
-      description="Apertura, operación y cierre diario."
+      description="Apertura, operaciÃ³n y cierre diario."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -431,15 +431,18 @@ export default function CajaPage() {
 
             <div>
               <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Observaciones
+                Nombre del empleado
               </p>
 
               <Input
-                value={openingNotes}
+                value={openingEmployeeName}
                 onChange={(event) =>
-                  setOpeningNotes(event.target.value)
+                  setOpeningEmployeeName(
+                    event.target.value,
+                  )
                 }
-                placeholder="Opcional"
+                placeholder="Escribe el nombre completo"
+                autoComplete="name"
                 className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
@@ -471,7 +474,7 @@ export default function CajaPage() {
                 </div>
 
                 <h2 className="mt-4 text-2xl font-semibold">
-                  Operación activa
+                  OperaciÃ³n activa
                 </h2>
 
                 <p className="mt-2 text-sm text-white/75">
@@ -577,8 +580,8 @@ export default function CajaPage() {
                     <tr>
                       <th className="px-5 py-3.5">Fecha</th>
                       <th className="px-5 py-3.5">Movimiento</th>
-                      <th className="px-5 py-3.5">Método</th>
-                      <th className="px-5 py-3.5">Descripción</th>
+                      <th className="px-5 py-3.5">MÃ©todo</th>
+                      <th className="px-5 py-3.5">DescripciÃ³n</th>
                       <th className="px-6 py-4 text-right">
                         Importe
                       </th>
@@ -610,7 +613,7 @@ export default function CajaPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-500">
-                          {movement.description ?? "—"}
+                          {movement.description ?? "â€”"}
                         </td>
 
                         <td className="px-6 py-4 text-right font-semibold">
@@ -625,7 +628,7 @@ export default function CajaPage() {
                           colSpan={5}
                           className="px-5 py-14 text-center text-sm text-slate-500"
                         >
-                          Todavía no hay movimientos.
+                          TodavÃ­a no hay movimientos.
                         </td>
                       </tr>
                     )}
