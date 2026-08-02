@@ -425,3 +425,50 @@ label {
 }
 
 /* FIN LA MARTINA RESPONSIVE FINAL */
+
+/* LA MARTINA GLOBAL BACKGROUND */
+
+body {
+  background-color: #f6f4ed;
+  background-image:
+    linear-gradient(
+      rgba(248, 248, 244, 0.90),
+      rgba(248, 248, 244, 0.90)
+    ),
+    url("/la-martina-fondo.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: min(58vw, 760px) auto;
+  background-attachment: fixed;
+}
+
+.app-main-content {
+  background: transparent !important;
+}
+
+.app-main-content > header,
+.app-main-content > div:first-child {
+  backdrop-filter: blur(3px);
+}
+
+@media (max-width: 1279px) {
+  body {
+    background-size: min(78vw, 650px) auto;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    background-position: center 34%;
+    background-size: 92vw auto;
+    background-attachment: scroll;
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+}
+
+/* FIN LA MARTINA GLOBAL BACKGROUND */

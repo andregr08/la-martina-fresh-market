@@ -119,7 +119,6 @@ export default function PuntoDeVentaPage() {
         )
       `)
       .eq("active", true)
-      .gt("current_stock", 0)
       .order("name")
 
     if (productsError) {
@@ -225,6 +224,11 @@ export default function PuntoDeVentaPage() {
     setError("")
     setMessage("")
     setLastSale(null)
+
+    if (Number(product.current_stock) <= 0) {
+      setError(`${product.name} est? agotado.`)
+      return
+    }
 
     if (Number(product.sale_price) <= 0) {
       setError(
