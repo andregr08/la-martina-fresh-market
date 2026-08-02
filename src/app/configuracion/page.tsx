@@ -1,43 +1,51 @@
 ﻿"use client"
 
-import { useCallback, useEffect, useState } from "react"
 import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
+import {
+  Building2,
   CheckCircle2,
+  Eye,
+  EyeOff,
   Loader2,
+  MapPin,
+  Phone,
+  Printer,
   RefreshCw,
   Save,
   Settings,
+  Store,
 } from "lucide-react"
 
 import { AppShell } from "@/components/layout/app-shell"
+import {
+  TicketBranding,
+  TicketFooter,
+} from "@/components/tickets/ticket-branding"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import type { BusinessSettings } from "@/hooks/use-business-settings"
 import { createClient } from "@/lib/supabase/client"
 
-type BusinessSettings = {
+type SettingsRecord = BusinessSettings & {
   id: string
-  business_name: string
-  ticket_header: string | null
-  address: string | null
-  phone: string | null
-  currency: "MXN" | "USD"
-  ticket_footer: string
-  show_address_on_ticket: boolean
-  show_phone_on_ticket: boolean
-  auto_print_ticket: boolean
   updated_at: string
 }
 
 export default function ConfiguracionPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const [settingsId, setSettingsId] = useState("")
   const [businessName, setBusinessName] = useState("")
   const [ticketHeader, setTicketHeader] = useState("")
   const [address, setAddress] = useState("")
   const [phone, setPhone] = useState("")
-  const [currency, setCurrency] = useState<"MXN" | "USD">("MXN")
+  const [currency, setCurrency] =
+    useState<"MXN" | "USD">("MXN")
   const [ticketFooter, setTicketFooter] = useState("")
   const [showAddress, setShowAddress] = useState(true)
   const [showPhone, setShowPhone] = useState(true)
@@ -83,19 +91,19 @@ export default function ConfiguracionPage() {
       return
     }
 
-    const settings = data as BusinessSettings
+    const record = data as SettingsRecord
 
-    setSettingsId(settings.id)
-    setBusinessName(settings.business_name)
-    setTicketHeader(settings.ticket_header ?? "")
-    setAddress(settings.address ?? "")
-    setPhone(settings.phone ?? "")
-    setCurrency(settings.currency)
-    setTicketFooter(settings.ticket_footer)
-    setShowAddress(settings.show_address_on_ticket)
-    setShowPhone(settings.show_phone_on_ticket)
-    setAutoPrint(settings.auto_print_ticket)
-    setUpdatedAt(settings.updated_at)
+    setSettingsId(record.id)
+    setBusinessName(record.business_name)
+    setTicketHeader(record.ticket_header ?? "")
+    setAddress(record.address ?? "")
+    setPhone(record.phone ?? "")
+    setCurrency(record.currency)
+    setTicketFooter(record.ticket_footer)
+    setShowAddress(record.show_address_on_ticket)
+    setShowPhone(record.show_phone_on_ticket)
+    setAutoPrint(record.auto_print_ticket)
+    setUpdatedAt(record.updated_at)
 
     setLoading(false)
   }, [supabase])
@@ -103,6 +111,21 @@ export default function ConfiguracionPage() {
   useEffect(() => {
     void loadSettings()
   }, [loadSettings])
+
+  const previewSettings: BusinessSettings = {
+    business_name:
+      businessName.trim() || "La Martina Fresh Market",
+    ticket_header: ticketHeader.trim() || null,
+    address: address.trim() || null,
+    phone: phone.trim() || null,
+    currency,
+    ticket_footer:
+      ticketFooter.trim() ||
+      "Siempre mejor precio, mejor calidad y más fresco.",
+    show_address_on_ticket: showAddress,
+    show_phone_on_ticket: showPhone,
+    auto_print_ticket: autoPrint,
+  }
 
   async function saveSettings() {
     setError("")
@@ -114,7 +137,7 @@ export default function ConfiguracionPage() {
     }
 
     if (!ticketFooter.trim()) {
-      setError("El mensaje final del ticket no puede estar vacío.")
+      setError("El mensaje final del ticket es obligatorio.")
       return
     }
 
@@ -160,166 +183,209 @@ export default function ConfiguracionPage() {
   return (
     <AppShell
       title="Configuración"
-      description="Información comercial y formato general de tickets."
+      description="Datos comerciales, tickets y preferencias del sistema."
     >
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {message && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           <CheckCircle2 className="h-5 w-5" />
           {message}
         </div>
       )}
 
+      <div className="mb-6 flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void loadSettings()}
+          disabled={loading}
+          className="rounded-xl"
+        >
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${
+              loading ? "animate-spin" : ""
+            }`}
+          />
+          Recargar
+        </Button>
+      </div>
+
       {loading ? (
-        <div className="flex min-h-96 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+        <div className="flex min-h-[520px] items-center justify-center rounded-[24px] border border-[#dde2da] bg-white">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1f6a3a]" />
         </div>
       ) : (
-        <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+        <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
+          <section className="space-y-6">
+            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
+                  <Building2 className="h-5 w-5" />
+                </div>
 
-              <h2 className="text-lg font-semibold">
-                Datos del negocio
-              </h2>
-            </div>
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Información comercial
+                  </h2>
 
-            <div className="mt-6 space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="businessName">
-                  Nombre comercial
-                </Label>
-
-                <Input
-                  id="businessName"
-                  value={businessName}
-                  onChange={(event) =>
-                    setBusinessName(event.target.value)
-                  }
-                />
+                  <p className="mt-1 text-sm text-slate-500">
+                    Datos que identifican el negocio.
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="ticketHeader">
-                  Encabezado secundario del ticket
-                </Label>
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <p className="mb-1.5 text-xs font-medium text-slate-500">
+                    Nombre comercial
+                  </p>
 
-                <Input
-                  id="ticketHeader"
-                  value={ticketHeader}
-                  onChange={(event) =>
-                    setTicketHeader(event.target.value)
-                  }
-                  placeholder="Ej. Frutas y verduras frescas"
-                />
+                  <div className="relative">
+                    <Store className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <Input
+                      value={businessName}
+                      onChange={(event) =>
+                        setBusinessName(event.target.value)
+                      }
+                      className="rounded-xl pl-9"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <p className="mb-1.5 text-xs font-medium text-slate-500">
+                    Encabezado secundario
+                  </p>
+
+                  <Input
+                    value={ticketHeader}
+                    onChange={(event) =>
+                      setTicketHeader(event.target.value)
+                    }
+                    placeholder="Ej. Frutas y verduras frescas"
+                    className="rounded-xl"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <p className="mb-1.5 text-xs font-medium text-slate-500">
+                    Dirección
+                  </p>
+
+                  <div className="relative">
+                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <Input
+                      value={address}
+                      onChange={(event) =>
+                        setAddress(event.target.value)
+                      }
+                      className="rounded-xl pl-9"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-1.5 text-xs font-medium text-slate-500">
+                    Teléfono
+                  </p>
+
+                  <div className="relative">
+                    <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <Input
+                      value={phone}
+                      onChange={(event) =>
+                        setPhone(event.target.value)
+                      }
+                      className="rounded-xl pl-9"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-1.5 text-xs font-medium text-slate-500">
+                    Moneda
+                  </p>
+
+                  <select
+                    value={currency}
+                    onChange={(event) =>
+                      setCurrency(
+                        event.target.value as "MXN" | "USD",
+                      )
+                    }
+                    className="h-10 w-full rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
+                  >
+                    <option value="MXN">
+                      Peso mexicano (MXN)
+                    </option>
+
+                    <option value="USD">
+                      Dólar estadounidense (USD)
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </article>
+
+            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
+                  <Printer className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Configuración del ticket
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Información visible e impresión automática.
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">Dirección</Label>
+              <div className="mt-6">
+                <p className="mb-1.5 text-xs font-medium text-slate-500">
+                  Mensaje final
+                </p>
 
                 <Input
-                  id="address"
-                  value={address}
-                  onChange={(event) =>
-                    setAddress(event.target.value)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
-
-                <Input
-                  id="phone"
-                  value={phone}
-                  onChange={(event) =>
-                    setPhone(event.target.value)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="currency">Moneda</Label>
-
-                <select
-                  id="currency"
-                  value={currency}
-                  onChange={(event) =>
-                    setCurrency(
-                      event.target.value as "MXN" | "USD",
-                    )
-                  }
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-                >
-                  <option value="MXN">
-                    Peso mexicano (MXN)
-                  </option>
-
-                  <option value="USD">
-                    Dólar estadounidense (USD)
-                  </option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="ticketFooter">
-                  Mensaje final del ticket
-                </Label>
-
-                <Input
-                  id="ticketFooter"
                   value={ticketFooter}
                   onChange={(event) =>
                     setTicketFooter(event.target.value)
                   }
+                  className="rounded-xl"
                 />
               </div>
 
-              <Button
-                type="button"
-                onClick={saveSettings}
-                disabled={saving}
-              >
-                {saving ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4" />
-                )}
+              <div className="mt-6 grid gap-4">
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-[#e1e6de] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ed] text-[#1f6a3a]">
+                      {showAddress ? (
+                        <Eye className="h-5 w-5" />
+                      ) : (
+                        <EyeOff className="h-5 w-5" />
+                      )}
+                    </div>
 
-                Guardar configuración
-              </Button>
+                    <div>
+                      <p className="text-sm font-medium">
+                        Mostrar dirección
+                      </p>
 
-              {updatedAt && (
-                <p className="text-xs text-slate-500">
-                  Última actualización:{" "}
-                  {new Date(updatedAt).toLocaleString("es-MX")}
-                </p>
-              )}
-            </div>
-          </section>
-
-          <section className="space-y-6">
-            <article className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="text-lg font-semibold">
-                Opciones del ticket
-              </h2>
-
-              <div className="mt-6 space-y-5">
-                <label className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4">
-                  <div>
-                    <p className="font-medium">
-                      Mostrar dirección
-                    </p>
-
-                    <p className="mt-1 text-sm text-slate-500">
-                      Incluye la dirección en el comprobante.
-                    </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Aparece en los tickets impresos.
+                      </p>
+                    </div>
                   </div>
 
                   <input
@@ -332,15 +398,25 @@ export default function ConfiguracionPage() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4">
-                  <div>
-                    <p className="font-medium">
-                      Mostrar teléfono
-                    </p>
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-[#e1e6de] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ed] text-[#1f6a3a]">
+                      {showPhone ? (
+                        <Eye className="h-5 w-5" />
+                      ) : (
+                        <EyeOff className="h-5 w-5" />
+                      )}
+                    </div>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Incluye el teléfono del local.
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium">
+                        Mostrar teléfono
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        Aparece en los tickets impresos.
+                      </p>
+                    </div>
                   </div>
 
                   <input
@@ -353,15 +429,21 @@ export default function ConfiguracionPage() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4">
-                  <div>
-                    <p className="font-medium">
-                      Impresión automática
-                    </p>
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-[#e1e6de] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ed] text-[#1f6a3a]">
+                      <Printer className="h-5 w-5" />
+                    </div>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Abrirá la impresión al terminar una venta.
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium">
+                        Impresión automática
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        Abre la ventana de impresión al cobrar.
+                      </p>
+                    </div>
                   </div>
 
                   <input
@@ -376,40 +458,97 @@ export default function ConfiguracionPage() {
               </div>
             </article>
 
-            <article className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center">
-              <p className="text-lg font-semibold">
-                {businessName}
+            <button
+              type="button"
+              onClick={() => void saveSettings()}
+              disabled={saving}
+              className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-[#102019] text-sm font-semibold text-white transition hover:bg-[#174f2d] disabled:opacity-50"
+            >
+              {saving ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Save className="h-5 w-5" />
+              )}
+
+              Guardar configuración
+            </button>
+
+            {updatedAt && (
+              <p className="text-center text-xs text-slate-400">
+                Última actualización:{" "}
+                {new Date(updatedAt).toLocaleString("es-MX")}
               </p>
+            )}
+          </section>
 
-              {ticketHeader && (
-                <p className="mt-1 text-sm">
-                  {ticketHeader}
-                </p>
-              )}
-
-              {showAddress && address && (
-                <p className="mt-4 text-sm">{address}</p>
-              )}
-
-              {showPhone && phone && (
-                <p className="text-sm">Tel. {phone}</p>
-              )}
-
-              <div className="my-5 border-y border-dashed border-slate-400 py-4 text-sm">
-                <div className="flex justify-between">
-                  <span>Producto de ejemplo</span>
-                  <span>$25.00</span>
+          <aside className="space-y-6">
+            <article className="sticky top-28 rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#102019] text-white">
+                  <Settings className="h-5 w-5" />
                 </div>
 
-                <div className="mt-3 flex justify-between text-lg font-semibold">
-                  <span>Total</span>
-                  <span>$25.00</span>
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Vista previa
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Así se verá el ticket.
+                  </p>
                 </div>
               </div>
 
-              <p className="text-sm">{ticketFooter}</p>
+              <div className="mt-6 rounded-2xl border border-dashed border-slate-400 bg-white p-5 text-black">
+                <TicketBranding
+                  settings={previewSettings}
+                />
+
+                <div className="my-5 border-y border-dashed border-black py-3 text-sm">
+                  <p>Ticket: TK-000001</p>
+                  <p>Venta: VEN-000001</p>
+                  <p>
+                    Fecha:{" "}
+                    {new Date().toLocaleString("es-MX")}
+                  </p>
+                </div>
+
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="font-medium">
+                      Producto de ejemplo
+                    </p>
+
+                    <div className="flex justify-between">
+                      <span>1 kg × $25.00</span>
+                      <span>$25.00</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="my-5 space-y-2 border-y border-dashed border-black py-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>$25.00</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span>Descuento</span>
+                    <span>-$0.00</span>
+                  </div>
+
+                  <div className="flex justify-between text-lg font-semibold">
+                    <span>Total</span>
+                    <span>$25.00</span>
+                  </div>
+                </div>
+
+                <TicketFooter
+                  settings={previewSettings}
+                />
+              </div>
             </article>
-          </section>
+          </aside>
         </div>
       )}
     </AppShell>

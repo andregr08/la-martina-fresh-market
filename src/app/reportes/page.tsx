@@ -1,32 +1,44 @@
 ﻿"use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   BarChart3,
   Boxes,
   Download,
   Loader2,
-  PackagePlus,
+  ReceiptText,
   RefreshCw,
   ShoppingCart,
-  Trash2,
+  TrendingDown,
   TrendingUp,
   WalletCards,
 } from "lucide-react"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 import { AppShell } from "@/components/layout/app-shell"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 
 type Sale = {
   id: string
   folio: string
-  subtotal: number
-  discount: number
   total: number
-  payment_method: string
   sold_at: string
+  status: string
 }
 
 type SaleItem = {
@@ -34,48 +46,25 @@ type SaleItem = {
   subtotal: number
   profit: number
   product: {
+    id: string
     name: string
     unit: string
   } | null
-  sale: {
-    sold_at: string
-    status: string
-  } | null
-}
-
-type Purchase = {
-  id: string
-  folio: string
-  merchandise_subtotal: number
-  transport_cost: number
-  parking_cost: number
-  loader_cost: number
-  other_costs: number
-  total: number
-  purchase_date: string
 }
 
 type Expense = {
-  id: string
   amount: number
-  payment_method: string
-  description: string
   expense_date: string
-  category: {
-    name: string
-  } | null
 }
 
-type WasteRecord = {
-  id: string
-  quantity: number
+type Waste = {
   total_loss: number
-  reason: string
   recorded_at: string
-  product: {
-    name: string
-    unit: string
-  } | null
+}
+
+type Purchase = {
+  total: number
+  purchase_date: string
 }
 
 type Product = {
@@ -86,7 +75,13 @@ type Product = {
   purchase_price: number
 }
 
+type ChartPoint = {
+  label: string
+  sales: number
+}
+
 type TopProduct = {
+  id: string
   name: string
   unit: string
   quantity: number
@@ -100,7 +95,13 @@ function money(value: number) {
   }).format(Number(value || 0))
 }
 
-function dateInputValue(date: Date) {
+function quantity(value: number, unit: string) {
+  return `${Number(value || 0).toLocaleString("es-MX", {
+    maximumFractionDigits: 3,
+  })} ${unit}`
+}
+
+function toDateInputValue(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
   const day = String(date.getDate()).padStart(2, "0")
@@ -108,76 +109,144 @@ function dateInputValue(date: Date) {
   return `${year}-${month}-${day}`
 }
 
-function csvValue(value: unknown) {
+function startOfDay(value: string) {
+  return new Date(`${value}T00:00:00`).toISOString()
+}
+
+function endOfDay(value: string) {
+  return new Date(`${value}T23:59:59.999`).toISOString()
+}
+
+function escapeCsv(value: string | number) {
   const text = String(value ?? "")
-  return `"${text.replaceAll('"', '""')}"`
+
+  if (
+    text.includes(",") ||
+    text.includes('"') ||
+    text.includes("\n")
+  ) {
+    return `"${text.replace(/"/g, '""')}"`
+  }
+
+  return text
+}
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  tone = "default",
+}: {
+  title: string
+  value: string
+  subtitle?: string
+  icon: React.ComponentType<{ className?: string }>
+  tone?: "default" | "green" | "red" | "amber"
+}) {
+  const classes = {
+    default: {
+      card: "border-[#dde2da] bg-white",
+      icon: "bg-[#eef3ed] text-[#1f6a3a]",
+      text: "text-[#172018]",
+      subtitle: "text-slate-400",
+    },
+    green: {
+      card: "border-emerald-200 bg-emerald-50",
+      icon: "bg-white text-emerald-700",
+      text: "text-emerald-950",
+      subtitle: "text-emerald-700",
+    },
+    red: {
+      card: "border-red-200 bg-red-50",
+      icon: "bg-white text-red-700",
+      text: "text-red-950",
+      subtitle: "text-red-700",
+    },
+    amber: {
+      card: "border-amber-200 bg-amber-50",
+      icon: "bg-white text-amber-700",
+      text: "text-amber-950",
+      subtitle: "text-amber-700",
+    },
+  }[tone]
+
+  return (
+    <article
+      className={`rounded-[20px] border p-5 shadow-sm ${classes.card}`}
+    >
+      <div
+        className={`flex h-11 w-11 items-center justify-center rounded-2xl ${classes.icon}`}
+      >
+        <Icon className="h-5 w-5" />
+      </div>
+
+      <p className="mt-5 text-sm font-medium text-slate-500">
+        {title}
+      </p>
+
+      <p
+        className={`mt-2 text-[28px] font-semibold tracking-tight ${classes.text}`}
+      >
+        {value}
+      </p>
+
+      {subtitle && (
+        <p className={`mt-2 text-xs ${classes.subtitle}`}>
+          {subtitle}
+        </p>
+      )}
+    </article>
+  )
 }
 
 export default function ReportesPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  const initialStart = new Date()
-  initialStart.setDate(1)
+  const today = useMemo(() => new Date(), [])
+  const firstDay = useMemo(
+    () => new Date(today.getFullYear(), today.getMonth(), 1),
+    [today],
+  )
 
   const [startDate, setStartDate] = useState(
-    dateInputValue(initialStart),
+    toDateInputValue(firstDay),
   )
   const [endDate, setEndDate] = useState(
-    dateInputValue(new Date()),
+    toDateInputValue(today),
   )
 
   const [sales, setSales] = useState<Sale[]>([])
   const [saleItems, setSaleItems] = useState<SaleItem[]>([])
-  const [purchases, setPurchases] = useState<Purchase[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
-  const [waste, setWaste] = useState<WasteRecord[]>([])
+  const [waste, setWaste] = useState<Waste[]>([])
+  const [purchases, setPurchases] = useState<Purchase[]>([])
   const [products, setProducts] = useState<Product[]>([])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const loadReports = useCallback(async () => {
+  const loadReport = useCallback(async () => {
     setLoading(true)
     setError("")
 
-    const start = new Date(`${startDate}T00:00:00`)
-    const end = new Date(`${endDate}T23:59:59.999`)
-
-    if (
-      Number.isNaN(start.getTime()) ||
-      Number.isNaN(end.getTime()) ||
-      start > end
-    ) {
-      setError("El rango de fechas no es válido.")
-      setLoading(false)
-      return
-    }
-
-    const startIso = start.toISOString()
-    const endIso = end.toISOString()
+    const start = startOfDay(startDate)
+    const end = endOfDay(endDate)
 
     const [
       salesResponse,
-      saleItemsResponse,
-      purchasesResponse,
+      itemsResponse,
       expensesResponse,
       wasteResponse,
+      purchasesResponse,
       productsResponse,
     ] = await Promise.all([
       supabase
         .from("sales")
-        .select(`
-          id,
-          folio,
-          subtotal,
-          discount,
-          total,
-          payment_method,
-          sold_at
-        `)
+        .select("id, folio, total, sold_at, status")
         .eq("status", "completed")
-        .gte("sold_at", startIso)
-        .lte("sold_at", endIso)
+        .gte("sold_at", start)
+        .lte("sold_at", end)
         .order("sold_at"),
 
       supabase
@@ -187,6 +256,7 @@ export default function ReportesPage() {
           subtotal,
           profit,
           product:products (
+            id,
             name,
             unit
           ),
@@ -196,58 +266,26 @@ export default function ReportesPage() {
           )
         `)
         .eq("sale.status", "completed")
-        .gte("sale.sold_at", startIso)
-        .lte("sale.sold_at", endIso),
-
-      supabase
-        .from("purchases")
-        .select(`
-          id,
-          folio,
-          merchandise_subtotal,
-          transport_cost,
-          parking_cost,
-          loader_cost,
-          other_costs,
-          total,
-          purchase_date
-        `)
-        .gte("purchase_date", startIso)
-        .lte("purchase_date", endIso)
-        .order("purchase_date"),
+        .gte("sale.sold_at", start)
+        .lte("sale.sold_at", end),
 
       supabase
         .from("expenses")
-        .select(`
-          id,
-          amount,
-          payment_method,
-          description,
-          expense_date,
-          category:expense_categories (
-            name
-          )
-        `)
-        .gte("expense_date", startIso)
-        .lte("expense_date", endIso)
-        .order("expense_date"),
+        .select("amount, expense_date")
+        .gte("expense_date", start)
+        .lte("expense_date", end),
 
       supabase
         .from("waste_records")
-        .select(`
-          id,
-          quantity,
-          total_loss,
-          reason,
-          recorded_at,
-          product:products (
-            name,
-            unit
-          )
-        `)
-        .gte("recorded_at", startIso)
-        .lte("recorded_at", endIso)
-        .order("recorded_at"),
+        .select("total_loss, recorded_at")
+        .gte("recorded_at", start)
+        .lte("recorded_at", end),
+
+      supabase
+        .from("purchases")
+        .select("total, purchase_date")
+        .gte("purchase_date", start)
+        .lte("purchase_date", end),
 
       supabase
         .from("products")
@@ -264,10 +302,10 @@ export default function ReportesPage() {
 
     const firstError =
       salesResponse.error ||
-      saleItemsResponse.error ||
-      purchasesResponse.error ||
+      itemsResponse.error ||
       expensesResponse.error ||
       wasteResponse.error ||
+      purchasesResponse.error ||
       productsResponse.error
 
     if (firstError) {
@@ -277,81 +315,107 @@ export default function ReportesPage() {
     }
 
     setSales((salesResponse.data ?? []) as Sale[])
-
     setSaleItems(
-      (saleItemsResponse.data ?? []) as unknown as SaleItem[],
+      (itemsResponse.data ?? []) as unknown as SaleItem[],
     )
-
-    setPurchases(
-      (purchasesResponse.data ?? []) as Purchase[],
-    )
-
-    setExpenses(
-      (expensesResponse.data ?? []) as unknown as Expense[],
-    )
-
-    setWaste(
-      (wasteResponse.data ?? []) as unknown as WasteRecord[],
-    )
-
+    setExpenses((expensesResponse.data ?? []) as Expense[])
+    setWaste((wasteResponse.data ?? []) as Waste[])
+    setPurchases((purchasesResponse.data ?? []) as Purchase[])
     setProducts((productsResponse.data ?? []) as Product[])
+
     setLoading(false)
-  }, [supabase, startDate, endDate])
+  }, [endDate, startDate, supabase])
 
   useEffect(() => {
-    void loadReports()
-  }, [loadReports])
+    void loadReport()
+  }, [loadReport])
 
-  const summary = useMemo(() => {
-    const totalSales = sales.reduce(
-      (total, sale) => total + Number(sale.total || 0),
-      0,
-    )
+  const salesTotal = useMemo(
+    () =>
+      sales.reduce(
+        (total, sale) => total + Number(sale.total || 0),
+        0,
+      ),
+    [sales],
+  )
 
-    const grossProfit = saleItems.reduce(
-      (total, item) => total + Number(item.profit || 0),
-      0,
-    )
+  const grossProfit = useMemo(
+    () =>
+      saleItems.reduce(
+        (total, item) => total + Number(item.profit || 0),
+        0,
+      ),
+    [saleItems],
+  )
 
-    const totalPurchases = purchases.reduce(
-      (total, purchase) => total + Number(purchase.total || 0),
-      0,
-    )
+  const expenseTotal = useMemo(
+    () =>
+      expenses.reduce(
+        (total, item) => total + Number(item.amount || 0),
+        0,
+      ),
+    [expenses],
+  )
 
-    const totalExpenses = expenses.reduce(
-      (total, expense) => total + Number(expense.amount || 0),
-      0,
-    )
+  const wasteTotal = useMemo(
+    () =>
+      waste.reduce(
+        (total, item) => total + Number(item.total_loss || 0),
+        0,
+      ),
+    [waste],
+  )
 
-    const totalWaste = waste.reduce(
-      (total, record) => total + Number(record.total_loss || 0),
-      0,
-    )
+  const purchaseTotal = useMemo(
+    () =>
+      purchases.reduce(
+        (total, item) => total + Number(item.total || 0),
+        0,
+      ),
+    [purchases],
+  )
 
-    const inventoryValue = products.reduce(
-      (total, product) =>
-        total +
-        Number(product.current_stock || 0) *
-          Number(product.purchase_price || 0),
-      0,
-    )
+  const netProfit =
+    grossProfit - expenseTotal - wasteTotal
 
-    const netProfit =
-      grossProfit - totalExpenses - totalWaste
+  const averageTicket =
+    sales.length > 0 ? salesTotal / sales.length : 0
 
-    return {
-      totalSales,
-      grossProfit,
-      totalPurchases,
-      totalExpenses,
-      totalWaste,
-      inventoryValue,
-      netProfit,
-      salesCount: sales.length,
-      averageTicket:
-        sales.length > 0 ? totalSales / sales.length : 0,
-    }
-  }, [sales, saleItems, purchases, expenses, waste, products])
+  const inventoryValue = useMemo(
+    () =>
+      products.reduce(
+        (total, product) =>
+          total +
+          Number(product.current_stock || 0) *
+            Number(product.purchase_price || 0),
+        0,
+      ),
+    [products],
+  )
+
+  const chartData = useMemo(() => {
+    const grouped = new Map<string, number>()
+
+    sales.forEach((sale) => {
+      const date = new Date(sale.sold_at)
+      const key = date.toLocaleDateString("es-MX", {
+        day: "2-digit",
+        month: "short",
+      })
+
+      grouped.set(
+        key,
+        (grouped.get(key) ?? 0) + Number(sale.total || 0),
+      )
+    })
+
+    return Array.from(grouped.entries()).map(
+      ([label, amount]) => ({
+        label,
+        sales: Number(amount.toFixed(2)),
+      }),
+    ) as ChartPoint[]
+  }, [sales])
 
   const topProducts = useMemo(() => {
     const grouped = new Map<string, TopProduct>()
@@ -359,7 +423,8 @@ export default function ReportesPage() {
     saleItems.forEach((item) => {
       if (!item.product) return
 
-      const current = grouped.get(item.product.name) ?? {
+      const current = grouped.get(item.product.id) ?? {
+        id: item.product.id,
         name: item.product.name,
         unit: item.product.unit,
         quantity: 0,
@@ -369,7 +434,7 @@ export default function ReportesPage() {
       current.quantity += Number(item.quantity || 0)
       current.amount += Number(item.subtotal || 0)
 
-      grouped.set(item.product.name, current)
+      grouped.set(item.product.id, current)
     })
 
     return Array.from(grouped.values())
@@ -378,124 +443,46 @@ export default function ReportesPage() {
   }, [saleItems])
 
   function exportCsv() {
-    const rows: string[][] = [
-      ["REPORTE LA MARTINA FRESH MARKET"],
+    const rows = [
+      ["Reporte La Martina Fresh Market"],
       ["Desde", startDate],
       ["Hasta", endDate],
       [],
-      ["RESUMEN"],
-      ["Concepto", "Importe"],
-      ["Ventas", summary.totalSales.toFixed(2)],
-      ["Utilidad bruta", summary.grossProfit.toFixed(2)],
-      ["Gastos", summary.totalExpenses.toFixed(2)],
-      ["Mermas", summary.totalWaste.toFixed(2)],
-      ["Utilidad neta", summary.netProfit.toFixed(2)],
-      ["Compras", summary.totalPurchases.toFixed(2)],
-      ["Valor actual inventario", summary.inventoryValue.toFixed(2)],
-      ["Número de ventas", String(summary.salesCount)],
-      ["Ticket promedio", summary.averageTicket.toFixed(2)],
+      ["Indicador", "Valor"],
+      ["Ventas", salesTotal],
+      ["Utilidad bruta", grossProfit],
+      ["Gastos", expenseTotal],
+      ["Mermas", wasteTotal],
+      ["Utilidad neta", netProfit],
+      ["Compras", purchaseTotal],
+      ["Ticket promedio", averageTicket],
+      ["Valor inventario", inventoryValue],
       [],
-      ["VENTAS"],
-      [
-        "Folio",
-        "Fecha",
-        "Método",
-        "Subtotal",
-        "Descuento",
-        "Total",
-      ],
-      ...sales.map((sale) => [
-        sale.folio,
-        new Date(sale.sold_at).toLocaleString("es-MX"),
-        sale.payment_method,
-        Number(sale.subtotal).toFixed(2),
-        Number(sale.discount).toFixed(2),
-        Number(sale.total).toFixed(2),
-      ]),
-      [],
-      ["COMPRAS"],
-      ["Folio", "Fecha", "Mercancía", "Logística", "Total"],
-      ...purchases.map((purchase) => {
-        const logistics =
-          Number(purchase.transport_cost || 0) +
-          Number(purchase.parking_cost || 0) +
-          Number(purchase.loader_cost || 0) +
-          Number(purchase.other_costs || 0)
-
-        return [
-          purchase.folio,
-          new Date(purchase.purchase_date).toLocaleString("es-MX"),
-          Number(purchase.merchandise_subtotal).toFixed(2),
-          logistics.toFixed(2),
-          Number(purchase.total).toFixed(2),
-        ]
-      }),
-      [],
-      ["GASTOS"],
-      ["Fecha", "Categoría", "Descripción", "Método", "Importe"],
-      ...expenses.map((expense) => [
-        new Date(expense.expense_date).toLocaleString("es-MX"),
-        expense.category?.name ?? "",
-        expense.description,
-        expense.payment_method,
-        Number(expense.amount).toFixed(2),
-      ]),
-      [],
-      ["MERMAS"],
-      ["Fecha", "Producto", "Cantidad", "Unidad", "Motivo", "Pérdida"],
-      ...waste.map((record) => [
-        new Date(record.recorded_at).toLocaleString("es-MX"),
-        record.product?.name ?? "",
-        Number(record.quantity).toFixed(3),
-        record.product?.unit ?? "",
-        record.reason,
-        Number(record.total_loss).toFixed(2),
-      ]),
-      [],
-      ["PRODUCTOS MÁS VENDIDOS"],
+      ["Productos más vendidos"],
       ["Producto", "Cantidad", "Unidad", "Ventas"],
       ...topProducts.map((product) => [
         product.name,
-        product.quantity.toFixed(3),
+        product.quantity,
         product.unit,
-        product.amount.toFixed(2),
-      ]),
-      [],
-      ["INVENTARIO ACTUAL"],
-      ["Producto", "Existencia", "Unidad", "Costo promedio", "Valor"],
-      ...products.map((product) => [
-        product.name,
-        Number(product.current_stock).toFixed(3),
-        product.unit,
-        Number(product.purchase_price).toFixed(2),
-        (
-          Number(product.current_stock) *
-          Number(product.purchase_price)
-        ).toFixed(2),
+        product.amount,
       ]),
     ]
 
     const csv = rows
-      .map((row) => row.map(csvValue).join(","))
-      .join("\r\n")
+      .map((row) => row.map(escapeCsv).join(","))
+      .join("\n")
 
-    const blob = new Blob(
-      ["\uFEFF", csv],
-      {
-        type: "text/csv;charset=utf-8;",
-      },
-    )
+    const blob = new Blob([`\uFEFF${csv}`], {
+      type: "text/csv;charset=utf-8;",
+    })
 
     const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
+    const anchor = document.createElement("a")
 
-    link.href = url
-    link.download =
-      `reporte-la-martina-${startDate}-a-${endDate}.csv`
+    anchor.href = url
+    anchor.download = `reporte-la-martina-${startDate}-${endDate}.csv`
+    anchor.click()
 
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
     URL.revokeObjectURL(url)
   }
 
@@ -505,63 +492,64 @@ export default function ReportesPage() {
       description="Resultados financieros y operativos por periodo."
     >
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_auto_auto] xl:items-end">
-          <div className="space-y-2">
-            <Label htmlFor="startDate">Fecha inicial</Label>
+      <section className="mb-6 rounded-[24px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-slate-500">
+                Desde
+              </p>
 
-            <div className="flex w-full min-w-0 rounded-xl border px-3 py-2">
-              <input
-                id="startDate"
+              <Input
                 type="date"
                 value={startDate}
                 onChange={(event) =>
                   setStartDate(event.target.value)
                 }
-                className="block w-full min-w-0 border-0 bg-transparent p-0 text-base"
+                className="rounded-xl"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="endDate">Fecha final</Label>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-slate-500">
+                Hasta
+              </p>
 
-            <div className="flex w-full min-w-0 rounded-xl border px-3 py-2">
-              <input
-                id="endDate"
+              <Input
                 type="date"
                 value={endDate}
                 onChange={(event) =>
                   setEndDate(event.target.value)
                 }
-                className="block w-full min-w-0 border-0 bg-transparent p-0 text-base"
+                className="rounded-xl"
               />
             </div>
+
+            <Button
+              type="button"
+              onClick={() => void loadReport()}
+              disabled={loading}
+              className="h-10 self-end rounded-xl bg-[#102019] text-white"
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${
+                  loading ? "animate-spin" : ""
+                }`}
+              />
+              Actualizar
+            </Button>
           </div>
 
           <Button
             type="button"
             variant="outline"
-            onClick={() => void loadReports()}
-            disabled={loading}
-          >
-            <RefreshCw
-              className={`mr-2 h-4 w-4 ${
-                loading ? "animate-spin" : ""
-              }`}
-            />
-            Generar
-          </Button>
-
-          <Button
-            type="button"
             onClick={exportCsv}
-            disabled={loading}
+            className="rounded-xl"
           >
             <Download className="mr-2 h-4 w-4" />
             Exportar CSV
@@ -570,134 +558,268 @@ export default function ReportesPage() {
       </section>
 
       {loading ? (
-        <div className="flex min-h-96 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+        <div className="flex min-h-[520px] items-center justify-center rounded-[24px] border border-[#dde2da] bg-white">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1f6a3a]" />
         </div>
       ) : (
         <div className="space-y-6">
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <TrendingUp className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Ventas
-              </p>
-              <p className="mt-2 text-2xl font-semibold">
-                {money(summary.totalSales)}
-              </p>
-              <p className="mt-2 text-sm text-slate-500">
-                {summary.salesCount} tickets · Promedio{" "}
-                {money(summary.averageTicket)}
-              </p>
+            <StatCard
+              title="Ventas"
+              value={money(salesTotal)}
+              subtitle={`${sales.length} operaciones`}
+              icon={TrendingUp}
+              tone="green"
+            />
+
+            <StatCard
+              title="Utilidad bruta"
+              value={money(grossProfit)}
+              subtitle="Antes de gastos y mermas"
+              icon={WalletCards}
+            />
+
+            <StatCard
+              title="Utilidad neta"
+              value={money(netProfit)}
+              subtitle={`Gastos ${money(
+                expenseTotal,
+              )} · Mermas ${money(wasteTotal)}`}
+              icon={TrendingUp}
+              tone={netProfit >= 0 ? "green" : "red"}
+            />
+
+            <StatCard
+              title="Ticket promedio"
+              value={money(averageTicket)}
+              subtitle="Promedio por venta"
+              icon={ReceiptText}
+            />
+
+            <StatCard
+              title="Compras"
+              value={money(purchaseTotal)}
+              subtitle={`${purchases.length} registros`}
+              icon={ShoppingCart}
+              tone="amber"
+            />
+
+            <StatCard
+              title="Gastos"
+              value={money(expenseTotal)}
+              subtitle={`${expenses.length} registros`}
+              icon={TrendingDown}
+              tone="red"
+            />
+
+            <StatCard
+              title="Mermas"
+              value={money(wasteTotal)}
+              subtitle={`${waste.length} registros`}
+              icon={TrendingDown}
+              tone="red"
+            />
+
+            <StatCard
+              title="Valor de inventario"
+              value={money(inventoryValue)}
+              subtitle={`${products.length} productos activos`}
+              icon={Boxes}
+            />
+          </section>
+
+          <section className="grid gap-6 xl:grid-cols-[1.45fr_0.8fr]">
+            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-[#1f6a3a]" />
+
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Ventas por día
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Evolución dentro del rango seleccionado
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 h-[360px]">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                  >
+                    <BarChart data={chartData}>
+                      <CartesianGrid
+                        strokeDasharray="4 4"
+                        vertical={false}
+                        stroke="#e6ebe3"
+                      />
+
+                      <XAxis
+                        dataKey="label"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fill: "#7a857b",
+                          fontSize: 12,
+                        }}
+                      />
+
+                      <YAxis
+                        tickFormatter={(value) =>
+                          `$${Number(value).toLocaleString(
+                            "es-MX",
+                          )}`
+                        }
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{
+                          fill: "#7a857b",
+                          fontSize: 12,
+                        }}
+                      />
+
+                      <Tooltip
+                        formatter={(value) => [
+                          money(Number(value)),
+                          "Ventas",
+                        ]}
+                        contentStyle={{
+                          borderRadius: "14px",
+                          border: "1px solid #dde2da",
+                          boxShadow:
+                            "0 12px 30px rgba(16,24,18,.10)",
+                        }}
+                      />
+
+                      <Bar
+                        dataKey="sales"
+                        fill="#1f6a3a"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-center">
+                    <BarChart3 className="h-8 w-8 text-slate-300" />
+
+                    <p className="mt-4 text-sm font-medium text-slate-600">
+                      Sin ventas en este periodo
+                    </p>
+                  </div>
+                )}
+              </div>
             </article>
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <WalletCards className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Utilidad bruta
+            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+              <p className="text-sm font-medium text-slate-500">
+                Rentabilidad
               </p>
-              <p className="mt-2 text-2xl font-semibold">
-                {money(summary.grossProfit)}
-              </p>
-            </article>
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <BarChart3 className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Utilidad neta
-              </p>
-              <p
-                className={`mt-2 text-2xl font-semibold ${
-                  summary.netProfit < 0 ? "text-red-700" : ""
-                }`}
-              >
-                {money(summary.netProfit)}
-              </p>
-              <p className="mt-2 text-sm text-slate-500">
-                Después de gastos y mermas
-              </p>
-            </article>
+              <h2 className="mt-1 text-lg font-semibold">
+                Resumen financiero
+              </h2>
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <Boxes className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Valor del inventario
-              </p>
-              <p className="mt-2 text-2xl font-semibold">
-                {money(summary.inventoryValue)}
-              </p>
+              <div className="mt-6 space-y-4">
+                {[
+                  {
+                    label: "Ventas",
+                    value: salesTotal,
+                    tone: "text-[#1f6a3a]",
+                  },
+                  {
+                    label: "Utilidad bruta",
+                    value: grossProfit,
+                    tone: "text-[#1f6a3a]",
+                  },
+                  {
+                    label: "Gastos",
+                    value: -expenseTotal,
+                    tone: "text-red-700",
+                  },
+                  {
+                    label: "Mermas",
+                    value: -wasteTotal,
+                    tone: "text-red-700",
+                  },
+                  {
+                    label: "Utilidad neta",
+                    value: netProfit,
+                    tone:
+                      netProfit >= 0
+                        ? "text-emerald-700"
+                        : "text-red-700",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between rounded-2xl border border-[#e4e8e1] px-4 py-3"
+                  >
+                    <span className="text-sm text-slate-500">
+                      {item.label}
+                    </span>
+
+                    <span
+                      className={`font-semibold ${item.tone}`}
+                    >
+                      {money(item.value)}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </article>
           </section>
 
-          <section className="grid gap-4 sm:grid-cols-3">
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <ShoppingCart className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Compras
-              </p>
-              <p className="mt-2 text-2xl font-semibold">
-                {money(summary.totalPurchases)}
-              </p>
-            </article>
-
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <PackagePlus className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Gastos operativos
-              </p>
-              <p className="mt-2 text-2xl font-semibold">
-                {money(summary.totalExpenses)}
-              </p>
-            </article>
-
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <Trash2 className="h-5 w-5 text-slate-500" />
-              <p className="mt-4 text-sm text-slate-500">
-                Pérdida por mermas
-              </p>
-              <p className="mt-2 text-2xl font-semibold">
-                {money(summary.totalWaste)}
-              </p>
-            </article>
-          </section>
-
-          <section className="rounded-2xl border border-slate-200 bg-white">
-            <div className="border-b border-slate-200 p-5">
+          <section className="overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
+            <div className="border-b border-[#e6eae4] px-6 py-5">
               <h2 className="text-lg font-semibold">
                 Productos más vendidos
               </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Ranking por importe vendido
+              </p>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[650px] text-left">
-                <thead className="border-b border-slate-200 bg-slate-50 text-sm text-slate-500">
+              <table className="w-full min-w-[760px] text-left">
+                <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                   <tr>
-                    <th className="px-5 py-4 font-medium">
-                      Producto
-                    </th>
-                    <th className="px-5 py-4 font-medium">
-                      Cantidad
-                    </th>
-                    <th className="px-5 py-4 font-medium">
+                    <th className="px-6 py-4">Posición</th>
+                    <th className="px-6 py-4">Producto</th>
+                    <th className="px-6 py-4">Cantidad</th>
+                    <th className="px-6 py-4 text-right">
                       Ventas
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-100">
-                  {topProducts.map((product) => (
-                    <tr key={product.name}>
-                      <td className="px-5 py-4 font-medium">
+                <tbody className="divide-y divide-[#edf0eb]">
+                  {topProducts.map((product, index) => (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-[#fafbf8]"
+                    >
+                      <td className="px-6 py-4">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#eef3ed] text-sm font-semibold text-[#1f6a3a]">
+                          {index + 1}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 font-medium">
                         {product.name}
                       </td>
 
-                      <td className="px-5 py-4">
-                        {product.quantity.toLocaleString("es-MX", {
-                          maximumFractionDigits: 3,
-                        })}{" "}
-                        {product.unit}
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {quantity(
+                          product.quantity,
+                          product.unit,
+                        )}
                       </td>
 
-                      <td className="px-5 py-4 font-semibold">
+                      <td className="px-6 py-4 text-right font-semibold">
                         {money(product.amount)}
                       </td>
                     </tr>
@@ -706,10 +828,10 @@ export default function ReportesPage() {
                   {topProducts.length === 0 && (
                     <tr>
                       <td
-                        colSpan={3}
-                        className="px-5 py-14 text-center text-sm text-slate-500"
+                        colSpan={4}
+                        className="px-6 py-20 text-center text-sm text-slate-500"
                       >
-                        No existen ventas en el periodo.
+                        No existen productos vendidos en este periodo.
                       </td>
                     </tr>
                   )}

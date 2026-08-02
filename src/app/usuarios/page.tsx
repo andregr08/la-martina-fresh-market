@@ -1,6 +1,11 @@
 ﻿"use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   CheckCircle2,
   Loader2,
@@ -17,54 +22,82 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 
+type UserRole =
+  | "admin"
+  | "cashier"
+  | "warehouse"
+  | "finance"
+  | "partner"
+
 type UserProfile = {
   id: string
   full_name: string | null
   email: string | null
-  role: "admin" | "cashier" | "warehouse" | "finance" | "partner"
+  role: UserRole
   active: boolean
   created_at: string
   updated_at: string
 }
 
 type EditableUser = UserProfile & {
-  fullNameInput: string
-  roleInput: UserProfile["role"]
+  nameInput: string
+  roleInput: UserRole
   activeInput: boolean
 }
 
-const roleOptions = [
+const roles: {
+  value: UserRole
+  label: string
+  description: string
+}[] = [
   {
     value: "admin",
     label: "Administrador",
+    description: "Acceso completo al sistema.",
   },
   {
     value: "cashier",
     label: "Caja",
+    description: "Ventas, caja, cortes y gastos.",
   },
   {
     value: "warehouse",
     label: "Almacén",
+    description: "Inventario, entradas, mermas y ajustes.",
   },
   {
     value: "finance",
     label: "Finanzas",
+    description: "Compras, gastos, reportes y resultados.",
   },
   {
     value: "partner",
     label: "Socio",
+    description: "Consulta de resultados y operación.",
   },
-] as const
+]
 
 function roleLabel(role: string) {
   return (
-    roleOptions.find((option) => option.value === role)?.label ??
+    roles.find((item) => item.value === role)?.label ??
     role
   )
 }
 
+function initials(name: string | null, email: string | null) {
+  const source = name?.trim() || email?.trim() || "Usuario"
+
+  return source
+    .split(/[\s@._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase()
+}
+
 export default function UsuariosPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const [users, setUsers] = useState<EditableUser[]>([])
   const [search, setSearch] = useState("")
@@ -91,7 +124,9 @@ export default function UsuariosPage() {
         created_at,
         updated_at
       `)
-      .order("created_at")
+      .order("created_at", {
+        ascending: true,
+      })
 
     if (usersError) {
       setError(usersError.message)
@@ -102,7 +137,7 @@ export default function UsuariosPage() {
     setUsers(
       ((data ?? []) as UserProfile[]).map((user) => ({
         ...user,
-        fullNameInput: user.full_name ?? "",
+        nameInput: user.full_name ?? "",
         roleInput: user.role,
         activeInput: user.active,
       })),
@@ -133,7 +168,11 @@ export default function UsuariosPage() {
         (statusFilter === "Activos" && user.active) ||
         (statusFilter === "Inactivos" && !user.active)
 
-      return matchesSearch && matchesRole && matchesStatus
+      return (
+        matchesSearch &&
+        matchesRole &&
+        matchesStatus
+      )
     })
   }, [users, search, roleFilter, statusFilter])
 
@@ -166,7 +205,7 @@ export default function UsuariosPage() {
   function updateUser(
     userId: string,
     field:
-      | "fullNameInput"
+      | "nameInput"
       | "roleInput"
       | "activeInput",
     value: string | boolean,
@@ -183,18 +222,32 @@ export default function UsuariosPage() {
     )
   }
 
+  function hasChanges(user: EditableUser) {
+    return (
+      user.nameInput.trim() !==
+        (user.full_name ?? "").trim() ||
+      user.roleInput !== user.role ||
+      user.activeInput !== user.active
+    )
+  }
+
   async function saveUser(user: EditableUser) {
     setError("")
     setMessage("")
 
-    if (!user.fullNameInput.trim()) {
-      setError("El nombre del usuario no puede estar vacío.")
+    if (!user.nameInput.trim()) {
+      setError("El nombre no puede estar vacío.")
+      return
+    }
+
+    if (!hasChanges(user)) {
+      setMessage("No existen cambios por guardar.")
       return
     }
 
     const confirmed = window.confirm(
       `Se actualizará el acceso de ${
-        user.email ?? user.fullNameInput
+        user.email ?? user.nameInput
       }. ¿Deseas continuar?`,
     )
 
@@ -206,7 +259,7 @@ export default function UsuariosPage() {
       "update_user_access",
       {
         p_user_id: user.id,
-        p_full_name: user.fullNameInput.trim(),
+        p_full_name: user.nameInput.trim(),
         p_role: user.roleInput,
         p_active: user.activeInput,
       },
@@ -220,7 +273,7 @@ export default function UsuariosPage() {
 
     const result = data as {
       full_name?: string
-      role?: UserProfile["role"]
+      role?: UserRole
       active?: boolean
     }
 
@@ -230,19 +283,26 @@ export default function UsuariosPage() {
           ? {
               ...item,
               full_name:
-                result.full_name ?? user.fullNameInput.trim(),
-              role: result.role ?? user.roleInput,
+                result.full_name ??
+                user.nameInput.trim(),
+              role:
+                result.role ??
+                user.roleInput,
               active:
                 typeof result.active === "boolean"
                   ? result.active
                   : user.activeInput,
-              fullNameInput:
-                result.full_name ?? user.fullNameInput.trim(),
-              roleInput: result.role ?? user.roleInput,
+              nameInput:
+                result.full_name ??
+                user.nameInput.trim(),
+              roleInput:
+                result.role ??
+                user.roleInput,
               activeInput:
                 typeof result.active === "boolean"
                   ? result.active
                   : user.activeInput,
+              updated_at: new Date().toISOString(),
             }
           : item,
       ),
@@ -250,7 +310,7 @@ export default function UsuariosPage() {
 
     setMessage(
       `El acceso de ${
-        user.email ?? user.fullNameInput
+        user.email ?? user.nameInput
       } se actualizó correctamente.`,
     )
 
@@ -260,294 +320,345 @@ export default function UsuariosPage() {
   return (
     <AppShell
       title="Usuarios"
-      description="Roles, permisos y accesos del personal."
+      description="Roles, accesos y estado del personal."
     >
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {message && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           <CheckCircle2 className="h-5 w-5" />
           {message}
         </div>
       )}
 
-      <section className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-        Para crear un usuario nuevo, créalo primero en
-        Supabase Authentication y después asígnale aquí su rol y
-        permisos. Esta pantalla no guarda contraseñas.
+      <section className="mb-6 rounded-[20px] border border-amber-200 bg-amber-50 px-5 py-4">
+        <p className="text-sm font-medium text-amber-900">
+          Creación de usuarios
+        </p>
+
+        <p className="mt-1 text-sm leading-6 text-amber-800">
+          Los usuarios nuevos se crean desde Supabase
+          Authentication. Después puedes asignar aquí su nombre,
+          rol y estado.
+        </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5">
-          <Users className="h-5 w-5 text-slate-500" />
+      <div className="mb-6 flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void loadUsers()}
+          disabled={loading}
+          className="rounded-xl"
+        >
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${
+              loading ? "animate-spin" : ""
+            }`}
+          />
+          Actualizar
+        </Button>
+      </div>
 
-          <p className="mt-4 text-sm text-slate-500">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
+            <Users className="h-5 w-5" />
+          </div>
+
+          <p className="mt-5 text-sm font-medium text-slate-500">
             Usuarios registrados
           </p>
 
-          <p className="mt-2 text-2xl font-semibold">
+          <p className="mt-2 text-[28px] font-semibold">
             {summary.total}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <CheckCircle2 className="h-5 w-5 text-emerald-700" />
+        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
 
-          <p className="mt-4 text-sm text-emerald-700">
+          <p className="mt-5 text-sm font-medium text-emerald-700">
             Usuarios activos
           </p>
 
-          <p className="mt-2 text-2xl font-semibold text-emerald-900">
+          <p className="mt-2 text-[28px] font-semibold text-emerald-950">
             {summary.active}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5">
-          <UserCog className="h-5 w-5 text-slate-500" />
+        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-slate-600">
+            <UserCog className="h-5 w-5" />
+          </div>
 
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-5 text-sm font-medium text-slate-500">
             Usuarios inactivos
           </p>
 
-          <p className="mt-2 text-2xl font-semibold">
+          <p className="mt-2 text-[28px] font-semibold">
             {summary.inactive}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5">
-          <ShieldCheck className="h-5 w-5 text-slate-500" />
+        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
 
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-5 text-sm font-medium text-slate-500">
             Administradores activos
           </p>
 
-          <p className="mt-2 text-2xl font-semibold">
+          <p className="mt-2 text-[28px] font-semibold">
             {summary.admins}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white">
-        <div className="flex flex-col gap-4 border-b border-slate-200 p-5 xl:flex-row xl:items-center xl:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">
-              Administración de usuarios
-            </h2>
+      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">
+                Administración de usuarios
+              </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              {filteredUsers.length} resultados
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative min-w-72">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-              <Input
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Buscar nombre o correo"
-                className="pl-9"
-              />
+              <p className="mt-1 text-sm text-slate-500">
+                {filteredUsers.length} resultados
+              </p>
             </div>
 
-            <select
-              value={roleFilter}
-              onChange={(event) =>
-                setRoleFilter(event.target.value)
-              }
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
-            >
-              <option value="Todos">Todos los roles</option>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative min-w-72">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-              {roleOptions.map((role) => (
-                <option
-                  key={role.value}
-                  value={role.value}
-                >
-                  {role.label}
+                <input
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
+                  placeholder="Buscar nombre o correo"
+                  className="h-10 w-full rounded-xl border border-[#dce2d9] bg-[#f8f9f6] pl-9 pr-3 text-sm outline-none focus:border-[#1f6a3a] focus:bg-white"
+                />
+              </div>
+
+              <select
+                value={roleFilter}
+                onChange={(event) =>
+                  setRoleFilter(event.target.value)
+                }
+                className="h-10 rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
+              >
+                <option value="Todos">
+                  Todos los roles
                 </option>
-              ))}
-            </select>
 
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value)
-              }
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
-            >
-              <option value="Todos">Todos</option>
-              <option value="Activos">Activos</option>
-              <option value="Inactivos">Inactivos</option>
-            </select>
+                {roles.map((role) => (
+                  <option
+                    key={role.value}
+                    value={role.value}
+                  >
+                    {role.label}
+                  </option>
+                ))}
+              </select>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void loadUsers()}
-              disabled={loading}
-            >
-              <RefreshCw
-                className={`mr-2 h-4 w-4 ${
-                  loading ? "animate-spin" : ""
-                }`}
-              />
-              Actualizar
-            </Button>
+              <select
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value)
+                }
+                className="h-10 rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
+              >
+                <option value="Todos">
+                  Todos los estados
+                </option>
+                <option value="Activos">Activos</option>
+                <option value="Inactivos">Inactivos</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex min-h-72 items-center justify-center">
-            <Loader2 className="h-7 w-7 animate-spin text-slate-500" />
+          <div className="flex min-h-96 items-center justify-center">
+            <Loader2 className="h-7 w-7 animate-spin text-[#1f6a3a]" />
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1050px] text-left">
-              <thead className="border-b border-slate-200 bg-slate-50 text-sm text-slate-500">
+            <table className="w-full min-w-[1250px] text-left">
+              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-5 py-4 font-medium">
-                    Usuario
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Nombre
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Rol actual
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Nuevo rol
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Estado
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Registro
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Acción
-                  </th>
+                  <th className="px-6 py-4">Usuario</th>
+                  <th className="px-6 py-4">Nombre</th>
+                  <th className="px-6 py-4">Rol actual</th>
+                  <th className="px-6 py-4">Nuevo rol</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4">Registro</th>
+                  <th className="px-6 py-4">Cambios</th>
+                  <th className="px-6 py-4">Acción</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
-                {filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-slate-50"
-                  >
-                    <td className="px-5 py-4">
-                      <p className="font-medium">
-                        {user.email ?? "Sin correo"}
-                      </p>
+              <tbody className="divide-y divide-[#edf0eb]">
+                {filteredUsers.map((user) => {
+                  const changed = hasChanges(user)
 
-                      <p className="mt-1 text-xs text-slate-500">
-                        {user.id}
-                      </p>
-                    </td>
+                  return (
+                    <tr
+                      key={user.id}
+                      className="hover:bg-[#fafbf8]"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e8f3eb] text-sm font-semibold text-[#1f6a3a]">
+                            {initials(
+                              user.full_name,
+                              user.email,
+                            )}
+                          </div>
 
-                    <td className="px-5 py-4">
-                      <Input
-                        value={user.fullNameInput}
-                        onChange={(event) =>
-                          updateUser(
-                            user.id,
-                            "fullNameInput",
-                            event.target.value,
-                          )
-                        }
-                        className="min-w-52"
-                      />
-                    </td>
+                          <div className="min-w-0">
+                            <p className="max-w-60 truncate font-medium">
+                              {user.email ?? "Sin correo"}
+                            </p>
 
-                    <td className="px-5 py-4">
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs">
-                        {roleLabel(user.role)}
-                      </span>
-                    </td>
+                            <p className="mt-1 max-w-60 truncate text-xs text-slate-400">
+                              {user.id}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
 
-                    <td className="px-5 py-4">
-                      <select
-                        value={user.roleInput}
-                        onChange={(event) =>
-                          updateUser(
-                            user.id,
-                            "roleInput",
-                            event.target.value,
-                          )
-                        }
-                        className="h-10 min-w-40 rounded-md border border-slate-200 bg-white px-3 text-sm"
-                      >
-                        {roleOptions.map((role) => (
-                          <option
-                            key={role.value}
-                            value={role.value}
-                          >
-                            {role.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <label className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={user.activeInput}
+                      <td className="px-6 py-4">
+                        <Input
+                          value={user.nameInput}
                           onChange={(event) =>
                             updateUser(
                               user.id,
-                              "activeInput",
-                              event.target.checked,
+                              "nameInput",
+                              event.target.value,
                             )
                           }
-                          className="h-4 w-4"
+                          className="min-w-52 rounded-xl"
                         />
+                      </td>
 
-                        <span className="text-sm">
-                          {user.activeInput
-                            ? "Activo"
-                            : "Inactivo"}
+                      <td className="px-6 py-4">
+                        <span className="rounded-full bg-[#eef3ed] px-3 py-1.5 text-xs font-medium text-[#1f6a3a]">
+                          {roleLabel(user.role)}
                         </span>
-                      </label>
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-4 text-sm text-slate-600">
-                      {new Date(
-                        user.created_at,
-                      ).toLocaleString("es-MX")}
-                    </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={user.roleInput}
+                          onChange={(event) =>
+                            updateUser(
+                              user.id,
+                              "roleInput",
+                              event.target.value as UserRole,
+                            )
+                          }
+                          className="h-10 min-w-44 rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
+                        >
+                          {roles.map((role) => (
+                            <option
+                              key={role.value}
+                              value={role.value}
+                            >
+                              {role.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
 
-                    <td className="px-5 py-4">
-                      <Button
-                        type="button"
-                        onClick={() => void saveUser(user)}
-                        disabled={savingId === user.id}
-                      >
-                        {savingId === user.id ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Save className="mr-2 h-4 w-4" />
-                        )}
+                      <td className="px-6 py-4">
+                        <label className="inline-flex cursor-pointer items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={user.activeInput}
+                            onChange={(event) =>
+                              updateUser(
+                                user.id,
+                                "activeInput",
+                                event.target.checked,
+                              )
+                            }
+                            className="h-4 w-4"
+                          />
 
-                        Guardar
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                          <span
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+                              user.activeInput
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {user.activeInput
+                              ? "Activo"
+                              : "Inactivo"}
+                          </span>
+                        </label>
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {new Date(
+                          user.created_at,
+                        ).toLocaleString("es-MX")}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <span
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+                            changed
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-slate-100 text-slate-500"
+                          }`}
+                        >
+                          {changed
+                            ? "Pendientes"
+                            : "Sin cambios"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void saveUser(user)
+                          }
+                          disabled={
+                            savingId === user.id ||
+                            !changed
+                          }
+                          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#102019] px-4 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          {savingId === user.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Save className="h-4 w-4" />
+                          )}
+
+                          Guardar
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
 
                 {filteredUsers.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
-                      className="px-5 py-14 text-center text-sm text-slate-500"
+                      colSpan={8}
+                      className="px-6 py-20 text-center text-sm text-slate-500"
                     >
                       No se encontraron usuarios.
                     </td>
@@ -557,6 +668,23 @@ export default function UsuariosPage() {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {roles.map((role) => (
+          <article
+            key={role.value}
+            className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm"
+          >
+            <p className="font-semibold">
+              {role.label}
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              {role.description}
+            </p>
+          </article>
+        ))}
       </section>
     </AppShell>
   )
