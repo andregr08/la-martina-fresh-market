@@ -28,6 +28,7 @@ type Product = {
   name: string
   unit: string
   current_stock: number
+  sale_price: number
 }
 
 type Adjustment = {
@@ -36,8 +37,6 @@ type Adjustment = {
   counted_quantity: number
   difference_quantity: number
   adjustment_type: string
-  reason: string
-  notes: string | null
   adjusted_at: string
   product: {
     name: string
@@ -57,7 +56,7 @@ function quantity(value: number, unit: string) {
 
 function adjustmentLabel(type: string) {
   if (type === "increase") return "Aumento"
-  if (type === "decrease") return "Disminución"
+  if (type === "decrease") return "DisminuciÃ³n"
 
   return "Sin diferencia"
 }
@@ -85,9 +84,8 @@ export default function AjustesInventarioPage() {
   const [adjustments, setAdjustments] = useState<Adjustment[]>([])
 
   const [productId, setProductId] = useState("")
-  const [countedQuantity, setCountedQuantity] = useState("")
-  const [reason, setReason] = useState("")
-  const [notes, setNotes] = useState("")
+  const [productSearch, setProductSearch] = useState("")
+  const [salePrice, setSalePrice] = useState("")
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("Todos")
 
@@ -104,7 +102,7 @@ export default function AjustesInventarioPage() {
       await Promise.all([
         supabase
           .from("products")
-          .select("id, sku, name, unit, current_stock")
+          .select("id, sku, name, unit, current_stock, sale_price")
           .eq("active", true)
           .order("name"),
 
@@ -116,8 +114,6 @@ export default function AjustesInventarioPage() {
             counted_quantity,
             difference_quantity,
             adjustment_type,
-            reason,
-            notes,
             adjusted_at,
             product:products (
               name,
@@ -161,12 +157,15 @@ export default function AjustesInventarioPage() {
     (product) => product.id === productId,
   )
 
-  const difference =
-    selectedProduct && countedQuantity !== ""
-      ? Number(countedQuantity) -
-        Number(selectedProduct.current_stock)
-      : 0
 
+  const difference = adjustments.reduce(
+    (total, adjustment) =>
+      total +
+      Number(
+        adjustment.difference_quantity || 0,
+      ),
+    0,
+  )
   const filteredAdjustments = useMemo(() => {
     const value = search.trim().toLowerCase()
 
@@ -174,7 +173,6 @@ export default function AjustesInventarioPage() {
       const matchesSearch =
         !value ||
         adjustment.product?.name.toLowerCase().includes(value) ||
-        adjustment.reason.toLowerCase().includes(value) ||
         adjustment.user?.full_name?.toLowerCase().includes(value)
 
       const matchesType =
@@ -216,83 +214,138 @@ export default function AjustesInventarioPage() {
     )
   }, [adjustments])
 
-  async function registerAdjustment() {
+  function selectProductForEditing(
+    product: Product,
+  ) {
+    setProductId(product.id)
+    setProductSearch(product.name)
+    setSalePrice(
+      String(Number(product.sale_price || 0)),
+    )
     setError("")
     setMessage("")
+  }
 
-    const counted = Number(countedQuantity)
+  async function saveSalePrice() {
+    setError("")
+    setMessage("")
 
     if (!productId) {
       setError("Selecciona un producto.")
       return
     }
 
-    if (!Number.isFinite(counted) || counted < 0) {
-      setError("La cantidad contada no es válida.")
+    const price = Number(salePrice)
+
+    if (
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+      setError(
+        "Escribe un precio de venta vÃ¡lido.",
+      )
       return
     }
-
-    if (!reason.trim()) {
-      setError("Debes indicar el motivo del ajuste.")
-      return
-    }
-
-    const confirmed = window.confirm(
-      `El inventario de ${
-        selectedProduct?.name ?? "este producto"
-      } cambiará de ${
-        selectedProduct?.current_stock ?? 0
-      } a ${counted}. ¿Deseas continuar?`,
-    )
-
-    if (!confirmed) return
 
     setSubmitting(true)
 
-    const { data, error: rpcError } = await supabase.rpc(
-      "adjust_inventory",
-      {
-        p_product_id: productId,
-        p_counted_quantity: counted,
-        p_reason: reason.trim(),
-        p_notes: notes.trim() || null,
-      },
-    )
+    const { error: updateError } =
+      await supabase
+        .from("products")
+        .update({
+          sale_price: Number(
+            price.toFixed(2),
+          ),
+        })
+        .eq("id", productId)
 
-    if (rpcError) {
-      setError(rpcError.message)
+    if (updateError) {
+      setError(updateError.message)
       setSubmitting(false)
       return
     }
 
-    const result = data as {
-      product?: string
-      system_quantity?: number
-      counted_quantity?: number
-      difference_quantity?: number
-    }
+    setProducts((current) =>
+      current.map((product) =>
+        product.id === productId
+          ? {
+              ...product,
+              sale_price: Number(
+                price.toFixed(2),
+              ),
+            }
+          : product,
+      ),
+    )
 
     setMessage(
-      `${result.product ?? "Producto"} ajustado de ${
-        result.system_quantity ?? 0
-      } a ${result.counted_quantity ?? counted}. Diferencia: ${
-        result.difference_quantity ?? difference
-      }.`,
+      "Precio de venta actualizado correctamente.",
+    )
+
+    setSubmitting(false)
+  }
+
+  async function deleteSelectedProduct() {
+    setError("")
+    setMessage("")
+
+    if (!productId) {
+      setError("Selecciona un producto.")
+      return
+    }
+
+    const product = products.find(
+      (item) => item.id === productId,
+    )
+
+    const confirmed = window.confirm(
+      `Â¿Deseas eliminar ${
+        product?.name ?? "este producto"
+      }?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setSubmitting(true)
+
+    const { error: deleteError } =
+      await supabase
+        .from("products")
+        .update({
+          active: false,
+        })
+        .eq("id", productId)
+
+    if (deleteError) {
+      setError(deleteError.message)
+      setSubmitting(false)
+      return
+    }
+
+    setProducts((current) =>
+      current.filter(
+        (item) => item.id !== productId,
+      ),
     )
 
     setProductId("")
-    setCountedQuantity("")
-    setReason("")
-    setNotes("")
+    setProductSearch("")
+    setSalePrice("")
 
-    await loadData()
+    setMessage(
+      "Producto eliminado correctamente.",
+    )
+
     setSubmitting(false)
   }
+
 
   return (
     <AppShell
       title="Ajustes de inventario"
-      description="Correcciones por conteo físico con trazabilidad."
+      description="Correcciones por conteo fÃ­sico con trazabilidad."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -411,140 +464,185 @@ export default function AjustesInventarioPage() {
             <ClipboardCheck className="h-5 w-5 text-[#1f6a3a]" />
 
             <h2 className="text-lg font-semibold">
-              Nuevo ajuste
+              Editar producto
             </h2>
           </div>
 
           <div className="mt-6 space-y-5">
-            <div>
+            <div className="relative">
               <p className="mb-1.5 text-xs font-medium text-slate-500">
                 Producto
               </p>
 
-              <select
-                value={productId}
-                onChange={(event) => {
-                  setProductId(event.target.value)
-                  setCountedQuantity("")
-                }}
-                className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white px-3 text-sm outline-none focus:border-[#1f6a3a]"
-              >
-                <option value="">
-                  Selecciona un producto
-                </option>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-                {products.map((product) => (
-                  <option
-                    key={product.id}
-                    value={product.id}
-                  >
-                    {product.sku ? `${product.sku} — ` : ""}
-                    {product.name}
-                  </option>
-                ))}
-              </select>
+                <input
+                  value={productSearch}
+                  onChange={(event) => {
+                    setProductSearch(
+                      event.target.value,
+                    )
+                    setProductId("")
+                    setSalePrice("")
+                  }}
+                  placeholder="Escribe el nombre del producto"
+                  className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white pl-10 pr-3 text-sm outline-none focus:border-[#1f6a3a] focus:ring-4 focus:ring-[#1f6a3a]/10"
+                />
+              </div>
+
+              {productSearch.trim() &&
+                !productId && (
+                  <div className="absolute left-0 right-0 top-[72px] z-30 max-h-64 overflow-y-auto rounded-xl border border-[#dce2d9] bg-white p-1 shadow-xl">
+                    {products
+                      .filter((product) => {
+                        const term =
+                          productSearch
+                            .toLowerCase()
+                            .trim()
+
+                        return (
+                          product.name
+                            .toLowerCase()
+                            .includes(term) ||
+                          product.sku
+                            ?.toLowerCase()
+                            .includes(term)
+                        )
+                      })
+                      .slice(0, 10)
+                      .map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() =>
+                            selectProductForEditing(
+                              product,
+                            )
+                          }
+                          className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left hover:bg-[#f5f7f3]"
+                        >
+                          <div>
+                            <p className="text-sm font-medium">
+                              {product.name}
+                            </p>
+
+                            <p className="mt-0.5 text-xs text-slate-400">
+                              {product.sku ??
+                                "Sin SKU"}
+                            </p>
+                          </div>
+
+                          <span className="text-xs font-medium text-[#1f6a3a]">
+                            {new Intl.NumberFormat(
+                              "es-MX",
+                              {
+                                style:
+                                  "currency",
+                                currency:
+                                  "MXN",
+                              },
+                            ).format(
+                              Number(
+                                product.sale_price ||
+                                  0,
+                              ),
+                            )}
+                          </span>
+                        </button>
+                      ))}
+
+                    {products.filter(
+                      (product) => {
+                        const term =
+                          productSearch
+                            .toLowerCase()
+                            .trim()
+
+                        return (
+                          product.name
+                            .toLowerCase()
+                            .includes(term) ||
+                          product.sku
+                            ?.toLowerCase()
+                            .includes(term)
+                        )
+                      },
+                    ).length === 0 && (
+                      <p className="px-3 py-4 text-center text-sm text-slate-400">
+                        No se encontraron productos.
+                      </p>
+                    )}
+                  </div>
+                )}
             </div>
 
             {selectedProduct && (
               <div className="rounded-2xl bg-[#f5f7f3] p-4">
-                <p className="text-xs font-medium text-slate-500">
-                  Existencia del sistema
+                <p className="font-semibold">
+                  {selectedProduct.name}
                 </p>
 
-                <p className="mt-2 text-2xl font-semibold">
-                  {quantity(
-                    selectedProduct.current_stock,
-                    selectedProduct.unit,
-                  )}
+                <p className="mt-1 text-xs text-slate-500">
+                  {selectedProduct.sku ??
+                    "Sin SKU"}{" "}
+                  Â· {selectedProduct.unit}
                 </p>
               </div>
             )}
 
             <div>
               <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Cantidad física contada
+                Precio de venta
               </p>
 
               <Input
                 type="number"
                 min="0"
-                step="0.001"
-                value={countedQuantity}
+                step="0.01"
+                value={salePrice}
+                disabled={!productId}
                 onChange={(event) =>
-                  setCountedQuantity(event.target.value)
+                  setSalePrice(
+                    event.target.value,
+                  )
                 }
-                placeholder="0.000"
-                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
-              />
-            </div>
-
-            {selectedProduct && countedQuantity !== "" && (
-              <div
-                className={`rounded-2xl p-4 ${
-                  difference < 0
-                    ? "bg-red-50 text-red-800"
-                    : difference > 0
-                      ? "bg-emerald-50 text-emerald-800"
-                      : "bg-[#f5f7f3] text-slate-700"
-                }`}
-              >
-                <p className="text-xs font-medium">
-                  Diferencia detectada
-                </p>
-
-                <p className="mt-2 text-2xl font-semibold">
-                  {difference > 0 ? "+" : ""}
-                  {quantity(
-                    difference,
-                    selectedProduct.unit,
-                  )}
-                </p>
-              </div>
-            )}
-
-            <div>
-              <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Motivo
-              </p>
-
-              <Input
-                value={reason}
-                onChange={(event) =>
-                  setReason(event.target.value)
-                }
-                placeholder="Ej. Diferencia en conteo físico"
-                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
-              />
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Observaciones
-              </p>
-
-              <Input
-                value={notes}
-                onChange={(event) =>
-                  setNotes(event.target.value)
-                }
-                placeholder="Opcional"
-                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    void saveSalePrice()
+                  }
+                }}
+                placeholder="0.00"
+                className="h-11 rounded-xl"
               />
             </div>
 
             <button
               type="button"
-              onClick={() => void registerAdjustment()}
-              disabled={submitting}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#102019] text-sm font-semibold text-white transition hover:bg-[#174f2d] disabled:opacity-50"
+              onClick={() =>
+                void saveSalePrice()
+              }
+              disabled={
+                submitting || !productId
+              }
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-[#102019] text-sm font-semibold text-white hover:bg-[#174f2d] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {submitting ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <ClipboardCheck className="h-5 w-5" />
-              )}
+              {submitting
+                ? "Guardando..."
+                : "Guardar precio"}
+            </button>
 
-              Aplicar ajuste
+            <button
+              type="button"
+              onClick={() =>
+                void deleteSelectedProduct()
+              }
+              disabled={
+                submitting || !productId
+              }
+              className="flex h-11 w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Eliminar producto
             </button>
           </div>
         </article>
@@ -687,7 +785,6 @@ export default function AjustesInventarioPage() {
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        {adjustment.reason}
                       </td>
 
                       <td className="px-6 py-4 text-sm text-slate-500">
