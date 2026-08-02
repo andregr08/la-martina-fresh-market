@@ -64,7 +64,7 @@ function movementLabel(value: string) {
   if (value === "opening") return "Apertura"
   if (value === "sale") return "Venta"
   if (value === "expense") return "Gasto"
-  if (value === "refund") return "DevoluciÃ³n"
+  if (value === "refund") return "Devolución"
   if (value === "adjustment") return "Ajuste"
 
   return value
@@ -234,7 +234,7 @@ export default function CortesPage() {
           variant="outline"
           onClick={() => void loadRegisters()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -246,65 +246,65 @@ export default function CortesPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <WalletCards className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Cortes registrados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {summary.count}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <Clock3 className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-emerald-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-emerald-700">
             Cajas abiertas
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-emerald-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-emerald-950">
             {summary.open}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <CheckCircle2 className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-emerald-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-emerald-700">
             Sobrantes acumulados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-emerald-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-emerald-950">
             {money(summary.surplus)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5">
+        <article className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
             <Banknote className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-red-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
             Faltantes acumulados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-red-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-red-950">
             {money(summary.shortage)}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h2 className="text-lg font-semibold">
@@ -352,18 +352,18 @@ export default function CortesPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1180px] text-left">
-              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">Apertura</th>
-                  <th className="px-6 py-4">Cierre</th>
-                  <th className="px-6 py-4">AbriÃ³</th>
-                  <th className="px-6 py-4">CerrÃ³</th>
-                  <th className="px-6 py-4">Fondo</th>
-                  <th className="px-6 py-4">Esperado</th>
-                  <th className="px-6 py-4">Contado</th>
-                  <th className="px-6 py-4">Diferencia</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">AcciÃ³n</th>
+                  <th className="px-5 py-3.5">Apertura</th>
+                  <th className="px-5 py-3.5">Cierre</th>
+                  <th className="px-5 py-3.5">Abrió</th>
+                  <th className="px-5 py-3.5">Cerró</th>
+                  <th className="px-5 py-3.5">Fondo</th>
+                  <th className="px-5 py-3.5">Esperado</th>
+                  <th className="px-5 py-3.5">Contado</th>
+                  <th className="px-5 py-3.5">Diferencia</th>
+                  <th className="px-5 py-3.5">Estado</th>
+                  <th className="px-5 py-3.5">Acción</th>
                 </tr>
               </thead>
 
@@ -376,7 +376,7 @@ export default function CortesPage() {
                   return (
                     <tr
                       key={register.id}
-                      className="transition hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
                       <td className="px-6 py-4 text-sm text-slate-500">
                         {new Date(
@@ -389,7 +389,7 @@ export default function CortesPage() {
                           ? new Date(
                               register.closed_at,
                             ).toLocaleString("es-MX")
-                          : "â€”"}
+                          : "—"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
@@ -397,7 +397,7 @@ export default function CortesPage() {
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        {register.closer?.full_name ?? "â€”"}
+                        {register.closer?.full_name ?? "—"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
@@ -425,7 +425,7 @@ export default function CortesPage() {
                         {money(difference)}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
                           className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                             register.status === "open"
@@ -437,7 +437,7 @@ export default function CortesPage() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <button
                           type="button"
                           onClick={() =>
@@ -457,7 +457,7 @@ export default function CortesPage() {
                   <tr>
                     <td
                       colSpan={10}
-                      className="px-6 py-20 text-center"
+                      className="px-5 py-14 text-center"
                     >
                       <WalletCards className="mx-auto h-8 w-8 text-slate-300" />
 
@@ -475,7 +475,7 @@ export default function CortesPage() {
 
       {selectedRegister && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
-          <section className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[24px] bg-white shadow-2xl">
+          <section className="max-h-[88vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#e6eae4] bg-white px-6 py-5">
               <div>
                 <p className="text-sm font-medium text-slate-500">
@@ -489,7 +489,7 @@ export default function CortesPage() {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  {statusLabel(selectedRegister.status)} Â·{" "}
+                  {statusLabel(selectedRegister.status)} ·{" "}
                   {selectedRegister.opener?.full_name ?? "Usuario"}
                 </p>
               </div>
@@ -513,12 +513,12 @@ export default function CortesPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left">
-                  <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                     <tr>
-                      <th className="px-6 py-4">Fecha</th>
-                      <th className="px-6 py-4">Movimiento</th>
-                      <th className="px-6 py-4">MÃ©todo</th>
-                      <th className="px-6 py-4">DescripciÃ³n</th>
+                      <th className="px-5 py-3.5">Fecha</th>
+                      <th className="px-5 py-3.5">Movimiento</th>
+                      <th className="px-5 py-3.5">Método</th>
+                      <th className="px-5 py-3.5">Descripción</th>
                       <th className="px-6 py-4 text-right">
                         Importe
                       </th>
@@ -547,7 +547,7 @@ export default function CortesPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-500">
-                          {movement.description ?? "â€”"}
+                          {movement.description ?? "—"}
                         </td>
 
                         <td className="px-6 py-4 text-right font-semibold">
@@ -560,7 +560,7 @@ export default function CortesPage() {
                       <tr>
                         <td
                           colSpan={5}
-                          className="px-6 py-20 text-center text-sm text-slate-500"
+                          className="px-5 py-14 text-center text-sm text-slate-500"
                         >
                           Esta caja no tiene movimientos.
                         </td>

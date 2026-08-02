@@ -45,7 +45,7 @@ type MenuSection =
   | "General"
   | "Ventas"
   | "Inventario"
-  | "AdministraciÃ³n"
+  | "Administración"
 
 type MenuItem = {
   name: string
@@ -133,42 +133,42 @@ const menu: MenuItem[] = [
     href: "/gastos",
     icon: Store,
     roles: ["admin", "cashier", "finance"],
-    section: "AdministraciÃ³n",
+    section: "Administración",
   },
   {
     name: "Mermas",
     href: "/mermas",
     icon: Trash2,
     roles: ["admin", "warehouse", "finance", "partner"],
-    section: "AdministraciÃ³n",
+    section: "Administración",
   },
   {
     name: "Reportes",
     href: "/reportes",
     icon: BarChart3,
     roles: ["admin", "finance", "partner"],
-    section: "AdministraciÃ³n",
+    section: "Administración",
   },
   {
     name: "Usuarios",
     href: "/usuarios",
     icon: Users,
     roles: ["admin"],
-    section: "AdministraciÃ³n",
+    section: "Administración",
   },
   {
-    name: "AuditorÃ­a",
+    name: "Auditoría",
     href: "/auditoria",
     icon: FileClock,
     roles: ["admin"],
-    section: "AdministraciÃ³n",
+    section: "Administración",
   },
   {
-    name: "ConfiguraciÃ³n",
+    name: "Configuración",
     href: "/configuracion",
     icon: Settings,
     roles: ["admin"],
-    section: "AdministraciÃ³n",
+    section: "Administración",
   },
 ]
 
@@ -176,13 +176,13 @@ const sections: MenuSection[] = [
   "General",
   "Ventas",
   "Inventario",
-  "AdministraciÃ³n",
+  "Administración",
 ]
 
 const roleNames: Record<UserRole, string> = {
   admin: "Administrador",
   cashier: "Caja",
-  warehouse: "AlmacÃ©n",
+  warehouse: "Almacén",
   finance: "Finanzas",
   partner: "Socio",
 }
@@ -232,7 +232,7 @@ export function AppShell({
     if (error || !data) {
       setProfileError(
         error?.message ??
-          "No se encontrÃ³ el perfil del usuario.",
+          "No se encontró el perfil del usuario.",
       )
       setLoadingProfile(false)
       return
@@ -293,7 +293,7 @@ export function AppShell({
 
   if (loadingProfile) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f4f5f1]">
+      <main className="app-main-content flex min-h-screen items-center justify-center bg-[#f4f5f1]">
         <div className="flex flex-col items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#102019] text-white shadow-lg">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -328,7 +328,7 @@ export function AppShell({
             onClick={handleLogout}
             className="mt-6 rounded-xl bg-[#102019] px-5 py-2.5 text-sm font-medium text-white"
           >
-            Cerrar sesiÃ³n
+            Cerrar sesión
           </button>
         </section>
       </main>
@@ -454,7 +454,7 @@ export function AppShell({
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/55 transition hover:bg-white/8 hover:text-white"
         >
           <LogOut className="h-[18px] w-[18px]" />
-          Cerrar sesiÃ³n
+          Cerrar sesión
         </button>
       </div>
     </>
@@ -470,7 +470,7 @@ export function AppShell({
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            aria-label="Cerrar menÃº"
+            aria-label="Cerrar menú"
             onClick={() => setMobileOpen(false)}
             className="absolute inset-0 bg-black/45 backdrop-blur-sm"
           />
@@ -539,14 +539,14 @@ export function AppShell({
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Tu rol de{" "}
                 {role ? roleNames[role] : "usuario"} no tiene
-                permiso para consultar este mÃ³dulo.
+                permiso para consultar este módulo.
               </p>
 
               <Link
                 href={allowedMenu[0]?.href ?? "/login"}
                 className="mt-6 inline-flex rounded-xl bg-[#102019] px-5 py-2.5 text-sm font-medium text-white"
               >
-                Ir a un mÃ³dulo autorizado
+                Ir a un módulo autorizado
               </Link>
             </section>
           )}

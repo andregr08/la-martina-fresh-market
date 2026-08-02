@@ -181,7 +181,7 @@ function StatCard({
         <Icon className="h-5 w-5" />
       </div>
 
-      <p className="mt-5 text-sm font-medium text-slate-500">
+      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
         {title}
       </p>
 
@@ -515,7 +515,7 @@ export default function ReportesPage() {
                 onChange={(event) =>
                   setStartDate(event.target.value)
                 }
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -530,7 +530,7 @@ export default function ReportesPage() {
                 onChange={(event) =>
                   setEndDate(event.target.value)
                 }
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -553,7 +553,7 @@ export default function ReportesPage() {
             type="button"
             variant="outline"
             onClick={exportCsv}
-            className="rounded-xl"
+            className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
           >
             <Download className="mr-2 h-4 w-4" />
             Exportar CSV
@@ -566,7 +566,7 @@ export default function ReportesPage() {
           <Loader2 className="h-8 w-8 animate-spin text-[#1f6a3a]" />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               title="Ventas"
@@ -632,8 +632,8 @@ export default function ReportesPage() {
             />
           </section>
 
-          <section className="grid gap-6 xl:grid-cols-[1.45fr_0.8fr]">
-            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+          <section className="grid gap-4 xl:grid-cols-[1.45fr_0.8fr]">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-[#1f6a3a]" />
 
@@ -717,7 +717,7 @@ export default function ReportesPage() {
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
               <p className="text-sm font-medium text-slate-500">
                 Rentabilidad
               </p>
@@ -776,8 +776,8 @@ export default function ReportesPage() {
             </article>
           </section>
 
-          <section className="overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-            <div className="border-b border-[#e6eae4] px-6 py-5">
+          <section className="overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+            <div className="border-b border-[#e6eae4] px-5 py-4">
               <h2 className="text-lg font-semibold">
                 Productos más vendidos
               </h2>
@@ -789,11 +789,11 @@ export default function ReportesPage() {
 
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left">
-                <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                   <tr>
-                    <th className="px-6 py-4">Posición</th>
-                    <th className="px-6 py-4">Producto</th>
-                    <th className="px-6 py-4">Cantidad</th>
+                    <th className="px-5 py-3.5">Posición</th>
+                    <th className="px-5 py-3.5">Producto</th>
+                    <th className="px-5 py-3.5">Cantidad</th>
                     <th className="px-6 py-4 text-right">
                       Ventas
                     </th>
@@ -804,9 +804,9 @@ export default function ReportesPage() {
                   {topProducts.map((product, index) => (
                     <tr
                       key={product.id}
-                      className="hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#eef3ed] text-sm font-semibold text-[#1f6a3a]">
                           {index + 1}
                         </span>
@@ -833,7 +833,7 @@ export default function ReportesPage() {
                     <tr>
                       <td
                         colSpan={4}
-                        className="px-6 py-20 text-center text-sm text-slate-500"
+                        className="px-5 py-14 text-center text-sm text-slate-500"
                       >
                         No existen productos vendidos en este periodo.
                       </td>

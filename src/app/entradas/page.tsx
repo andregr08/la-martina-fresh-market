@@ -338,7 +338,7 @@ export default function EntradasPage() {
   return (
     <AppShell
       title="Entradas"
-      description="RecepciÃ³n de mercancÃ­a, costos y actualizaciÃ³n de inventario."
+      description="Recepción de mercancía, costos y actualización de inventario."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -353,9 +353,9 @@ export default function EntradasPage() {
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_430px]">
-        <section className="overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-          <div className="border-b border-[#e6eae4] p-5">
+      <div className="grid gap-4 xl:grid-cols-[1fr_430px]">
+        <section className="overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+          <div className="border-b border-[#e6eae4] p-4">
             <div className="flex items-center gap-2">
               <PackagePlus className="h-5 w-5 text-[#1f6a3a]" />
 
@@ -372,7 +372,7 @@ export default function EntradasPage() {
                 onChange={(event) =>
                   setSearch(event.target.value)
                 }
-                placeholder="Buscar producto, SKU o categorÃ­a"
+                placeholder="Buscar producto, SKU o categoría"
                 className="h-12 w-full rounded-2xl border border-[#dce2d9] bg-[#f8f9f6] pl-12 pr-4 text-sm outline-none focus:border-[#1f6a3a] focus:bg-white focus:ring-4 focus:ring-[#1f6a3a]/10"
               />
             </div>
@@ -403,9 +403,9 @@ export default function EntradasPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-400">
-                      {product.sku ?? "Sin SKU"} Â·{" "}
+                      {product.sku ?? "Sin SKU"} ·{" "}
                       {product.category?.name ??
-                        "Sin categorÃ­a"}
+                        "Sin categoría"}
                     </p>
 
                     <div className="mt-5 flex items-end justify-between gap-3">
@@ -442,7 +442,7 @@ export default function EntradasPage() {
           )}
         </section>
 
-        <section className="flex flex-col overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
+        <section className="flex flex-col overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
           <div className="border-b border-[#e6eae4] px-5 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -478,7 +478,7 @@ export default function EntradasPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-400">
-                      {item.sku ?? "Sin SKU"} Â· {item.unit}
+                      {item.sku ?? "Sin SKU"} · {item.unit}
                     </p>
                   </div>
 
@@ -576,7 +576,7 @@ export default function EntradasPage() {
                 <ShoppingBasket className="h-8 w-8 text-slate-300" />
 
                 <p className="mt-4 font-medium">
-                  Entrada vacÃ­a
+                  Entrada vacía
                 </p>
 
                 <p className="mt-1 text-sm text-slate-400">
@@ -617,7 +617,7 @@ export default function EntradasPage() {
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div>
                 <p className="mb-1.5 text-xs font-medium text-slate-500">
-                  MÃ©todo de pago
+                  Método de pago
                 </p>
 
                 <select
@@ -632,7 +632,7 @@ export default function EntradasPage() {
                   <option value="transfer">
                     Transferencia
                   </option>
-                  <option value="credit">CrÃ©dito</option>
+                  <option value="credit">Crédito</option>
                 </select>
               </div>
 
@@ -660,7 +660,7 @@ export default function EntradasPage() {
                 <Truck className="h-4 w-4 text-[#1f6a3a]" />
 
                 <p className="text-sm font-semibold">
-                  Costos logÃ­sticos
+                  Costos logísticos
                 </p>
               </div>
 
@@ -680,7 +680,7 @@ export default function EntradasPage() {
                         event.target.value,
                       )
                     }
-                    className="rounded-xl"
+                    className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                   />
                 </div>
 
@@ -699,7 +699,7 @@ export default function EntradasPage() {
                         event.target.value,
                       )
                     }
-                    className="rounded-xl"
+                    className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                   />
                 </div>
 
@@ -716,7 +716,7 @@ export default function EntradasPage() {
                     onChange={(event) =>
                       setLoaderCost(event.target.value)
                     }
-                    className="rounded-xl"
+                    className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                   />
                 </div>
 
@@ -733,7 +733,7 @@ export default function EntradasPage() {
                     onChange={(event) =>
                       setOtherCosts(event.target.value)
                     }
-                    className="rounded-xl"
+                    className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                   />
                 </div>
               </div>
@@ -750,18 +750,18 @@ export default function EntradasPage() {
                   setNotes(event.target.value)
                 }
                 placeholder="Opcional"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
             <div className="mt-4 rounded-2xl bg-[#f5f7f3] p-4">
               <div className="flex justify-between text-sm text-slate-500">
-                <span>MercancÃ­a</span>
+                <span>Mercancía</span>
                 <span>{money(merchandiseSubtotal)}</span>
               </div>
 
               <div className="mt-2 flex justify-between text-sm text-slate-500">
-                <span>LogÃ­stica</span>
+                <span>Logística</span>
                 <span>{money(logisticsTotal)}</span>
               </div>
 

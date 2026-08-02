@@ -344,7 +344,7 @@ export default function AuditoriaPage() {
           variant="outline"
           onClick={() => void loadLogs()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -356,65 +356,65 @@ export default function AuditoriaPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <FileClock className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Movimientos registrados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {summary.total}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <Activity className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-emerald-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-emerald-700">
             Actividad de hoy
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold text-emerald-950">
+          <p className="mt-1 text-[24px] font-semibold text-emerald-950">
             {summary.today}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <UserRound className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Usuarios con actividad
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {summary.users.size}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5">
+        <article className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
             <ShieldCheck className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-red-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
             Acciones críticas
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold text-red-950">
+          <p className="mt-1 text-[24px] font-semibold text-red-950">
             {summary.critical}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h2 className="text-lg font-semibold">
@@ -574,7 +574,7 @@ export default function AuditoriaPage() {
             })}
 
             {filteredLogs.length === 0 && (
-              <div className="px-6 py-20 text-center">
+              <div className="px-5 py-14 text-center">
                 <FileClock className="mx-auto h-8 w-8 text-slate-300" />
 
                 <p className="mt-4 text-sm font-medium text-slate-600">

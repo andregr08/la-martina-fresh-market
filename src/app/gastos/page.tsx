@@ -309,7 +309,7 @@ export default function GastosPage() {
           variant="outline"
           onClick={() => void loadData()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -321,63 +321,63 @@ export default function GastosPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5">
+        <article className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
             <TrendingDown className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-red-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
             Total de gastos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold text-red-950">
+          <p className="mt-1 text-[24px] font-semibold text-red-950">
             {money(summary.total)}
           </p>
 
-          <p className="mt-2 text-xs text-red-700">
+          <p className="mt-1 text-xs text-red-700">
             {summary.count} registros
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <Banknote className="h-5 w-5 text-[#1f6a3a]" />
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Efectivo
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {money(summary.cash)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <CreditCard className="h-5 w-5 text-[#1f6a3a]" />
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Tarjeta
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {money(summary.card)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <Smartphone className="h-5 w-5 text-[#1f6a3a]" />
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Transferencia
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {money(summary.transfer)}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[390px_1fr]">
-        <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+      <section className="mt-4 grid gap-4 xl:grid-cols-[390px_1fr]">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-[#1f6a3a]" />
 
@@ -425,7 +425,7 @@ export default function GastosPage() {
                   setDescription(event.target.value)
                 }
                 placeholder="Ej. Compra de bolsas"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -478,7 +478,7 @@ export default function GastosPage() {
                 onChange={(event) =>
                   setExpenseDate(event.target.value)
                 }
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -493,7 +493,7 @@ export default function GastosPage() {
                   setNotes(event.target.value)
                 }
                 placeholder="Opcional"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -514,8 +514,8 @@ export default function GastosPage() {
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-          <div className="border-b border-[#e6eae4] p-5">
+        <article className="overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+          <div className="border-b border-[#e6eae4] p-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold">
@@ -589,14 +589,14 @@ export default function GastosPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[980px] text-left">
-                <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                   <tr>
-                    <th className="px-6 py-4">Fecha</th>
-                    <th className="px-6 py-4">Descripción</th>
-                    <th className="px-6 py-4">Categoría</th>
-                    <th className="px-6 py-4">Método</th>
-                    <th className="px-6 py-4">Usuario</th>
-                    <th className="px-6 py-4">Notas</th>
+                    <th className="px-5 py-3.5">Fecha</th>
+                    <th className="px-5 py-3.5">Descripción</th>
+                    <th className="px-5 py-3.5">Categoría</th>
+                    <th className="px-5 py-3.5">Método</th>
+                    <th className="px-5 py-3.5">Usuario</th>
+                    <th className="px-5 py-3.5">Notas</th>
                     <th className="px-6 py-4 text-right">
                       Importe
                     </th>
@@ -607,7 +607,7 @@ export default function GastosPage() {
                   {filteredExpenses.map((expense) => (
                     <tr
                       key={expense.id}
-                      className="hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
                       <td className="px-6 py-4 text-sm text-slate-500">
                         {new Date(
@@ -624,7 +624,7 @@ export default function GastosPage() {
                           "Sin categoría"}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span className="inline-flex items-center gap-2 rounded-full bg-[#eef3ed] px-3 py-1.5 text-xs font-medium text-[#1f6a3a]">
                           <PaymentIcon
                             method={expense.payment_method}
@@ -654,7 +654,7 @@ export default function GastosPage() {
                     <tr>
                       <td
                         colSpan={7}
-                        className="px-6 py-20 text-center text-sm text-slate-500"
+                        className="px-5 py-14 text-center text-sm text-slate-500"
                       >
                         No se encontraron gastos.
                       </td>

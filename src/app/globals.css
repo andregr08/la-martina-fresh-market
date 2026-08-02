@@ -159,3 +159,269 @@ a {
     display: none !important;
   }
 }
+
+/* LA MARTINA RESPONSIVE FINAL */
+
+/* Base estable */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: #f6f8f4;
+}
+
+.app-main-content {
+  min-width: 0;
+}
+
+.app-main-content > * {
+  min-width: 0;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
+button,
+a,
+select,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tablas */
+.app-main-content table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.app-main-content thead {
+  background: rgba(248, 249, 246, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.app-main-content tbody tr {
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-main-content tbody tr:hover {
+  background: #f7f9f5;
+}
+
+/* Scroll horizontal discreto */
+.app-main-content .overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5cb transparent;
+}
+
+.app-main-content .overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.app-main-content .overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-main-content .overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5cb;
+  border-radius: 999px;
+}
+
+/* Inputs y botones */
+.app-main-content input,
+.app-main-content select,
+.app-main-content textarea {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.app-main-content button {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-main-content button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Mejor presentaci?n de modales */
+.app-main-content [class*="backdrop-blur"] > section {
+  overscroll-behavior: contain;
+}
+
+/* Tablet */
+@media (max-width: 1279px) {
+  .app-main-content {
+    width: 100%;
+  }
+
+  .app-main-content [class*="sticky"][class*="top-24"] {
+    position: static;
+    max-height: none;
+  }
+}
+
+/* Celular */
+@media (max-width: 767px) {
+  .app-main-content {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: 28px !important;
+  }
+
+  .app-main-content h1 {
+    font-size: 1.45rem;
+    line-height: 1.2;
+  }
+
+  .app-main-content h2 {
+    line-height: 1.25;
+  }
+
+  /*
+    16px evita que Safari haga zoom al enfocar inputs.
+  */
+  .app-main-content input,
+  .app-main-content select,
+  .app-main-content textarea {
+    font-size: 16px;
+  }
+
+  .app-main-content button,
+  .app-main-content a[role="button"] {
+    min-height: 40px;
+  }
+
+  .app-main-content table {
+    font-size: 13px;
+  }
+
+  .app-main-content th,
+  .app-main-content td {
+    white-space: nowrap;
+  }
+
+  .app-main-content th {
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+  }
+
+  .app-main-content td {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  /*
+    Los modales ocupan casi toda la pantalla y dejan margen seguro.
+  */
+  .app-main-content [class*="fixed"][class*="inset-0"] {
+    padding: 10px !important;
+  }
+
+  .app-main-content [class*="fixed"][class*="inset-0"] > section {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px;
+  }
+
+  /*
+    Evita tarjetas demasiado altas cuando no tienen datos.
+  */
+  .app-main-content [class*="min-h-96"] {
+    min-height: 260px;
+  }
+
+  .app-main-content [class*="min-h-[520px]"] {
+    min-height: 320px;
+  }
+
+  /*
+    Gr?ficas menos altas en celular.
+  */
+  .app-main-content [class*="h-[300px]"],
+  .app-main-content [class*="h-[360px]"] {
+    height: 260px;
+  }
+}
+
+/* Celulares peque?os */
+@media (max-width: 420px) {
+  .app-main-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .app-main-content h1 {
+    font-size: 1.3rem;
+  }
+
+  .app-main-content [class*="rounded-2xl"] {
+    border-radius: 14px;
+  }
+
+  .app-main-content [class*="text-[24px]"],
+  .app-main-content [class*="text-[28px]"] {
+    font-size: 1.35rem;
+  }
+}
+
+/* Impresi?n de tickets */
+@media print {
+  @page {
+    margin: 4mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print\:static,
+  .print\:static * {
+    visibility: visible;
+  }
+
+  .print\:static {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+}
+
+/* FIN LA MARTINA RESPONSIVE FINAL */

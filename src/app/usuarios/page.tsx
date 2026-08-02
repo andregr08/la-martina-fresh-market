@@ -357,7 +357,7 @@ export default function UsuariosPage() {
           variant="outline"
           onClick={() => void loadUsers()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -369,65 +369,65 @@ export default function UsuariosPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <Users className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Usuarios registrados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {summary.total}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <CheckCircle2 className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-emerald-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-emerald-700">
             Usuarios activos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold text-emerald-950">
+          <p className="mt-1 text-[24px] font-semibold text-emerald-950">
             {summary.active}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-slate-600">
             <UserCog className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Usuarios inactivos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {summary.inactive}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
             <ShieldCheck className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Administradores activos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {summary.admins}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h2 className="text-lg font-semibold">
@@ -498,16 +498,16 @@ export default function UsuariosPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1250px] text-left">
-              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">Usuario</th>
-                  <th className="px-6 py-4">Nombre</th>
-                  <th className="px-6 py-4">Rol actual</th>
-                  <th className="px-6 py-4">Nuevo rol</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Registro</th>
-                  <th className="px-6 py-4">Cambios</th>
-                  <th className="px-6 py-4">Acción</th>
+                  <th className="px-5 py-3.5">Usuario</th>
+                  <th className="px-5 py-3.5">Nombre</th>
+                  <th className="px-5 py-3.5">Rol actual</th>
+                  <th className="px-5 py-3.5">Nuevo rol</th>
+                  <th className="px-5 py-3.5">Estado</th>
+                  <th className="px-5 py-3.5">Registro</th>
+                  <th className="px-5 py-3.5">Cambios</th>
+                  <th className="px-5 py-3.5">Acción</th>
                 </tr>
               </thead>
 
@@ -518,9 +518,9 @@ export default function UsuariosPage() {
                   return (
                     <tr
                       key={user.id}
-                      className="hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e8f3eb] text-sm font-semibold text-[#1f6a3a]">
                             {initials(
@@ -541,7 +541,7 @@ export default function UsuariosPage() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <Input
                           value={user.nameInput}
                           onChange={(event) =>
@@ -555,13 +555,13 @@ export default function UsuariosPage() {
                         />
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span className="rounded-full bg-[#eef3ed] px-3 py-1.5 text-xs font-medium text-[#1f6a3a]">
                           {roleLabel(user.role)}
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <select
                           value={user.roleInput}
                           onChange={(event) =>
@@ -584,7 +584,7 @@ export default function UsuariosPage() {
                         </select>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <label className="inline-flex cursor-pointer items-center gap-3">
                           <input
                             type="checkbox"
@@ -619,7 +619,7 @@ export default function UsuariosPage() {
                         ).toLocaleString("es-MX")}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
                           className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                             changed
@@ -633,7 +633,7 @@ export default function UsuariosPage() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <button
                           type="button"
                           onClick={() =>
@@ -662,7 +662,7 @@ export default function UsuariosPage() {
                   <tr>
                     <td
                       colSpan={8}
-                      className="px-6 py-20 text-center text-sm text-slate-500"
+                      className="px-5 py-14 text-center text-sm text-slate-500"
                     >
                       No se encontraron usuarios.
                     </td>
@@ -678,7 +678,7 @@ export default function UsuariosPage() {
         {roles.map((role) => (
           <article
             key={role.value}
-            className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm"
           >
             <p className="font-semibold">
               {role.label}

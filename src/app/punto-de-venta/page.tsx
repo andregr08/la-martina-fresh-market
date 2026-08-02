@@ -302,7 +302,7 @@ export default function PuntoDeVentaPage() {
     if (cart.length === 0) return
 
     const confirmed = window.confirm(
-      "Â¿Deseas limpiar la venta actual?",
+      "¿Deseas limpiar la venta actual?",
     )
 
     if (!confirmed) return
@@ -387,7 +387,7 @@ export default function PuntoDeVentaPage() {
   return (
     <AppShell
       title="Punto de venta"
-      description="Venta rÃ¡pida al pÃºblico general."
+      description="Venta rápida al público general."
     >
       {error && (
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 print:hidden">
@@ -403,7 +403,7 @@ export default function PuntoDeVentaPage() {
       )}
 
       <div className="grid min-h-[calc(100vh-150px)] gap-5 xl:grid-cols-[1fr_430px] print:hidden">
-        <section className="flex min-h-0 flex-col rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
+        <section className="flex min-h-0 flex-col rounded-2xl border border-[#dde2da] bg-white shadow-sm">
           <div className="border-b border-[#e6eae4] p-4 sm:p-5">
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -474,9 +474,9 @@ export default function PuntoDeVentaPage() {
                       </p>
 
                       <p className="mt-1 text-xs text-slate-400">
-                        {product.sku ?? "Sin SKU"} Â·{" "}
+                        {product.sku ?? "Sin SKU"} ·{" "}
                         {product.category?.name ??
-                          "Sin categorÃ­a"}
+                          "Sin categoría"}
                       </p>
 
                       <div className="mt-6 flex items-end justify-between gap-3">
@@ -514,7 +514,7 @@ export default function PuntoDeVentaPage() {
           </div>
         </section>
 
-        <section className="flex min-h-0 flex-col rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
+        <section className="flex min-h-0 flex-col rounded-2xl border border-[#dde2da] bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-[#e6eae4] px-5 py-4">
             <div>
               <p className="text-sm font-semibold">
@@ -540,7 +540,7 @@ export default function PuntoDeVentaPage() {
             {cart.map((item) => (
               <article
                 key={item.product_id}
-                className="p-4"
+                className="p-3.5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -640,7 +640,7 @@ export default function PuntoDeVentaPage() {
                 </div>
 
                 <p className="mt-4 font-medium">
-                  Venta vacÃ­a
+                  Venta vacía
                 </p>
 
                 <p className="mt-1 text-sm text-slate-400">
@@ -650,7 +650,7 @@ export default function PuntoDeVentaPage() {
             )}
           </div>
 
-          <div className="border-t border-[#e6eae4] p-5">
+          <div className="border-t border-[#e6eae4] bg-white p-4">
             <div className="grid grid-cols-3 gap-2">
               {[
                 {
@@ -698,7 +698,7 @@ export default function PuntoDeVentaPage() {
               })}
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-2 gap-2">
               <div>
                 <p className="mb-1.5 text-xs font-medium text-slate-500">
                   Descuento
@@ -739,7 +739,7 @@ export default function PuntoDeVentaPage() {
               )}
             </div>
 
-            <div className="mt-4 rounded-2xl bg-[#f5f7f3] p-4">
+            <div className="mt-3 rounded-xl bg-[#f5f7f3] p-3">
               <div className="flex justify-between text-sm text-slate-500">
                 <span>Subtotal</span>
                 <span>{money(subtotal)}</span>
@@ -833,7 +833,7 @@ export default function PuntoDeVentaPage() {
                   <div className="flex justify-between">
                     <span>
                       {formatQuantity(item.quantity)}{" "}
-                      {item.unit} Ã—{" "}
+                      {item.unit} ×{" "}
                       {money(item.unit_price)}
                     </span>
 

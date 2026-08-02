@@ -261,7 +261,7 @@ export default function ComprasPage() {
           variant="outline"
           onClick={() => void loadPurchases()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -273,65 +273,65 @@ export default function ComprasPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
             <ShoppingCart className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Compras registradas
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {summary.count}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <PackageSearch className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Mercancía
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {money(summary.merchandise)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <Truck className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Costos logísticos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {money(summary.logistics)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-amber-700">
             <WalletCards className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-amber-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-amber-700">
             Pendiente de pago
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-amber-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-amber-950">
             {money(summary.pending)}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h2 className="text-lg font-semibold">
@@ -400,17 +400,17 @@ export default function ComprasPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1150px] text-left">
-              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">Compra</th>
-                  <th className="px-6 py-4">Proveedor</th>
-                  <th className="px-6 py-4">Fecha</th>
-                  <th className="px-6 py-4">Mercancía</th>
-                  <th className="px-6 py-4">Logística</th>
-                  <th className="px-6 py-4">Total</th>
-                  <th className="px-6 py-4">Pago</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Acción</th>
+                  <th className="px-5 py-3.5">Compra</th>
+                  <th className="px-5 py-3.5">Proveedor</th>
+                  <th className="px-5 py-3.5">Fecha</th>
+                  <th className="px-5 py-3.5">Mercancía</th>
+                  <th className="px-5 py-3.5">Logística</th>
+                  <th className="px-5 py-3.5">Total</th>
+                  <th className="px-5 py-3.5">Pago</th>
+                  <th className="px-5 py-3.5">Estado</th>
+                  <th className="px-5 py-3.5">Acción</th>
                 </tr>
               </thead>
 
@@ -429,9 +429,9 @@ export default function ComprasPage() {
                   return (
                     <tr
                       key={purchase.id}
-                      className="transition hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <p className="font-medium">
                           {purchase.folio}
                         </p>
@@ -466,7 +466,7 @@ export default function ComprasPage() {
                         {money(purchase.total)}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span className="inline-flex items-center gap-2 rounded-full bg-[#eef3ed] px-3 py-1.5 text-xs font-medium text-[#1f6a3a]">
                           <PaymentIcon className="h-3.5 w-3.5" />
                           {paymentLabel(
@@ -475,7 +475,7 @@ export default function ComprasPage() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
                           className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                             purchase.payment_status ===
@@ -493,7 +493,7 @@ export default function ComprasPage() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <button
                           type="button"
                           onClick={() =>
@@ -513,7 +513,7 @@ export default function ComprasPage() {
                   <tr>
                     <td
                       colSpan={9}
-                      className="px-6 py-20 text-center"
+                      className="px-5 py-14 text-center"
                     >
                       <ShoppingCart className="mx-auto h-8 w-8 text-slate-300" />
 
@@ -541,7 +541,7 @@ export default function ComprasPage() {
 
       {selectedPurchase && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
-          <section className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[24px] bg-white shadow-2xl">
+          <section className="max-h-[88vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#e6eae4] bg-white px-6 py-5">
               <div>
                 <p className="text-sm font-medium text-slate-500">
@@ -582,15 +582,15 @@ export default function ComprasPage() {
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] text-left">
-                    <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                    <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                       <tr>
-                        <th className="px-6 py-4">
+                        <th className="px-5 py-3.5">
                           Producto
                         </th>
-                        <th className="px-6 py-4">
+                        <th className="px-5 py-3.5">
                           Cantidad
                         </th>
-                        <th className="px-6 py-4">
+                        <th className="px-5 py-3.5">
                           Costo unitario
                         </th>
                         <th className="px-6 py-4 text-right">
@@ -602,7 +602,7 @@ export default function ComprasPage() {
                     <tbody className="divide-y divide-[#edf0eb]">
                       {selectedItems.map((item) => (
                         <tr key={item.id}>
-                          <td className="px-6 py-4">
+                          <td className="px-5 py-3.5">
                             <p className="font-medium">
                               {item.product?.name ??
                                 "Producto"}

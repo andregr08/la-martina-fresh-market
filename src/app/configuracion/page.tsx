@@ -208,7 +208,7 @@ export default function ConfiguracionPage() {
           variant="outline"
           onClick={() => void loadSettings()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -224,9 +224,9 @@ export default function ConfiguracionPage() {
           <Loader2 className="h-8 w-8 animate-spin text-[#1f6a3a]" />
         </div>
       ) : (
-        <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-          <section className="space-y-6">
-            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+        <div className="grid gap-4 xl:grid-cols-[1fr_420px]">
+          <section className="space-y-4">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
                   <Building2 className="h-5 w-5" />
@@ -273,7 +273,7 @@ export default function ConfiguracionPage() {
                       setTicketHeader(event.target.value)
                     }
                     placeholder="Ej. Frutas y verduras frescas"
-                    className="rounded-xl"
+                    className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                   />
                 </div>
 
@@ -339,7 +339,7 @@ export default function ConfiguracionPage() {
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
                   <Printer className="h-5 w-5" />
@@ -366,7 +366,7 @@ export default function ConfiguracionPage() {
                   onChange={(event) =>
                     setTicketFooter(event.target.value)
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -485,8 +485,8 @@ export default function ConfiguracionPage() {
             )}
           </section>
 
-          <aside className="space-y-6">
-            <article className="sticky top-28 rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+          <aside className="space-y-4">
+            <article className="sticky top-28 rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#102019] text-white">
                   <Settings className="h-5 w-5" />

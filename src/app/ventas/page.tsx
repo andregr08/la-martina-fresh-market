@@ -399,7 +399,7 @@ export default function VentasPage() {
           variant="outline"
           onClick={() => void loadSales()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -411,73 +411,73 @@ export default function VentasPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 print:hidden">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
             <TrendingUp className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Total vendido
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {money(summary.sales)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400">
             {summary.count} ventas completadas
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <ReceiptText className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Ticket promedio
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {money(averageTicket)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-amber-700">
             <WalletCards className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-amber-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-amber-700">
             Descuentos aplicados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-amber-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-amber-950">
             {money(summary.discounts)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5 shadow-sm">
+        <article className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
             <RotateCcw className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-red-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
             Devoluciones
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-red-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-red-950">
             {money(summary.refunds)}
           </p>
 
-          <p className="mt-2 text-xs text-red-700">
+          <p className="mt-1 text-xs text-red-700">
             {summary.refundCount} operaciones
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm print:hidden">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm print:hidden">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -555,17 +555,17 @@ export default function VentasPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1180px] text-left">
-              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">Venta</th>
-                  <th className="px-6 py-4">Fecha</th>
-                  <th className="px-6 py-4">Ticket</th>
-                  <th className="px-6 py-4">Método</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Subtotal</th>
-                  <th className="px-6 py-4">Descuento</th>
-                  <th className="px-6 py-4">Total</th>
-                  <th className="px-6 py-4">Acciones</th>
+                  <th className="px-5 py-3.5">Venta</th>
+                  <th className="px-5 py-3.5">Fecha</th>
+                  <th className="px-5 py-3.5">Ticket</th>
+                  <th className="px-5 py-3.5">Método</th>
+                  <th className="px-5 py-3.5">Estado</th>
+                  <th className="px-5 py-3.5">Subtotal</th>
+                  <th className="px-5 py-3.5">Descuento</th>
+                  <th className="px-5 py-3.5">Total</th>
+                  <th className="px-5 py-3.5">Acciones</th>
                 </tr>
               </thead>
 
@@ -573,9 +573,9 @@ export default function VentasPage() {
                 {filteredSales.map((sale) => (
                   <tr
                     key={sale.id}
-                    className="transition hover:bg-[#fafbf8]"
+                    className="transition-colors hover:bg-[#f7f9f5]"
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       <p className="font-medium">
                         {sale.folio}
                       </p>
@@ -596,7 +596,7 @@ export default function VentasPage() {
                         "Sin ticket"}
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       <span className="inline-flex items-center gap-2 rounded-full bg-[#eef3ed] px-3 py-1.5 text-xs font-medium text-[#1f6a3a]">
                         <PaymentIcon
                           method={sale.payment_method}
@@ -607,7 +607,7 @@ export default function VentasPage() {
                       </span>
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       <span
                         className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                           sale.status === "completed"
@@ -633,7 +633,7 @@ export default function VentasPage() {
                       {money(sale.total)}
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -667,7 +667,7 @@ export default function VentasPage() {
                   <tr>
                     <td
                       colSpan={9}
-                      className="px-6 py-20 text-center"
+                      className="px-5 py-14 text-center"
                     >
                       <ReceiptText className="mx-auto h-8 w-8 text-slate-300" />
 
@@ -714,7 +714,7 @@ export default function VentasPage() {
 
       {selectedSale && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm print:static print:block print:bg-white print:p-0">
-          <section className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-[24px] bg-white p-6 text-black shadow-2xl print:max-h-none print:max-w-none print:overflow-visible print:rounded-none print:p-0">
+          <section className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-[24px] bg-white p-6 text-black shadow-2xl print:max-h-none print:max-w-none print:overflow-visible print:rounded-none print:p-0">
             <div className="mb-4 flex justify-end print:hidden">
               <button
                 type="button"
@@ -871,7 +871,7 @@ export default function VentasPage() {
                     )
                   }
                   placeholder="Ej. Error en el cobro"
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -888,7 +888,7 @@ export default function VentasPage() {
                     )
                   }
                   placeholder="Opcional"
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 

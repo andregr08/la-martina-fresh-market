@@ -223,16 +223,16 @@ function StatCard({
         )}
       </div>
 
-      <p className="mt-5 text-sm font-medium text-slate-500">
+      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
         {title}
       </p>
 
-      <p className="mt-2 text-[28px] font-semibold tracking-tight text-[#172018]">
+      <p className="mt-1 text-[24px] font-semibold tracking-tight text-[#172018]">
         {value}
       </p>
 
       {subtitle && (
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500">
           {subtitle}
         </p>
       )}
@@ -558,7 +558,7 @@ export default function DashboardPage() {
   return (
     <AppShell
       title="Dashboard"
-      description="Resumen ejecutivo de la operaciÃ³n del local."
+      description="Resumen ejecutivo de la operación del local."
     >
       {error && (
         <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -570,7 +570,7 @@ export default function DashboardPage() {
         <div className="inline-flex w-fit rounded-xl border border-[#dde2da] bg-white p-1 shadow-sm">
           {[
             ["today", "Hoy"],
-            ["week", "7 dÃ­as"],
+            ["week", "7 días"],
             ["month", "Este mes"],
           ].map(([value, label]) => (
             <button
@@ -614,8 +614,8 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="space-y-4">
+          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               title="Ventas del periodo"
               value={money(salesTotal)}
@@ -632,14 +632,14 @@ export default function DashboardPage() {
               value={money(netProfit)}
               subtitle={`Gastos ${money(
                 expenseTotal,
-              )} Â· Mermas ${money(wasteTotal)}`}
+              )} · Mermas ${money(wasteTotal)}`}
               icon={WalletCards}
             />
 
             <StatCard
               title="Ticket promedio"
               value={money(averageTicket)}
-              subtitle="Promedio por operaciÃ³n"
+              subtitle="Promedio por operación"
               icon={ReceiptText}
               change={percentChange(
                 averageTicket,
@@ -664,7 +664,7 @@ export default function DashboardPage() {
                   </p>
 
                   <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#172018]">
-                    EvoluciÃ³n de ventas
+                    Evolución de ventas
                   </h2>
                 </div>
 
@@ -751,7 +751,7 @@ export default function DashboardPage() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      La grÃ¡fica aparecerÃ¡ al registrar operaciones.
+                      La gráfica aparecerá al registrar operaciones.
                     </p>
                   </div>
                 )}
@@ -760,14 +760,14 @@ export default function DashboardPage() {
 
             <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
               <p className="text-sm font-medium text-slate-500">
-                DistribuciÃ³n
+                Distribución
               </p>
 
               <h2 className="mt-1 text-xl font-semibold tracking-tight">
-                MÃ©todos de pago
+                Métodos de pago
               </h2>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 {[
                   {
                     name: "Efectivo",
@@ -838,13 +838,13 @@ export default function DashboardPage() {
 
           <section className="grid gap-6 xl:grid-cols-2">
             <article className="rounded-[24px] border border-[#dde2da] bg-white shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
-              <div className="border-b border-[#e6eae4] px-6 py-5">
+              <div className="border-b border-[#e6eae4] px-5 py-4">
                 <p className="text-sm font-medium text-slate-500">
                   Rendimiento comercial
                 </p>
 
                 <h2 className="mt-1 text-lg font-semibold">
-                  Productos mÃ¡s vendidos
+                  Productos más vendidos
                 </h2>
               </div>
 
@@ -885,7 +885,7 @@ export default function DashboardPage() {
                     <PackageOpen className="h-7 w-7 text-slate-300" />
 
                     <p className="mt-3 text-sm text-slate-500">
-                      TodavÃ­a no hay productos vendidos.
+                      Todavía no hay productos vendidos.
                     </p>
                   </div>
                 )}
@@ -893,9 +893,9 @@ export default function DashboardPage() {
             </article>
 
             <article className="rounded-[24px] border border-[#dde2da] bg-white shadow-[0_1px_2px_rgba(16,24,18,0.04),0_8px_24px_rgba(16,24,18,0.04)]">
-              <div className="border-b border-[#e6eae4] px-6 py-5">
+              <div className="border-b border-[#e6eae4] px-5 py-4">
                 <p className="text-sm font-medium text-slate-500">
-                  AtenciÃ³n requerida
+                  Atención requerida
                 </p>
 
                 <h2 className="mt-1 text-lg font-semibold">
@@ -977,7 +977,7 @@ export default function DashboardPage() {
                 </p>
 
                 <h2 className="mt-1 text-lg font-semibold">
-                  Ãšltimas ventas
+                  Últimas ventas
                 </h2>
               </div>
 
@@ -990,10 +990,10 @@ export default function DashboardPage() {
               <table className="w-full min-w-[760px] text-left">
                 <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                   <tr>
-                    <th className="px-6 py-4">Folio</th>
-                    <th className="px-6 py-4">Fecha</th>
-                    <th className="px-6 py-4">MÃ©todo</th>
-                    <th className="px-6 py-4">Descuento</th>
+                    <th className="px-5 py-3.5">Folio</th>
+                    <th className="px-5 py-3.5">Fecha</th>
+                    <th className="px-5 py-3.5">Método</th>
+                    <th className="px-5 py-3.5">Descuento</th>
                     <th className="px-6 py-4 text-right">
                       Total
                     </th>
@@ -1043,7 +1043,7 @@ export default function DashboardPage() {
                         colSpan={5}
                         className="px-6 py-16 text-center text-sm text-slate-500"
                       >
-                        TodavÃ­a no existen ventas en este periodo.
+                        Todavía no existen ventas en este periodo.
                       </td>
                     </tr>
                   )}

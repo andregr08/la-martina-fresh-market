@@ -313,7 +313,7 @@ export default function AjustesInventarioPage() {
           variant="outline"
           onClick={() => void loadData()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -325,66 +325,66 @@ export default function AjustesInventarioPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <ClipboardCheck className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Ajustes registrados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {summary.count}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <ArrowUpRight className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-emerald-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-emerald-700">
             Aumentos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-emerald-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-emerald-950">
             {summary.increases}
           </p>
 
-          <p className="mt-2 text-xs text-emerald-700">
+          <p className="mt-1 text-xs text-emerald-700">
             +{summary.increaseQuantity.toLocaleString("es-MX", {
               maximumFractionDigits: 3,
             })}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5">
+        <article className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
             <ArrowDownRight className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-red-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
             Disminuciones
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-red-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-red-950">
             {summary.decreases}
           </p>
 
-          <p className="mt-2 text-xs text-red-700">
+          <p className="mt-1 text-xs text-red-700">
             -{summary.decreaseQuantity.toLocaleString("es-MX", {
               maximumFractionDigits: 3,
             })}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-slate-600">
             <Equal className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Diferencia actual
           </p>
 
@@ -405,8 +405,8 @@ export default function AjustesInventarioPage() {
         </article>
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[400px_1fr]">
-        <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+      <section className="mt-4 grid gap-4 xl:grid-cols-[400px_1fr]">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-[#1f6a3a]" />
 
@@ -474,7 +474,7 @@ export default function AjustesInventarioPage() {
                   setCountedQuantity(event.target.value)
                 }
                 placeholder="0.000"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -513,7 +513,7 @@ export default function AjustesInventarioPage() {
                   setReason(event.target.value)
                 }
                 placeholder="Ej. Diferencia en conteo físico"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -528,7 +528,7 @@ export default function AjustesInventarioPage() {
                   setNotes(event.target.value)
                 }
                 placeholder="Opcional"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -549,8 +549,8 @@ export default function AjustesInventarioPage() {
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-          <div className="border-b border-[#e6eae4] p-5">
+        <article className="overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+          <div className="border-b border-[#e6eae4] p-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold">
@@ -603,16 +603,16 @@ export default function AjustesInventarioPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1050px] text-left">
-                <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                   <tr>
-                    <th className="px-6 py-4">Fecha</th>
-                    <th className="px-6 py-4">Producto</th>
-                    <th className="px-6 py-4">Sistema</th>
-                    <th className="px-6 py-4">Contado</th>
-                    <th className="px-6 py-4">Diferencia</th>
-                    <th className="px-6 py-4">Tipo</th>
-                    <th className="px-6 py-4">Motivo</th>
-                    <th className="px-6 py-4">Usuario</th>
+                    <th className="px-5 py-3.5">Fecha</th>
+                    <th className="px-5 py-3.5">Producto</th>
+                    <th className="px-5 py-3.5">Sistema</th>
+                    <th className="px-5 py-3.5">Contado</th>
+                    <th className="px-5 py-3.5">Diferencia</th>
+                    <th className="px-5 py-3.5">Tipo</th>
+                    <th className="px-5 py-3.5">Motivo</th>
+                    <th className="px-5 py-3.5">Usuario</th>
                   </tr>
                 </thead>
 
@@ -620,7 +620,7 @@ export default function AjustesInventarioPage() {
                   {filteredAdjustments.map((adjustment) => (
                     <tr
                       key={adjustment.id}
-                      className="transition hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
                       <td className="px-6 py-4 text-sm text-slate-500">
                         {new Date(
@@ -664,7 +664,7 @@ export default function AjustesInventarioPage() {
                         )}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
                             adjustment.adjustment_type ===
@@ -700,7 +700,7 @@ export default function AjustesInventarioPage() {
                     <tr>
                       <td
                         colSpan={8}
-                        className="px-6 py-20 text-center"
+                        className="px-5 py-14 text-center"
                       >
                         <ClipboardCheck className="mx-auto h-8 w-8 text-slate-300" />
 

@@ -416,7 +416,7 @@ export default function ProductosPage() {
           variant="outline"
           onClick={() => void loadData()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -428,65 +428,65 @@ export default function ProductosPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
             <Tags className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Productos registrados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {summary.total}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-5">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <CheckCircle2 className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-emerald-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-emerald-700">
             Productos activos
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold text-emerald-950">
+          <p className="mt-1 text-[24px] font-semibold text-emerald-950">
             {summary.active}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <PackagePlus className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Valor del inventario
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold">
+          <p className="mt-1 text-[24px] font-semibold">
             {money(summary.value)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-amber-700">
             <Tags className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-amber-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-amber-700">
             Margen promedio
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold text-amber-950">
+          <p className="mt-1 text-[24px] font-semibold text-amber-950">
             {averageMargin.toFixed(1)}%
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h2 className="text-lg font-semibold">
@@ -557,19 +557,19 @@ export default function ProductosPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1300px] text-left">
-              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">Producto</th>
-                  <th className="px-6 py-4">Categoría</th>
-                  <th className="px-6 py-4">Existencia</th>
-                  <th className="px-6 py-4">Compra</th>
-                  <th className="px-6 py-4">Venta</th>
-                  <th className="px-6 py-4">Margen</th>
-                  <th className="px-6 py-4">Mínimo</th>
-                  <th className="px-6 py-4">Ideal</th>
-                  <th className="px-6 py-4">Conservación</th>
-                  <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Acción</th>
+                  <th className="px-5 py-3.5">Producto</th>
+                  <th className="px-5 py-3.5">Categoría</th>
+                  <th className="px-5 py-3.5">Existencia</th>
+                  <th className="px-5 py-3.5">Compra</th>
+                  <th className="px-5 py-3.5">Venta</th>
+                  <th className="px-5 py-3.5">Margen</th>
+                  <th className="px-5 py-3.5">Mínimo</th>
+                  <th className="px-5 py-3.5">Ideal</th>
+                  <th className="px-5 py-3.5">Conservación</th>
+                  <th className="px-5 py-3.5">Estado</th>
+                  <th className="px-5 py-3.5">Acción</th>
                 </tr>
               </thead>
 
@@ -583,9 +583,9 @@ export default function ProductosPage() {
                   return (
                     <tr
                       key={product.id}
-                      className="hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <p className="font-medium">
                           {product.name}
                         </p>
@@ -615,7 +615,7 @@ export default function ProductosPage() {
                         {money(product.sale_price)}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
                           className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                             margin >= 30
@@ -643,7 +643,7 @@ export default function ProductosPage() {
                         )}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2 text-sm">
                           {product.refrigerated && (
                             <Snowflake className="h-4 w-4 text-sky-600" />
@@ -657,7 +657,7 @@ export default function ProductosPage() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <span
                           className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                             product.active
@@ -671,7 +671,7 @@ export default function ProductosPage() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <button
                           type="button"
                           onClick={() =>
@@ -691,7 +691,7 @@ export default function ProductosPage() {
                   <tr>
                     <td
                       colSpan={11}
-                      className="px-6 py-20 text-center text-sm text-slate-500"
+                      className="px-5 py-14 text-center text-sm text-slate-500"
                     >
                       No se encontraron productos.
                     </td>
@@ -706,7 +706,7 @@ export default function ProductosPage() {
       {(editingProduct !== null ||
         form !== emptyForm) && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
-          <section className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[24px] bg-white shadow-2xl">
+          <section className="max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="sticky top-0 z-10 flex items-start justify-between border-b border-[#e6eae4] bg-white px-6 py-5">
               <div>
                 <p className="text-sm font-medium text-slate-500">
@@ -744,7 +744,7 @@ export default function ProductosPage() {
                       name: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -761,7 +761,7 @@ export default function ProductosPage() {
                       sku: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -835,7 +835,7 @@ export default function ProductosPage() {
                       purchasePrice: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -855,7 +855,7 @@ export default function ProductosPage() {
                       salePrice: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -875,7 +875,7 @@ export default function ProductosPage() {
                       minimumStock: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -895,7 +895,7 @@ export default function ProductosPage() {
                       idealStock: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 
@@ -915,7 +915,7 @@ export default function ProductosPage() {
                       shelfLifeDays: event.target.value,
                     }))
                   }
-                  className="rounded-xl"
+                  className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                 />
               </div>
 

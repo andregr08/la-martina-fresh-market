@@ -75,7 +75,7 @@ function movementLabel(value: string) {
   if (value === "opening") return "Apertura"
   if (value === "sale") return "Venta"
   if (value === "expense") return "Gasto"
-  if (value === "refund") return "DevoluciÃ³n"
+  if (value === "refund") return "Devolución"
   if (value === "adjustment") return "Ajuste"
 
   return value
@@ -258,7 +258,7 @@ export default function CajaPage() {
     const numericAmount = Number(openingAmount)
 
     if (!Number.isFinite(numericAmount) || numericAmount < 0) {
-      setError("El fondo inicial no es vÃ¡lido.")
+      setError("El fondo inicial no es válido.")
       return
     }
 
@@ -299,14 +299,14 @@ export default function CajaPage() {
       !Number.isFinite(numericCounted) ||
       numericCounted < 0
     ) {
-      setError("El efectivo contado no es vÃ¡lido.")
+      setError("El efectivo contado no es válido.")
       return
     }
 
     const confirmed = window.confirm(
-      `Se cerrarÃ¡ la caja con ${money(
+      `Se cerrará la caja con ${money(
         numericCounted,
-      )} contados. Â¿Deseas continuar?`,
+      )} contados. ¿Deseas continuar?`,
     )
 
     if (!confirmed) return
@@ -339,7 +339,7 @@ export default function CajaPage() {
   return (
     <AppShell
       title="Caja"
-      description="Apertura, operaciÃ³n y cierre diario."
+      description="Apertura, operación y cierre diario."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -360,7 +360,7 @@ export default function CajaPage() {
           variant="outline"
           onClick={() => void loadCashRegister()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -420,7 +420,7 @@ export default function CajaPage() {
                   setOpeningNotes(event.target.value)
                 }
                 placeholder="Opcional"
-                className="rounded-xl"
+                className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
               />
             </div>
 
@@ -441,7 +441,7 @@ export default function CajaPage() {
           </div>
         </section>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <section className="rounded-[24px] border border-emerald-200 bg-[linear-gradient(135deg,#102019,#1f6a3a)] p-6 text-white shadow-lg">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -451,7 +451,7 @@ export default function CajaPage() {
                 </div>
 
                 <h2 className="mt-4 text-2xl font-semibold">
-                  OperaciÃ³n activa
+                  Operación activa
                 </h2>
 
                 <p className="mt-2 text-sm text-white/65">
@@ -475,58 +475,58 @@ export default function CajaPage() {
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
               <Banknote className="h-5 w-5 text-[#1f6a3a]" />
 
-              <p className="mt-5 text-sm font-medium text-slate-500">
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
                 Ventas en efectivo
               </p>
 
-              <p className="mt-2 text-[28px] font-semibold">
+              <p className="mt-1 text-[24px] font-semibold">
                 {money(summary?.cash_sales)}
               </p>
             </article>
 
-            <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
               <CreditCard className="h-5 w-5 text-[#1f6a3a]" />
 
-              <p className="mt-5 text-sm font-medium text-slate-500">
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
                 Ventas con tarjeta
               </p>
 
-              <p className="mt-2 text-[28px] font-semibold">
+              <p className="mt-1 text-[24px] font-semibold">
                 {money(summary?.card_sales)}
               </p>
             </article>
 
-            <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
               <Smartphone className="h-5 w-5 text-[#1f6a3a]" />
 
-              <p className="mt-5 text-sm font-medium text-slate-500">
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
                 Transferencias
               </p>
 
-              <p className="mt-2 text-[28px] font-semibold">
+              <p className="mt-1 text-[24px] font-semibold">
                 {money(summary?.transfer_sales)}
               </p>
             </article>
 
-            <article className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+            <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <CircleDollarSign className="h-5 w-5 text-amber-700" />
 
-              <p className="mt-5 text-sm font-medium text-amber-700">
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-amber-700">
                 Fondo inicial
               </p>
 
-              <p className="mt-2 text-[28px] font-semibold text-amber-950">
+              <p className="mt-1 text-[24px] font-semibold text-amber-950">
                 {money(summary?.opening_amount)}
               </p>
             </article>
           </section>
 
-          <section className="grid gap-6 xl:grid-cols-[1fr_420px]">
-            <article className="overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-              <div className="border-b border-[#e6eae4] p-5">
+          <section className="grid gap-4 xl:grid-cols-[1fr_420px]">
+            <article className="overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+              <div className="border-b border-[#e6eae4] p-4">
                 <div className="flex items-center gap-2">
                   <Clock3 className="h-5 w-5 text-[#1f6a3a]" />
 
@@ -538,12 +538,12 @@ export default function CajaPage() {
 
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left">
-                  <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                     <tr>
-                      <th className="px-6 py-4">Fecha</th>
-                      <th className="px-6 py-4">Movimiento</th>
-                      <th className="px-6 py-4">MÃ©todo</th>
-                      <th className="px-6 py-4">DescripciÃ³n</th>
+                      <th className="px-5 py-3.5">Fecha</th>
+                      <th className="px-5 py-3.5">Movimiento</th>
+                      <th className="px-5 py-3.5">Método</th>
+                      <th className="px-5 py-3.5">Descripción</th>
                       <th className="px-6 py-4 text-right">
                         Importe
                       </th>
@@ -554,7 +554,7 @@ export default function CajaPage() {
                     {movements.map((movement) => (
                       <tr
                         key={movement.id}
-                        className="hover:bg-[#fafbf8]"
+                        className="transition-colors hover:bg-[#f7f9f5]"
                       >
                         <td className="px-6 py-4 text-sm text-slate-500">
                           {new Date(
@@ -575,7 +575,7 @@ export default function CajaPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-500">
-                          {movement.description ?? "â€”"}
+                          {movement.description ?? "—"}
                         </td>
 
                         <td className="px-6 py-4 text-right font-semibold">
@@ -588,9 +588,9 @@ export default function CajaPage() {
                       <tr>
                         <td
                           colSpan={5}
-                          className="px-6 py-20 text-center text-sm text-slate-500"
+                          className="px-5 py-14 text-center text-sm text-slate-500"
                         >
-                          TodavÃ­a no hay movimientos.
+                          Todavía no hay movimientos.
                         </td>
                       </tr>
                     )}
@@ -599,7 +599,7 @@ export default function CajaPage() {
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#dde2da] bg-white p-6 shadow-sm">
+            <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold">
                 Cierre de caja
               </h2>
@@ -688,7 +688,7 @@ export default function CajaPage() {
                       setClosingNotes(event.target.value)
                     }
                     placeholder="Opcional"
-                    className="rounded-xl"
+                    className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
                   />
                 </div>
 

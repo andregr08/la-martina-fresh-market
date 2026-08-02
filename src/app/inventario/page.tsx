@@ -215,7 +215,7 @@ export default function InventarioPage() {
           variant="outline"
           onClick={() => void loadInventory()}
           disabled={loading}
-          className="rounded-xl"
+          className="rounded-xl focus-visible:ring-4 focus-visible:ring-[#1f6a3a]/10"
         >
           <RefreshCw
             className={`mr-2 h-4 w-4 ${
@@ -227,69 +227,69 @@ export default function InventarioPage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8f3eb] text-[#1f6a3a]">
             <WalletCards className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Valor del inventario
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {money(summary.value)}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-[#dde2da] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[#dde2da] bg-white p-4 shadow-sm">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ed] text-[#1f6a3a]">
             <PackageCheck className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             Productos disponibles
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight">
             {summary.available}
           </p>
 
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400">
             Con existencia suficiente
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-amber-200 bg-amber-50 p-5">
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-amber-700">
             <AlertTriangle className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-amber-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-amber-700">
             Stock bajo
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-amber-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-amber-950">
             {summary.low}
           </p>
         </article>
 
-        <article className="rounded-[20px] border border-red-200 bg-red-50 p-5">
+        <article className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-red-700">
             <PackageOpen className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-sm font-medium text-red-700">
+          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
             Productos agotados
           </p>
 
-          <p className="mt-2 text-[28px] font-semibold tracking-tight text-red-950">
+          <p className="mt-1 text-[24px] font-semibold tracking-tight text-red-950">
             {summary.out}
           </p>
         </article>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[24px] border border-[#dde2da] bg-white shadow-sm">
-        <div className="border-b border-[#e6eae4] p-5">
+      <section className="mt-6 overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+        <div className="border-b border-[#e6eae4] p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -356,16 +356,16 @@ export default function InventarioPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1150px] text-left">
-              <thead className="bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-6 py-4">Producto</th>
-                  <th className="px-6 py-4">Categoría</th>
-                  <th className="px-6 py-4">Existencia</th>
-                  <th className="px-6 py-4">Costo</th>
-                  <th className="px-6 py-4">Precio</th>
-                  <th className="px-6 py-4">Valor</th>
-                  <th className="px-6 py-4">Conservación</th>
-                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-5 py-3.5">Producto</th>
+                  <th className="px-5 py-3.5">Categoría</th>
+                  <th className="px-5 py-3.5">Existencia</th>
+                  <th className="px-5 py-3.5">Costo</th>
+                  <th className="px-5 py-3.5">Precio</th>
+                  <th className="px-5 py-3.5">Valor</th>
+                  <th className="px-5 py-3.5">Conservación</th>
+                  <th className="px-5 py-3.5">Estado</th>
                 </tr>
               </thead>
 
@@ -382,9 +382,9 @@ export default function InventarioPage() {
                   return (
                     <tr
                       key={product.id}
-                      className="transition hover:bg-[#fafbf8]"
+                      className="transition-colors hover:bg-[#f7f9f5]"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ed] text-[#1f6a3a]">
                             <Boxes className="h-5 w-5" />
@@ -406,7 +406,7 @@ export default function InventarioPage() {
                         {product.category?.name ?? "Sin categoría"}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <p className="font-semibold">
                           {quantity(stock, product.unit)}
                         </p>
@@ -430,7 +430,7 @@ export default function InventarioPage() {
                         {money(stock * cost)}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2 text-sm text-slate-600">
                           {product.refrigerated && (
                             <Snowflake className="h-4 w-4 text-sky-600" />
@@ -444,7 +444,7 @@ export default function InventarioPage() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3.5">
                         {isOut ? (
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700">
                             <PackageOpen className="h-3.5 w-3.5" />
@@ -470,7 +470,7 @@ export default function InventarioPage() {
                   <tr>
                     <td
                       colSpan={8}
-                      className="px-6 py-20 text-center"
+                      className="px-5 py-14 text-center"
                     >
                       <PackageOpen className="mx-auto h-8 w-8 text-slate-300" />
 
