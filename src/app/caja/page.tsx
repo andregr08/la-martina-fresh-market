@@ -636,7 +636,7 @@ export default function CajaPage() {
                           colSpan={5}
                           className="px-5 py-14 text-center text-sm text-slate-500"
                         >
-                          TodavÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­a no hay movimientos.
+                          Todav?a no hay movimientos.
                         </td>
                       </tr>
                     )}
