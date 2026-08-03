@@ -76,7 +76,7 @@ function movementLabel(value: string) {
   if (value === "opening") return "Apertura"
   if (value === "sale") return "Venta"
   if (value === "expense") return "Gasto"
-  if (value === "refund") return "Devolución"
+  if (value === "refund") return "DevoluciÃ³n"
   if (value === "adjustment") return "Ajuste"
 
   return value
@@ -277,7 +277,7 @@ export default function CajaPage() {
     const employeeName = openingEmployeeName.trim()
 
     if (!Number.isFinite(numericAmount) || numericAmount < 0) {
-      setError("El fondo inicial no es vÃƒÂ¡lido.")
+      setError("El fondo inicial no es vÃƒÆ’Ã‚Â¡lido.")
       return
     }
 
@@ -327,14 +327,14 @@ export default function CajaPage() {
       !Number.isFinite(numericCounted) ||
       numericCounted < 0
     ) {
-      setError("El efectivo contado no es vÃƒÂ¡lido.")
+      setError("El efectivo contado no es vÃƒÆ’Ã‚Â¡lido.")
       return
     }
 
     const confirmed = window.confirm(
-      `Se cerrarÃƒÂ¡ la caja con ${money(
+      `Se cerrarÃƒÆ’Ã‚Â¡ la caja con ${money(
         numericCounted,
-      )} contados. Ã‚¿Deseas continuar?`,
+      )} contados. Ãƒâ€šÂ¿Deseas continuar?`,
     )
 
     if (!confirmed) return
@@ -588,8 +588,8 @@ export default function CajaPage() {
                     <tr>
                       <th className="px-5 py-3.5">Fecha</th>
                       <th className="px-5 py-3.5">Movimiento</th>
-                      <th className="px-5 py-3.5">Método</th>
-                      <th className="px-5 py-3.5">Descripción</th>
+                      <th className="px-5 py-3.5">MÃ©todo</th>
+                      <th className="px-5 py-3.5">DescripciÃ³n</th>
                       <th className="px-6 py-4 text-right">
                         Importe
                       </th>
@@ -621,7 +621,7 @@ export default function CajaPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-500">
-                          {movement.description ?? "Ã¢â‚¬â€"}
+                          {movement.description ?? "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                         </td>
 
                         <td className="px-6 py-4 text-right font-semibold">
@@ -636,7 +636,7 @@ export default function CajaPage() {
                           colSpan={5}
                           className="px-5 py-14 text-center text-sm text-slate-500"
                         >
-                          TodavÃƒÂ­a no hay movimientos.
+                          TodavÃƒÆ’Ã‚Â­a no hay movimientos.
                         </td>
                       </tr>
                     )}
