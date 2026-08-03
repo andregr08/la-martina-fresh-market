@@ -76,7 +76,7 @@ function movementLabel(value: string) {
   if (value === "opening") return "Apertura"
   if (value === "sale") return "Venta"
   if (value === "expense") return "Gasto"
-  if (value === "refund") return "DevoluciÃ³n"
+  if (value === "refund") return "DevoluciÃƒÂ³n"
   if (value === "adjustment") return "Ajuste"
 
   return value
@@ -277,7 +277,7 @@ export default function CajaPage() {
     const employeeName = openingEmployeeName.trim()
 
     if (!Number.isFinite(numericAmount) || numericAmount < 0) {
-      setError("El fondo inicial no es vÃƒÆ’Ã‚Â¡lido.")
+      setError("El fondo inicial no es vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido.")
       return
     }
 
@@ -327,14 +327,14 @@ export default function CajaPage() {
       !Number.isFinite(numericCounted) ||
       numericCounted < 0
     ) {
-      setError("El efectivo contado no es vÃƒÆ’Ã‚Â¡lido.")
+      setError("El efectivo contado no es vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido.")
       return
     }
 
     const confirmed = window.confirm(
-      `Se cerrarÃƒÆ’Ã‚Â¡ la caja con ${money(
+      `Se cerrarÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ la caja con ${money(
         numericCounted,
-      )} contados. Ãƒâ€šÂ¿Deseas continuar?`,
+      )} contados. ÃƒÆ’Ã¢â‚¬Å¡Ã‚Â¿Deseas continuar?`,
     )
 
     if (!confirmed) return
@@ -367,7 +367,7 @@ export default function CajaPage() {
   return (
     <AppShell
       title="Caja"
-      description="Apertura, operación y cierre diario."
+      description="Apertura, operaciÃ³n y cierre diario."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -482,7 +482,7 @@ export default function CajaPage() {
                 </div>
 
                 <h2 className="mt-4 text-2xl font-semibold">
-                  Operación activa
+                  OperaciÃ³n activa
                 </h2>
 
                 <p className="mt-2 text-sm text-white/75">
@@ -588,8 +588,8 @@ export default function CajaPage() {
                     <tr>
                       <th className="px-5 py-3.5">Fecha</th>
                       <th className="px-5 py-3.5">Movimiento</th>
-                      <th className="px-5 py-3.5">MÃ©todo</th>
-                      <th className="px-5 py-3.5">DescripciÃ³n</th>
+                      <th className="px-5 py-3.5">MÃƒÂ©todo</th>
+                      <th className="px-5 py-3.5">DescripciÃƒÂ³n</th>
                       <th className="px-6 py-4 text-right">
                         Importe
                       </th>
@@ -621,7 +621,7 @@ export default function CajaPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm text-slate-500">
-                          {movement.description ?? "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                          {movement.description ?? "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"}
                         </td>
 
                         <td className="px-6 py-4 text-right font-semibold">
@@ -636,7 +636,7 @@ export default function CajaPage() {
                           colSpan={5}
                           className="px-5 py-14 text-center text-sm text-slate-500"
                         >
-                          TodavÃƒÆ’Ã‚Â­a no hay movimientos.
+                          TodavÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­a no hay movimientos.
                         </td>
                       </tr>
                     )}
