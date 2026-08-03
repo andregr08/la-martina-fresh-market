@@ -367,7 +367,7 @@ export default function CajaPage() {
   return (
     <AppShell
       title="Caja"
-      description="Apertura, operaciÃ³n y cierre diario."
+      description="Apertura, operación y cierre diario."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -482,7 +482,7 @@ export default function CajaPage() {
                 </div>
 
                 <h2 className="mt-4 text-2xl font-semibold">
-                  OperaciÃ³n activa
+                  Operación activa
                 </h2>
 
                 <p className="mt-2 text-sm text-white/75">
