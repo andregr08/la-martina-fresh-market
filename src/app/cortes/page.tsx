@@ -25,6 +25,8 @@ import { createClient } from "@/lib/supabase/client"
 type CashRegister = {
   id: string
   opened_at: string
+  opened_by_name: string | null
+  closed_by_name: string | null
   closed_at: string | null
   opening_amount: number
   expected_amount: number | null
@@ -107,12 +109,8 @@ export default function CortesPage() {
         difference_amount,
         status,
         notes,
-        opener:profiles!cash_registers_opened_by_fkey (
-          full_name
-        ),
-        closer:profiles!cash_registers_closed_by_fkey (
-          full_name
-        )
+        opened_by_name,
+        closed_by_name
       `)
       .order("opened_at", {
         ascending: false,
@@ -143,8 +141,8 @@ export default function CortesPage() {
     return registers.filter((register) => {
       const matchesSearch =
         !value ||
-        register.opener?.full_name?.toLowerCase().includes(value) ||
-        register.closer?.full_name?.toLowerCase().includes(value) ||
+        register.opened_by_name?.toLowerCase().includes(value) ||
+        register.closed_by_name?.toLowerCase().includes(value) ||
         register.id.toLowerCase().includes(value)
 
       const matchesStatus =
@@ -393,11 +391,11 @@ export default function CortesPage() {
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        {register.opener?.full_name ?? "Usuario"}
+                        {register.opened_by_name ?? "Usuario"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        {register.closer?.full_name ?? "—"}
+                        {register.closed_by_name || "—"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
