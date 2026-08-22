@@ -36,6 +36,7 @@ type RestaurantVariant = {
   name: string
   sale_price: number
   sort_order: number
+  fruit_total_grams: number | null
 }
 
 type RestaurantProduct = {
@@ -47,13 +48,28 @@ type RestaurantProduct = {
   variants: RestaurantVariant[]
 }
 
+type FruitOption = {
+  id: string
+  name: string
+  unit: string
+  current_stock: number
+}
+
+type FruitSelection = {
+  product_id: string
+  name: string
+  grams: number
+}
+
 type CartItem = {
+  cart_key: string
   variant_id: string
   restaurant_product_id: string
   product_name: string
   variant_name: string
   quantity: number
   unit_price: number
+  fruit_selections: FruitSelection[]
 }
 
 type SaleResult = {
@@ -97,8 +113,19 @@ export default function RestaurantePage() {
   const [products, setProducts] = useState<RestaurantProduct[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
 
+  const [fruitOptions, setFruitOptions] =
+    useState<FruitOption[]>([])
+
+  const [fruitModal, setFruitModal] = useState<{
+    product: RestaurantProduct
+    variant: RestaurantVariant
+  } | null>(null)
+
+  const [selectedFruitIds, setSelectedFruitIds] =
+    useState<string[]>([])
+
   const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("Todos")
+  const [category, setCategory] = useState("")
 
   const [paymentMethod, setPaymentMethod] = useState<
     "cash" | "card" | "transfer"
@@ -126,6 +153,7 @@ export default function RestaurantePage() {
     const [
       productsResponse,
       variantsResponse,
+      fruitOptionsResponse,
     ] = await Promise.all([
       supabase
         .from("restaurant_products")
@@ -147,16 +175,25 @@ export default function RestaurantePage() {
           restaurant_product_id,
           name,
           sale_price,
-          sort_order
+          sort_order,
+          fruit_total_grams
         `)
         .eq("active", true)
         .order("sort_order")
+        .order("name"),
+
+      supabase
+        .from("products")
+        .select("id, name, unit, current_stock")
+        .eq("active", true)
+        .eq("restaurant_fruit_option", true)
         .order("name"),
     ])
 
     const firstError =
       productsResponse.error ||
-      variantsResponse.error
+      variantsResponse.error ||
+      fruitOptionsResponse.error
 
     if (firstError) {
       setError(firstError.message)
@@ -172,6 +209,16 @@ export default function RestaurantePage() {
 
     const rawVariants =
       (variantsResponse.data ?? []) as RestaurantVariant[]
+
+    const rawFruitOptions =
+      (fruitOptionsResponse.data ?? []) as FruitOption[]
+
+    setFruitOptions(
+      rawFruitOptions.map((fruit) => ({
+        ...fruit,
+        current_stock: Number(fruit.current_stock || 0),
+      })),
+    )
 
     const variantsByProduct = new Map<
       string,
@@ -189,6 +236,10 @@ export default function RestaurantePage() {
         sale_price: Number(
           variant.sale_price || 0,
         ),
+        fruit_total_grams:
+          variant.fruit_total_grams == null
+            ? null
+            : Number(variant.fruit_total_grams),
       })
 
       variantsByProduct.set(
@@ -219,7 +270,6 @@ export default function RestaurantePage() {
 
   const categories = useMemo(() => {
     return [
-      "Todos",
       ...Array.from(
         new Set(
           products
@@ -241,8 +291,7 @@ export default function RestaurantePage() {
 
     return products.filter((product) => {
       const categoryMatches =
-        category === "Todos" ||
-        product.category === category
+        !category || product.category === category
 
       const textMatches =
         !term ||
@@ -305,16 +354,69 @@ export default function RestaurantePage() {
     setError("")
     setMessage("")
 
+    if (
+      product.category
+        .trim()
+        .toLowerCase() === "fruta picada"
+    ) {
+      if (
+        !variant.fruit_total_grams ||
+        variant.fruit_total_grams <= 0
+      ) {
+        setError(
+          "Este tamaño no tiene configurados los gramos de fruta.",
+        )
+        return
+      }
+
+      if (fruitOptions.length === 0) {
+        setError(
+          "No hay frutas configuradas para Fruta picada.",
+        )
+        return
+      }
+
+      setFruitModal({
+        product,
+        variant,
+      })
+
+      setSelectedFruitIds([])
+      return
+    }
+
+    addCartItem(
+      product,
+      variant,
+      [],
+    )
+  }
+
+  function addCartItem(
+    product: RestaurantProduct,
+    variant: RestaurantVariant,
+    fruitSelections: FruitSelection[],
+  ) {
+    const selectionKey =
+      fruitSelections
+        .map((fruit) => fruit.product_id)
+        .join("-")
+
+    const cartKey =
+      selectionKey
+        ? `${variant.id}:${selectionKey}`
+        : variant.id
+
     setCart((current) => {
       const existing =
         current.find(
           (item) =>
-            item.variant_id === variant.id,
+            item.cart_key === cartKey,
         )
 
       if (existing) {
         return current.map((item) =>
-          item.variant_id === variant.id
+          item.cart_key === cartKey
             ? {
                 ...item,
                 quantity:
@@ -327,6 +429,7 @@ export default function RestaurantePage() {
       return [
         ...current,
         {
+          cart_key: cartKey,
           variant_id: variant.id,
           restaurant_product_id:
             product.id,
@@ -336,19 +439,137 @@ export default function RestaurantePage() {
           unit_price: Number(
             variant.sale_price || 0,
           ),
+          fruit_selections:
+            fruitSelections,
         },
       ]
     })
   }
 
+  function toggleFruit(
+    productId: string,
+  ) {
+    setSelectedFruitIds((current) => {
+      if (current.includes(productId)) {
+        return current.filter(
+          (id) => id !== productId,
+        )
+      }
+
+      if (current.length >= 4) {
+        return current
+      }
+
+      return [
+        ...current,
+        productId,
+      ]
+    })
+  }
+
+  function selectedFruitGrams(
+    index: number,
+  ) {
+    if (
+      !fruitModal ||
+      selectedFruitIds.length === 0
+    ) {
+      return 0
+    }
+
+    const totalGrams =
+      Math.round(
+        Number(
+          fruitModal.variant
+            .fruit_total_grams || 0,
+        ),
+      )
+
+    const base =
+      Math.floor(
+        totalGrams /
+          selectedFruitIds.length,
+      )
+
+    const remainder =
+      totalGrams %
+      selectedFruitIds.length
+
+    return (
+      base +
+      (index < remainder ? 1 : 0)
+    )
+  }
+
+  function confirmFruitSelection() {
+    if (!fruitModal) return
+
+    if (
+      selectedFruitIds.length < 1 ||
+      selectedFruitIds.length > 4
+    ) {
+      setError(
+        "Selecciona entre 1 y 4 frutas.",
+      )
+      return
+    }
+
+    const selections =
+      selectedFruitIds
+        .map((productId, index) => {
+          const fruit =
+            fruitOptions.find(
+              (option) =>
+                option.id === productId,
+            )
+
+          if (!fruit) {
+            return null
+          }
+
+          return {
+            product_id: fruit.id,
+            name: fruit.name,
+            grams:
+              selectedFruitGrams(index),
+          }
+        })
+        .filter(
+          (
+            fruit,
+          ): fruit is FruitSelection =>
+            fruit !== null,
+        )
+
+    if (
+      selections.length !==
+      selectedFruitIds.length
+    ) {
+      setError(
+        "No fue posible cargar una de las frutas seleccionadas.",
+      )
+      return
+    }
+
+    addCartItem(
+      fruitModal.product,
+      fruitModal.variant,
+      selections,
+    )
+
+    setFruitModal(null)
+    setSelectedFruitIds([])
+    setError("")
+  }
+
   function changeQuantity(
-    variantId: string,
+    cartKey: string,
     difference: number,
   ) {
     setCart((current) =>
       current
         .map((item) =>
-          item.variant_id === variantId
+          item.cart_key === cartKey
             ? {
                 ...item,
                 quantity:
@@ -364,11 +585,11 @@ export default function RestaurantePage() {
     )
   }
 
-  function removeItem(variantId: string) {
+  function removeItem(cartKey: string) {
     setCart((current) =>
       current.filter(
         (item) =>
-          item.variant_id !== variantId,
+          item.cart_key !== cartKey,
       ),
     )
   }
@@ -443,6 +664,11 @@ export default function RestaurantePage() {
               item.variant_id,
             quantity:
               item.quantity,
+            fruit_selections:
+              item.fruit_selections.map(
+                (fruit) =>
+                  fruit.product_id,
+              ),
           }),
         ),
         p_payment_method:
@@ -530,7 +756,7 @@ export default function RestaurantePage() {
                     onClick={() =>
                       setCategory(item)
                     }
-                    className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
+                    className={`inline-flex h-10 items-center justify-center whitespace-nowrap rounded-full px-3 text-[13px] font-medium leading-none transition ${
                       category === item
                         ? "bg-[#102019] text-white"
                         : "border border-[#dce2d9] bg-white text-slate-600 hover:bg-[#f6f8f4]"
@@ -705,7 +931,7 @@ export default function RestaurantePage() {
                   {cart.map(
                     (item) => (
                       <div
-                        key={item.variant_id}
+                        key={item.cart_key}
                         className="p-4"
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -720,13 +946,29 @@ export default function RestaurantePage() {
                                 item.unit_price,
                               )}
                             </p>
+
+                            {item.fruit_selections.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {item.fruit_selections.map(
+                                  (fruit) => (
+                                    <span
+                                      key={fruit.product_id}
+                                      className="rounded-full bg-[#eef3ed] px-2 py-1 text-[11px] font-medium text-[#1f6a3a]"
+                                    >
+                                      {fruit.name}{" "}
+                                      {fruit.grams} g
+                                    </span>
+                                  ),
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           <button
                             type="button"
                             onClick={() =>
                               removeItem(
-                                item.variant_id,
+                                item.cart_key,
                               )
                             }
                             className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
@@ -741,7 +983,7 @@ export default function RestaurantePage() {
                               type="button"
                               onClick={() =>
                                 changeQuantity(
-                                  item.variant_id,
+                                  item.cart_key,
                                   -1,
                                 )
                               }
@@ -760,7 +1002,7 @@ export default function RestaurantePage() {
                               type="button"
                               onClick={() =>
                                 changeQuantity(
-                                  item.variant_id,
+                                  item.cart_key,
                                   1,
                                 )
                               }
@@ -999,9 +1241,7 @@ export default function RestaurantePage() {
               {lastSaleItems.map(
                 (item) => (
                   <div
-                    key={
-                      item.variant_id
-                    }
+                    key={item.cart_key}
                   >
                     <p className="font-medium">
                       {item.product_name}
@@ -1010,6 +1250,17 @@ export default function RestaurantePage() {
                     <p className="text-xs">
                       {item.variant_name}
                     </p>
+
+                    {item.fruit_selections.length > 0 && (
+                      <p className="text-xs">
+                        {item.fruit_selections
+                          .map(
+                            (fruit) =>
+                              `${fruit.name} ${fruit.grams} g`,
+                          )
+                          .join(" · ")}
+                      </p>
+                    )}
 
                     <div className="flex justify-between">
                       <span>
@@ -1079,6 +1330,179 @@ export default function RestaurantePage() {
           </section>
         </div>
       )}
+
+      {fruitModal && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[24px] bg-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-[#e4e8e1] p-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#1f6a3a]">
+                  Fruta picada
+                </p>
+
+                <h2 className="mt-1 text-xl font-semibold text-[#172018]">
+                  Selecciona las frutas
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  {fruitModal.product.name} ·{" "}
+                  {fruitModal.variant.name}
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-[#1f6a3a]">
+                  {fruitModal.variant.fruit_total_grams} g de fruta en total
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFruitModal(null)
+                  setSelectedFruitIds([])
+                }}
+                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className="text-sm text-slate-600">
+                  Elige mínimo 1 y máximo 4 frutas.
+                </p>
+
+                <span className="rounded-full bg-[#eef3ed] px-3 py-1 text-sm font-semibold text-[#1f6a3a]">
+                  {selectedFruitIds.length}/4
+                </span>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {fruitOptions.map((fruit) => {
+                  const selected =
+                    selectedFruitIds.includes(
+                      fruit.id,
+                    )
+
+                  const disabled =
+                    !selected &&
+                    selectedFruitIds.length >= 4
+
+                  return (
+                    <button
+                      key={fruit.id}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() =>
+                        toggleFruit(fruit.id)
+                      }
+                      className={
+                        selected
+                          ? "flex items-center justify-between rounded-xl border border-[#1f6a3a] bg-[#eef3ed] px-4 py-3 text-left"
+                          : "flex items-center justify-between rounded-xl border border-[#dce2d9] px-4 py-3 text-left hover:border-[#1f6a3a] disabled:cursor-not-allowed disabled:opacity-40"
+                      }
+                    >
+                      <span className="font-medium text-[#172018]">
+                        {fruit.name}
+                      </span>
+
+                      <span
+                        className={
+                          selected
+                            ? "flex h-6 w-6 items-center justify-center rounded-full bg-[#1f6a3a] text-xs font-bold text-white"
+                            : "flex h-6 w-6 items-center justify-center rounded-full border border-[#cbd3c8] text-xs text-slate-400"
+                        }
+                      >
+                        {selected ? "✓" : "+"}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {selectedFruitIds.length > 0 && (
+                <div className="mt-5 rounded-2xl bg-[#f6f8f4] p-4">
+                  <p className="text-sm font-semibold text-[#172018]">
+                    Distribución automática
+                  </p>
+
+                  <div className="mt-3 space-y-2">
+                    {selectedFruitIds.map(
+                      (productId, index) => {
+                        const fruit =
+                          fruitOptions.find(
+                            (option) =>
+                              option.id ===
+                              productId,
+                          )
+
+                        if (!fruit) {
+                          return null
+                        }
+
+                        return (
+                          <div
+                            key={productId}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <span>
+                              {fruit.name}
+                            </span>
+
+                            <span className="font-semibold text-[#1f6a3a]">
+                              {selectedFruitGrams(
+                                index,
+                              )}{" "}
+                              g
+                            </span>
+                          </div>
+                        )
+                      },
+                    )}
+
+                    <div className="flex items-center justify-between border-t border-[#dfe4dc] pt-2 text-sm font-bold">
+                      <span>Total</span>
+
+                      <span>
+                        {
+                          fruitModal.variant
+                            .fruit_total_grams
+                        }{" "}
+                        g
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 border-t border-[#e4e8e1] p-5">
+              <button
+                type="button"
+                onClick={() => {
+                  setFruitModal(null)
+                  setSelectedFruitIds([])
+                }}
+                className="flex-1 rounded-xl border border-[#dce2d9] px-4 py-3 text-sm font-semibold text-slate-600"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                disabled={
+                  selectedFruitIds.length === 0
+                }
+                onClick={confirmFruitSelection}
+                className="flex-1 rounded-xl bg-[#102019] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Agregar a la venta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </AppShell>
   )
 }
