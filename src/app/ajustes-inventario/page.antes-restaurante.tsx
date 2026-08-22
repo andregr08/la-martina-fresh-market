@@ -347,22 +347,6 @@ export default function AjustesInventarioPage() {
       title="Ajustes de inventario"
       description="Correcciones por conteo fÃ­sico con trazabilidad."
     >
-      <div className="mb-5 flex flex-wrap gap-2">
-        <a
-          href="/ajustes-inventario"
-          className="rounded-xl bg-[#102019] px-4 py-2.5 text-sm font-semibold text-white"
-        >
-          Inventario
-        </a>
-
-        <a
-          href="/ajustes-restaurante"
-          className="rounded-xl border border-[#dce2d9] bg-white px-4 py-2.5 text-sm font-semibold text-slate-600"
-        >
-          Restaurante
-        </a>
-      </div>
-
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}

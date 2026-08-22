@@ -74,13 +74,6 @@ const menu: MenuItem[] = [
     section: "Ventas",
   },
   {
-    name: "Restaurante",
-    href: "/restaurante",
-    icon: Store,
-    roles: ["admin", "cashier"],
-    section: "Ventas",
-  },
-  {
     name: "Ventas",
     href: "/ventas",
     icon: ReceiptText,

@@ -1,0 +1,475 @@
+﻿@import "tailwindcss";
+
+:root {
+  --background: #f4f5f1;
+  --foreground: #172018;
+  --surface: #ffffff;
+  --surface-soft: #f8f9f6;
+  --surface-muted: #eef1eb;
+  --border: #dde2da;
+  --border-strong: #cbd2c7;
+  --brand: #1f6a3a;
+  --brand-dark: #174f2d;
+  --brand-soft: #e8f3eb;
+  --sidebar: #102019;
+  --sidebar-muted: #182b21;
+  --sidebar-border: #284033;
+  --danger: #b42318;
+  --warning: #b54708;
+  --success: #067647;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-soft:
+    0 1px 2px rgb(16 24 18 / 0.04),
+    0 8px 24px rgb(16 24 18 / 0.04);
+  --shadow-card:
+    0 1px 2px rgb(16 24 18 / 0.05),
+    0 12px 32px rgb(16 24 18 / 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgb(31 106 58 / 0.05),
+      transparent 28rem
+    ),
+    var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgb(31 106 58 / 0.18);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #b9c2b7;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #96a392;
+  background-clip: padding-box;
+}
+
+.app-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.app-card-strong {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.app-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-table thead {
+  background: var(--surface-soft);
+}
+
+.app-table th {
+  color: #667268;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.app-table tbody tr {
+  border-top: 1px solid #edf0eb;
+  transition:
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.app-table tbody tr:hover {
+  background: #fafbf8;
+}
+
+.app-input {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.app-input:focus {
+  border-color: rgb(31 106 58 / 0.65);
+  box-shadow: 0 0 0 4px rgb(31 106 58 / 0.1);
+  outline: none;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+}
+
+/* LA MARTINA RESPONSIVE FINAL */
+
+/* Base estable */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: #f6f8f4;
+}
+
+.app-main-content {
+  min-width: 0;
+}
+
+.app-main-content > * {
+  min-width: 0;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  min-width: 0;
+}
+
+button,
+a,
+select,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tablas */
+.app-main-content table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.app-main-content thead {
+  background: rgba(248, 249, 246, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.app-main-content tbody tr {
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-main-content tbody tr:hover {
+  background: #f7f9f5;
+}
+
+/* Scroll horizontal discreto */
+.app-main-content .overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5cb transparent;
+}
+
+.app-main-content .overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.app-main-content .overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-main-content .overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5cb;
+  border-radius: 999px;
+}
+
+/* Inputs y botones */
+.app-main-content input,
+.app-main-content select,
+.app-main-content textarea {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.app-main-content button {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-main-content button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Mejor presentaci?n de modales */
+.app-main-content [class*="backdrop-blur"] > section {
+  overscroll-behavior: contain;
+}
+
+/* Tablet */
+@media (max-width: 1279px) {
+  .app-main-content {
+    width: 100%;
+  }
+
+  .app-main-content [class*="sticky"][class*="top-24"] {
+    position: static;
+    max-height: none;
+  }
+}
+
+/* Celular */
+@media (max-width: 767px) {
+  .app-main-content {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: 28px !important;
+  }
+
+  .app-main-content h1 {
+    font-size: 1.45rem;
+    line-height: 1.2;
+  }
+
+  .app-main-content h2 {
+    line-height: 1.25;
+  }
+
+  /*
+    16px evita que Safari haga zoom al enfocar inputs.
+  */
+  .app-main-content input,
+  .app-main-content select,
+  .app-main-content textarea {
+    font-size: 16px;
+  }
+
+  .app-main-content button,
+  .app-main-content a[role="button"] {
+    min-height: 40px;
+  }
+
+  .app-main-content table {
+    font-size: 13px;
+  }
+
+  .app-main-content th,
+  .app-main-content td {
+    white-space: nowrap;
+  }
+
+  .app-main-content th {
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+  }
+
+  .app-main-content td {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  /*
+    Los modales ocupan casi toda la pantalla y dejan margen seguro.
+  */
+  .app-main-content [class*="fixed"][class*="inset-0"] {
+    padding: 10px !important;
+  }
+
+  .app-main-content [class*="fixed"][class*="inset-0"] > section {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px;
+  }
+
+  /*
+    Evita tarjetas demasiado altas cuando no tienen datos.
+  */
+  .app-main-content [class*="min-h-96"] {
+    min-height: 260px;
+  }
+
+  .app-main-content [class*="min-h-[520px]"] {
+    min-height: 320px;
+  }
+
+  /*
+    Gr?ficas menos altas en celular.
+  */
+  .app-main-content [class*="h-[300px]"],
+  .app-main-content [class*="h-[360px]"] {
+    height: 260px;
+  }
+}
+
+/* Celulares peque?os */
+@media (max-width: 420px) {
+  .app-main-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .app-main-content h1 {
+    font-size: 1.3rem;
+  }
+
+  .app-main-content [class*="rounded-2xl"] {
+    border-radius: 14px;
+  }
+
+  .app-main-content [class*="text-[24px]"],
+  .app-main-content [class*="text-[28px]"] {
+    font-size: 1.35rem;
+  }
+}
+
+/* Impresi?n de tickets */
+@media print {
+  @page {
+    margin: 4mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print\:static,
+  .print\:static * {
+    visibility: visible;
+  }
+
+  .print\:static {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+}
+
+/* FIN LA MARTINA RESPONSIVE FINAL */
+
+/* LA MARTINA GLOBAL BACKGROUND */
+
+body {
+  background-color: #f6f4ed;
+  background-image:
+    linear-gradient(
+      rgba(248, 248, 244, 0.90),
+      rgba(248, 248, 244, 0.90)
+    ),
+    url("/images/la-martina-bg-v6.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: min(58vw, 760px) auto;
+  background-attachment: fixed;
+}
+
+.app-main-content {
+  background: transparent !important;
+}
+
+.app-main-content > header,
+.app-main-content > div:first-child {
+  backdrop-filter: blur(3px);
+}
+
+@media (max-width: 1279px) {
+  body {
+    background-size: min(78vw, 650px) auto;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    background-position: center 34%;
+    background-size: 92vw auto;
+    background-attachment: scroll;
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+}
+
+/* FIN LA MARTINA GLOBAL BACKGROUND */
+
