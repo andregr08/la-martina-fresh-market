@@ -437,6 +437,69 @@ export default function AjustesRestaurantePage() {
     setSaving(false)
   }
 
+
+  async function saveAllVariantPrices() {
+    clearMessages()
+
+    if (!selectedDishId) {
+      setError("Selecciona un platillo.")
+      return
+    }
+
+    if (dishVariants.length === 0) {
+      setError("Este platillo no tiene tamaños configurados.")
+      return
+    }
+
+    const inputs = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        '[data-restaurant-variant-price="true"]',
+      ),
+    )
+
+    const updates = inputs.map((input) => ({
+      id: input.dataset.variantId ?? "",
+      sale_price: Number(input.value),
+    }))
+
+    const invalid = updates.find(
+      (item) =>
+        !item.id ||
+        !Number.isFinite(item.sale_price) ||
+        item.sale_price < 0,
+    )
+
+    if (invalid) {
+      setError("Revisa los precios. Todos deben ser números válidos.")
+      return
+    }
+
+    setSaving(true)
+
+    for (const item of updates) {
+      const { error: priceError } = await supabase
+        .from("restaurant_variants")
+        .update({
+          sale_price: item.sale_price,
+        })
+        .eq("id", item.id)
+
+      if (priceError) {
+        setError(priceError.message)
+        setSaving(false)
+        return
+      }
+    }
+
+    await loadData()
+
+    setMessage(
+      "Precios guardados correctamente. Ya aparecen en Restaurante.",
+    )
+
+    setSaving(false)
+  }
+
   async function updateVariant(
     variantId: string,
     name: string,
@@ -896,25 +959,62 @@ export default function AjustesRestaurantePage() {
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    Cada tamaño puede tener un precio y una receta distinta.
+                    Captura el precio de cada medida y guarda todos los precios de una sola vez.
                   </p>
                 </div>
 
                 <div className="mt-5 grid gap-3">
                   {dishVariants.map((variant) => (
-                    <VariantRow
+                    <div
                       key={variant.id}
-                      variant={variant}
-                      selected={
-                        selectedVariantId === variant.id
-                      }
-                      saving={saving}
-                      onSelect={() =>
-                        setSelectedVariantId(variant.id)
-                      }
-                      onSave={updateVariant}
-                      onDelete={deleteVariant}
-                    />
+                      className="rounded-2xl border border-[#dce2d9] bg-white p-4"
+                    >
+                      <div className="grid gap-3 sm:grid-cols-[1fr_220px] sm:items-end">
+                        <div>
+                          <p className="mb-1 text-xs font-medium text-slate-400">
+                            Tamaño
+                          </p>
+
+                          <div className="flex h-11 items-center rounded-xl border border-[#dce2d9] bg-[#f7f8f5] px-4 text-sm font-semibold text-[#172018]">
+                            {variant.name}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-400">
+                            Precio
+                          </label>
+
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#1f6a3a]">
+                              $
+                            </span>
+
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              defaultValue={variant.sale_price}
+                              data-restaurant-variant-price="true"
+                              data-variant-id={variant.id}
+                              className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white pl-8 pr-3 text-sm font-semibold outline-none focus:border-[#1f6a3a]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedVariantId(variant.id)
+                        }
+                        className="mt-3 text-sm font-semibold text-[#1f6a3a]"
+                      >
+                        {selectedVariantId === variant.id
+                          ? "Editando receta"
+                          : "Editar receta"}
+                      </button>
+                    </div>
                   ))}
 
                   {dishVariants.length === 0 && (
@@ -922,40 +1022,25 @@ export default function AjustesRestaurantePage() {
                       Este platillo todavía no tiene tamaños.
                     </div>
                   )}
+
+                  {dishVariants.length > 0 && (
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() =>
+                        void saveAllVariantPrices()
+                      }
+                      className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#102019] px-5 text-sm font-semibold text-white transition hover:bg-[#173126] disabled:opacity-50"
+                    >
+                      <Save className="h-4 w-4" />
+                      {saving
+                        ? "Guardando..."
+                        : "Guardar precios"}
+                    </button>
+                  )}
                 </div>
 
-                <div className="mt-5 grid gap-3 border-t border-[#e5e9e3] pt-5 sm:grid-cols-[1fr_180px_auto]">
-                  <input
-                    value={newVariantName}
-                    onChange={(event) =>
-                      setNewVariantName(event.target.value)
-                    }
-                    placeholder="Tamaño: Chico, Grande, Completo..."
-                    className="h-11 rounded-xl border border-[#dce2d9] px-3 text-sm outline-none focus:border-[#1f6a3a]"
-                  />
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={newVariantPrice}
-                    onChange={(event) =>
-                      setNewVariantPrice(event.target.value)
-                    }
-                    placeholder="Precio"
-                    className="h-11 rounded-xl border border-[#dce2d9] px-3 text-sm outline-none focus:border-[#1f6a3a]"
-                  />
-
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void createVariant()}
-                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#102019] px-4 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Agregar
-                  </button>
-                </div>
+                
               </article>
 
               <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">

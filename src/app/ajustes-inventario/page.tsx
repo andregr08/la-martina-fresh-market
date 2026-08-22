@@ -56,7 +56,7 @@ function quantity(value: number, unit: string) {
 
 function adjustmentLabel(type: string) {
   if (type === "increase") return "Aumento"
-  if (type === "decrease") return "DisminuciÃ³n"
+  if (type === "decrease") return "Disminución"
 
   return "Sin diferencia"
 }
@@ -242,7 +242,7 @@ export default function AjustesInventarioPage() {
       price < 0
     ) {
       setError(
-        "Escribe un precio de venta vÃ¡lido.",
+        "Escribe un precio de venta válido.",
       )
       return
     }
@@ -299,7 +299,7 @@ export default function AjustesInventarioPage() {
     )
 
     const confirmed = window.confirm(
-      `Â¿Deseas eliminar ${
+      `\u00BFDeseas eliminar ${
         product?.name ?? "este producto"
       }?`,
     )
@@ -345,7 +345,7 @@ export default function AjustesInventarioPage() {
   return (
     <AppShell
       title="Ajustes de inventario"
-      description="Correcciones por conteo fÃ­sico con trazabilidad."
+      description="Conteo con trazabilidad de frutas y verduras."
     >
       <div className="mb-5 flex flex-wrap gap-2">
         <a
@@ -602,7 +602,7 @@ export default function AjustesInventarioPage() {
                 <p className="mt-1 text-xs text-slate-500">
                   {selectedProduct.sku ??
                     "Sin SKU"}{" "}
-                  Â· {selectedProduct.unit}
+                  · {selectedProduct.unit}
                 </p>
               </div>
             )}
