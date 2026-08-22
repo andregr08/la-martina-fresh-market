@@ -489,7 +489,7 @@ export function AppShell({
         </div>
       )}
 
-      <section className="relative min-h-screen overflow-hidden lg:pl-[264px]">
+      <section className="min-h-screen lg:pl-[264px]" style={{ backgroundImage: "url('/images/la-martina-bg.svg')", backgroundRepeat: "no-repeat", backgroundPosition: "center 56%", backgroundSize: "72% auto", backgroundAttachment: "fixed" }}>
 
         <div className="pointer-events-none fixed inset-y-0 right-0 z-0 flex items-center justify-center lg:left-[264px]">
           <div className="select-none text-center text-[#172018]/[0.035]">
@@ -574,5 +574,6 @@ export function AppShell({
     </main>
   )
 }
+
 
 
