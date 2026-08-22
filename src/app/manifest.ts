@@ -1,4 +1,4 @@
-﻿import type { MetadataRoute } from "next"
+import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -13,19 +13,19 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait-primary",
     icons: [
       {
-        src: "/icons/la-martina-app-192-v6.png",
+        src: "/icons/la-martina-install-192-v10.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/la-martina-app-512-v6.png",
+        src: "/icons/la-martina-install-512-v10.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/la-martina-app-512-v6.png",
+        src: "/icons/la-martina-install-512-v10.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
@@ -33,4 +33,3 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
   }
 }
-
