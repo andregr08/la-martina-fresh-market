@@ -435,7 +435,7 @@ body {
       rgba(248, 248, 244, 0.90),
       rgba(248, 248, 244, 0.90)
     ),
-    url("/la-martina-fondo.png");
+    url("/images/la-martina-bg-v6.svg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: min(58vw, 760px) auto;

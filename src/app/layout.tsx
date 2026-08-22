@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+﻿import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,7 +18,7 @@ export const metadata = {
   icons: {
     icon: [
       {
-        url: "/favicon.ico?v=5",
+        url: "/icons/la-martina-app-512-v6.png",
         type: "image/x-icon",
       },
       {
@@ -27,8 +27,8 @@ export const metadata = {
         sizes: "512x512",
       },
     ],
-    shortcut: "/favicon.ico?v=5",
-    apple: "/apple-icon.png?v=5",
+    shortcut: "/icons/la-martina-app-512-v6.png",
+    apple: "/icons/la-martina-apple-v6.png",
   },
 }
 
@@ -46,3 +46,4 @@ export default function RootLayout({
     </html>
   );
 }
+

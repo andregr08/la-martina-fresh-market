@@ -13,19 +13,19 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait-primary",
     icons: [
       {
-        src: "/icons/icon-192.png",
+        src: "/icons/la-martina-app-192-v6.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: "/icons/la-martina-app-512-v6.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: "/icons/la-martina-app-512-v6.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
@@ -33,3 +33,4 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
   }
 }
+
