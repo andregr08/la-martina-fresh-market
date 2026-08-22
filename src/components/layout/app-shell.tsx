@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import Image from "next/image"
@@ -46,7 +46,7 @@ type MenuSection =
   | "General"
   | "Ventas"
   | "Inventario"
-  | "Administración"
+  | "AdministraciÃ³n"
 
 type MenuItem = {
   name: string
@@ -134,42 +134,42 @@ const menu: MenuItem[] = [
     href: "/gastos",
     icon: Store,
     roles: ["admin", "cashier", "finance"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
     name: "Mermas",
     href: "/mermas",
     icon: Trash2,
     roles: ["admin", "warehouse", "finance", "partner"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
     name: "Reportes",
     href: "/reportes",
     icon: BarChart3,
     roles: ["admin", "finance", "partner"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
     name: "Usuarios",
     href: "/usuarios",
     icon: Users,
     roles: ["admin"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
-    name: "Auditoría",
+    name: "AuditorÃ­a",
     href: "/auditoria",
     icon: FileClock,
     roles: ["admin"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
   {
-    name: "Configuración",
+    name: "ConfiguraciÃ³n",
     href: "/configuracion",
     icon: Settings,
     roles: ["admin"],
-    section: "Administración",
+    section: "AdministraciÃ³n",
   },
 ]
 
@@ -177,13 +177,13 @@ const sections: MenuSection[] = [
   "General",
   "Ventas",
   "Inventario",
-  "Administración",
+  "AdministraciÃ³n",
 ]
 
 const roleNames: Record<UserRole, string> = {
   admin: "Administrador",
   cashier: "Caja",
-  warehouse: "Almacén",
+  warehouse: "AlmacÃ©n",
   finance: "Finanzas",
   partner: "Socio",
 }
@@ -233,7 +233,7 @@ export function AppShell({
     if (error || !data) {
       setProfileError(
         error?.message ??
-          "No se encontró el perfil del usuario.",
+          "No se encontrÃ³ el perfil del usuario.",
       )
       setLoadingProfile(false)
       return
@@ -329,7 +329,7 @@ export function AppShell({
             onClick={handleLogout}
             className="mt-6 rounded-xl bg-[#102019] px-5 py-2.5 text-sm font-medium text-white"
           >
-            Cerrar sesión
+            Cerrar sesiÃ³n
           </button>
         </section>
       </main>
@@ -340,14 +340,14 @@ export function AppShell({
     <>
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#174f2d] overflow-hidden bg-white">
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#234a2a]">
     <Image
       src="/icons/logo-sidebar.png"
       alt="La Martina"
       width={160}
       height={160}
       priority
-      className="h-full w-full object-cover"
+      className="h-full w-full scale-[1.06] object-cover"
     />
   </div>
 
@@ -462,7 +462,7 @@ export function AppShell({
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/55 transition hover:bg-white/8 hover:text-white"
         >
           <LogOut className="h-[18px] w-[18px]" />
-          Cerrar sesión
+          Cerrar sesiÃ³n
         </button>
       </div>
     </>
@@ -478,7 +478,7 @@ export function AppShell({
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            aria-label="Cerrar menú"
+            aria-label="Cerrar menÃº"
             onClick={() => setMobileOpen(false)}
             className="absolute inset-0 bg-black/45 backdrop-blur-sm"
           />
@@ -489,7 +489,18 @@ export function AppShell({
         </div>
       )}
 
-      <section className="min-h-screen lg:pl-[264px]">
+      <section className="relative min-h-screen overflow-hidden lg:pl-[264px]">
+
+        <div className="pointer-events-none fixed inset-y-0 right-0 z-0 flex items-center justify-center lg:left-[264px]">
+          <div className="select-none text-center text-[#172018]/[0.035]">
+            <div className="text-[12vw] font-black leading-[0.8] tracking-[-0.08em]">
+              LA MARTINA
+            </div>
+            <div className="mt-5 text-[2.3vw] font-light tracking-[0.35em]">
+              fresh market
+            </div>
+          </div>
+        </div>
         <header className="sticky top-0 z-30 border-b border-[#dde2da]/90 bg-[#f4f5f1]/90 backdrop-blur-xl">
           <div className="flex min-h-[78px] items-center gap-4 px-4 sm:px-6 lg:px-8">
             <button
@@ -531,7 +542,7 @@ export function AppShell({
           </div>
         </header>
 
-        <div className="mx-auto w-full max-w-[1680px] p-4 sm:p-6 lg:p-8">
+        <div className="relative z-10 mx-auto w-full max-w-[1680px] p-4 sm:p-6 lg:p-8">
           {hasRouteAccess ? (
             children
           ) : (
@@ -547,14 +558,14 @@ export function AppShell({
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Tu rol de{" "}
                 {role ? roleNames[role] : "usuario"} no tiene
-                permiso para consultar este módulo.
+                permiso para consultar este mÃ³dulo.
               </p>
 
               <Link
                 href={allowedMenu[0]?.href ?? "/login"}
                 className="mt-6 inline-flex rounded-xl bg-[#102019] px-5 py-2.5 text-sm font-medium text-white"
               >
-                Ir a un módulo autorizado
+                Ir a un mÃ³dulo autorizado
               </Link>
             </section>
           )}
@@ -563,3 +574,5 @@ export function AppShell({
     </main>
   )
 }
+
+
