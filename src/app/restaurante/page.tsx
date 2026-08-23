@@ -756,7 +756,7 @@ export default function RestaurantePage() {
                     onClick={() =>
                       setCategory(item)
                     }
-                    className={`inline-flex h-10 items-center justify-center whitespace-nowrap rounded-full px-3 text-[13px] font-medium leading-none transition ${
+                    className={`inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 text-[13px] font-medium leading-none transition ${
                       category === item
                         ? "bg-[#102019] text-white"
                         : "border border-[#dce2d9] bg-white text-slate-600 hover:bg-[#f6f8f4]"
