@@ -149,7 +149,7 @@ function ProductSaleCard({
   }
 
   return (
-    <article className="relative rounded-xl border border-[#e0e5dd] bg-white p-3 transition hover:border-[#9db4a3] hover:shadow-sm">
+    <article className="relative min-w-0 max-w-full overflow-hidden rounded-xl border border-[#e0e5dd] bg-white p-3 transition hover:border-[#9db4a3] hover:shadow-sm">
       {inCartQuantity > 0 && (
         <span className="absolute right-3 top-3 flex h-7 min-w-7 items-center justify-center rounded-full bg-[#1f6a3a] px-2 text-xs font-semibold text-white">
           {formatQuantity(inCartQuantity)}
@@ -192,11 +192,11 @@ function ProductSaleCard({
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-[#f5f7f3] p-1">
+      <div className="mt-4 grid min-w-0 w-full grid-cols-2 gap-1 rounded-xl bg-[#f5f7f3] p-1">
         <button
           type="button"
           onClick={() => changeMode("kg")}
-          className={`h-9 rounded-lg text-sm font-semibold transition ${
+          className={`min-w-0 h-9 rounded-lg px-2 text-sm font-semibold transition ${
             mode === "kg"
               ? "bg-[#102019] text-white shadow-sm"
               : "text-slate-500 hover:bg-white"
@@ -208,7 +208,7 @@ function ProductSaleCard({
         <button
           type="button"
           onClick={() => changeMode("g")}
-          className={`h-9 rounded-lg text-sm font-semibold transition ${
+          className={`min-w-0 h-9 rounded-lg px-2 text-sm font-semibold transition ${
             mode === "g"
               ? "bg-[#102019] text-white shadow-sm"
               : "text-slate-500 hover:bg-white"
@@ -218,7 +218,7 @@ function ProductSaleCard({
         </button>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex min-w-0 w-full items-center gap-2">
         <button
           type="button"
           onClick={() =>
@@ -683,8 +683,8 @@ export default function PuntoDeVentaPage() {
         </div>
       )}
 
-      <div className="grid min-h-[calc(100vh-150px)] gap-5 xl:grid-cols-[1fr_430px] print:hidden">
-        <section className="flex min-h-0 flex-col rounded-2xl border border-[#dde2da] bg-white shadow-sm">
+      <div className="grid min-w-0 min-h-[calc(100vh-150px)] gap-5 xl:grid-cols-[minmax(0,1fr)_430px] print:hidden">
+        <section className="flex min-h-0 min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-[#dde2da] bg-white shadow-sm">
           <div className="border-b border-[#e6eae4] p-4 sm:p-5">
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -704,13 +704,13 @@ export default function PuntoDeVentaPage() {
               </span>
             </div>
 
-            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+            <div className="mt-4 flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
               {categories.map((item) => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => setCategory(item)}
-                  className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition ${
+                  className={`shrink-0 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition ${
                     category === item
                       ? "bg-[#102019] text-white"
                       : "border border-[#dfe4dc] bg-white text-slate-600 hover:bg-[#f5f7f3]"
@@ -722,13 +722,13 @@ export default function PuntoDeVentaPage() {
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+          <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-5">
             {loading ? (
               <div className="flex min-h-96 items-center justify-center">
                 <Loader2 className="h-7 w-7 animate-spin text-[#1f6a3a]" />
               </div>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                 {filteredProducts.map(
                   (product) => {
                     const inCart =
