@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   useCallback,
@@ -285,7 +285,7 @@ export default function AjustesRestaurantePage() {
     }
 
     if (!category) {
-      setError("Escribe la categoría del platillo.")
+      setError("Escribe la categorÃ­a del platillo.")
       return
     }
 
@@ -350,7 +350,7 @@ export default function AjustesRestaurantePage() {
     if (!selectedDishId || !selectedDish) return
 
     const confirmed = window.confirm(
-      `¿Deseas desactivar "${selectedDish.name}"?`,
+      `Â¿Deseas desactivar "${selectedDish.name}"?`,
     )
 
     if (!confirmed) return
@@ -390,12 +390,12 @@ export default function AjustesRestaurantePage() {
     const price = Number(newVariantPrice)
 
     if (!name) {
-      setError("Escribe el nombre del tamaño.")
+      setError("Escribe el nombre del tamaÃ±o.")
       return
     }
 
     if (!Number.isFinite(price) || price < 0) {
-      setError("Escribe un precio válido.")
+      setError("Escribe un precio vÃ¡lido.")
       return
     }
 
@@ -433,7 +433,7 @@ export default function AjustesRestaurantePage() {
 
     await loadData()
 
-    setMessage("Tamaño agregado correctamente.")
+    setMessage("TamaÃ±o agregado correctamente.")
     setSaving(false)
   }
 
@@ -447,7 +447,7 @@ export default function AjustesRestaurantePage() {
     }
 
     if (dishVariants.length === 0) {
-      setError("Este platillo no tiene tamaños configurados.")
+      setError("Este platillo no tiene tamaÃ±os configurados.")
       return
     }
 
@@ -470,7 +470,7 @@ export default function AjustesRestaurantePage() {
     )
 
     if (invalid) {
-      setError("Revisa los precios. Todos deben ser números válidos.")
+      setError("Revisa los precios. Todos deben ser nÃºmeros vÃ¡lidos.")
       return
     }
 
@@ -509,12 +509,12 @@ export default function AjustesRestaurantePage() {
     clearMessages()
 
     if (!name.trim()) {
-      setError("El tamaño necesita un nombre.")
+      setError("El tamaÃ±o necesita un nombre.")
       return
     }
 
     if (!Number.isFinite(price) || price < 0) {
-      setError("El precio no es válido.")
+      setError("El precio no es vÃ¡lido.")
       return
     }
 
@@ -537,13 +537,13 @@ export default function AjustesRestaurantePage() {
 
     await loadData()
 
-    setMessage("Tamaño actualizado.")
+    setMessage("TamaÃ±o actualizado.")
     setSaving(false)
   }
 
   async function deleteVariant(variant: RestaurantVariant) {
     const confirmed = window.confirm(
-      `¿Eliminar el tamaño "${variant.name}" y su receta?`,
+      `Â¿Eliminar el tamaÃ±o "${variant.name}" y su receta?`,
     )
 
     if (!confirmed) return
@@ -568,7 +568,7 @@ export default function AjustesRestaurantePage() {
 
     await loadData()
 
-    setMessage("Tamaño eliminado.")
+    setMessage("TamaÃ±o eliminado.")
     setSaving(false)
   }
 
@@ -581,11 +581,83 @@ export default function AjustesRestaurantePage() {
     }
   }
 
+  async function addVariant() {
+    clearMessages()
+
+    if (!selectedDishId) {
+      setError("Primero guarda el platillo.")
+      return
+    }
+
+    const name = newVariantName.trim()
+    const price = Number(newVariantPrice)
+
+    if (!name) {
+      setError("Escribe el nombre del tamaño.")
+      return
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      setError("Escribe un precio válido.")
+      return
+    }
+
+    const duplicated = dishVariants.some(
+      (item) =>
+        item.name.trim().toLowerCase() ===
+        name.toLowerCase(),
+    )
+
+    if (duplicated) {
+      setError("Ese tamaño ya existe en este platillo.")
+      return
+    }
+
+    setSaving(true)
+
+    const { data, error: insertError } = await supabase
+      .from("restaurant_variants")
+      .insert({
+        restaurant_product_id: selectedDishId,
+        name,
+        sale_price: price,
+        active: true,
+        sort_order: dishVariants.length + 1,
+      })
+      .select(`
+        id,
+        restaurant_product_id,
+        name,
+        sale_price,
+        active,
+        sort_order
+      `)
+      .single()
+
+    if (insertError) {
+      setError(insertError.message)
+      setSaving(false)
+      return
+    }
+
+    const created = data as RestaurantVariant
+
+    setNewVariantName("")
+    setNewVariantPrice("")
+    setSelectedVariantId(created.id)
+
+    setMessage(
+      `Tamaño "${created.name}" agregado correctamente.`,
+    )
+
+    await loadData()
+    setSaving(false)
+  }
   async function addRecipeIngredient() {
     clearMessages()
 
     if (!selectedVariantId) {
-      setError("Selecciona un tamaño.")
+      setError("Selecciona un tamaÃ±o.")
       return
     }
 
@@ -615,7 +687,7 @@ export default function AjustesRestaurantePage() {
       stockQuantity <= 0
     ) {
       setError(
-        "Indica cuánto debe descontarse realmente del inventario.",
+        "Indica cuÃ¡nto debe descontarse realmente del inventario.",
       )
       return
     }
@@ -691,7 +763,7 @@ export default function AjustesRestaurantePage() {
     )
 
     const confirmed = window.confirm(
-      `¿Quitar "${product?.name ?? "ingrediente"}" de esta receta?`,
+      `Â¿Quitar "${product?.name ?? "ingrediente"}" de esta receta?`,
     )
 
     if (!confirmed) return
@@ -720,7 +792,7 @@ export default function AjustesRestaurantePage() {
     return (
       <AppShell
         title="Ajustes de restaurante"
-        description="Platillos, tamaños, precios y recetas"
+        description="Platillos, tamaÃ±os, precios y recetas"
       >
         <div className="flex min-h-72 items-center justify-center">
           <Loader2 className="h-7 w-7 animate-spin text-[#1f6a3a]" />
@@ -732,7 +804,7 @@ export default function AjustesRestaurantePage() {
   return (
     <AppShell
       title="Ajustes de restaurante"
-      description="Platillos, tamaños, precios y recetas"
+      description="Platillos, tamaÃ±os, precios y recetas"
     >
       <div className="mb-5 flex flex-wrap gap-2">
         <a
@@ -848,14 +920,14 @@ export default function AjustesRestaurantePage() {
                   onChange={(event) =>
                     setDishName(event.target.value)
                   }
-                  placeholder="Ej. Ensalada César"
+                  placeholder="Ej. Ensalada CÃ©sar"
                   className="h-11 w-full rounded-xl border border-[#dce2d9] px-3 text-sm outline-none focus:border-[#1f6a3a]"
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500">
-                  Categoría
+                  CategorÃ­a
                 </label>
 
                 <input
@@ -870,7 +942,7 @@ export default function AjustesRestaurantePage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500">
-                  Descripción
+                  DescripciÃ³n
                 </label>
 
                 <textarea
@@ -879,7 +951,7 @@ export default function AjustesRestaurantePage() {
                     setDishDescription(event.target.value)
                   }
                   rows={3}
-                  placeholder="Descripción opcional"
+                  placeholder="DescripciÃ³n opcional"
                   className="w-full resize-none rounded-xl border border-[#dce2d9] p-3 text-sm outline-none focus:border-[#1f6a3a]"
                 />
               </div>
@@ -947,7 +1019,7 @@ export default function AjustesRestaurantePage() {
               </h2>
 
               <p className="mt-2 max-w-md text-sm text-slate-500">
-                Después podrás configurar tamaños, precios e ingredientes diferentes para cada presentación.
+                DespuÃ©s podrÃ¡s configurar tamaÃ±os, precios e ingredientes diferentes para cada presentaciÃ³n.
               </p>
             </article>
           ) : (
@@ -955,12 +1027,70 @@ export default function AjustesRestaurantePage() {
               <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
                 <div>
                   <h2 className="text-lg font-semibold">
-                    Tamaños y precios
+                    TamaÃ±os y precios
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
                     Captura el precio de cada medida y guarda todos los precios de una sola vez.
                   </p>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-[#dce2d9] bg-[#f8faf7] p-4">
+                  <p className="text-sm font-semibold text-[#172018]">
+                    Agregar tamaño
+                  </p>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_220px_auto] sm:items-end">
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-slate-500">
+                        Nombre del tamaño
+                      </label>
+
+                      <input
+                        type="text"
+                        value={newVariantName}
+                        onChange={(event) =>
+                          setNewVariantName(event.target.value)
+                        }
+                        placeholder="Ej. Chico, Mediano, Grande"
+                        className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white px-3 text-sm outline-none focus:border-[#1f6a3a]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-slate-500">
+                        Precio
+                      </label>
+
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#1f6a3a]">
+                          $
+                        </span>
+
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={newVariantPrice}
+                          onChange={(event) =>
+                            setNewVariantPrice(event.target.value)
+                          }
+                          placeholder="0.00"
+                          className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white pl-8 pr-3 text-sm font-semibold outline-none focus:border-[#1f6a3a]"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void addVariant()}
+                      className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1f6a3a] px-5 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Agregar
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-5 grid gap-3">
@@ -972,7 +1102,7 @@ export default function AjustesRestaurantePage() {
                       <div className="grid gap-3 sm:grid-cols-[1fr_220px] sm:items-end">
                         <div>
                           <p className="mb-1 text-xs font-medium text-slate-400">
-                            Tamaño
+                            TamaÃ±o
                           </p>
 
                           <div className="flex h-11 items-center rounded-xl border border-[#dce2d9] bg-[#f7f8f5] px-4 text-sm font-semibold text-[#172018]">
@@ -1019,7 +1149,7 @@ export default function AjustesRestaurantePage() {
 
                   {dishVariants.length === 0 && (
                     <div className="rounded-xl bg-[#f5f7f3] px-4 py-4 text-sm text-slate-500">
-                      Este platillo todavía no tiene tamaños.
+                      Este platillo todavÃ­a no tiene tamaÃ±os.
                     </div>
                   )}
 
@@ -1052,8 +1182,8 @@ export default function AjustesRestaurantePage() {
 
                     <p className="mt-1 text-sm text-slate-500">
                       {selectedVariant
-                        ? `${selectedDish?.name} · ${selectedVariant.name}`
-                        : "Selecciona un tamaño arriba."}
+                        ? `${selectedDish?.name} Â· ${selectedVariant.name}`
+                        : "Selecciona un tamaÃ±o arriba."}
                     </p>
                   </div>
 
@@ -1066,7 +1196,7 @@ export default function AjustesRestaurantePage() {
 
                 {!selectedVariant ? (
                   <div className="mt-5 rounded-xl bg-[#f5f7f3] p-5 text-sm text-slate-500">
-                    Selecciona uno de los tamaños para editar su receta.
+                    Selecciona uno de los tamaÃ±os para editar su receta.
                   </div>
                 ) : (
                   <>
@@ -1154,7 +1284,7 @@ export default function AjustesRestaurantePage() {
                                 colSpan={5}
                                 className="px-4 py-10 text-center text-sm text-slate-400"
                               >
-                                Todavía no hay ingredientes en esta receta.
+                                TodavÃ­a no hay ingredientes en esta receta.
                               </td>
                             </tr>
                           )}
@@ -1183,7 +1313,7 @@ export default function AjustesRestaurantePage() {
                               )
                               setIngredientProductId("")
                             }}
-                            placeholder="Buscar lechuga, pollo, limón..."
+                            placeholder="Buscar lechuga, pollo, limÃ³n..."
                             className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white pl-10 pr-3 text-sm outline-none focus:border-[#1f6a3a]"
                           />
                         </div>
@@ -1391,7 +1521,7 @@ function VariantRow({
           className="min-w-0 text-left"
         >
           <p className="text-xs font-medium text-slate-400">
-            Tamaño
+            TamaÃ±o
           </p>
 
           <input
@@ -1430,7 +1560,7 @@ function VariantRow({
               )
             }
             className="flex h-10 items-center justify-center rounded-lg bg-[#102019] px-3 text-white disabled:opacity-50"
-            title="Guardar tamaño"
+            title="Guardar tamaÃ±o"
           >
             <Save className="h-4 w-4" />
           </button>
@@ -1440,7 +1570,7 @@ function VariantRow({
             disabled={saving}
             onClick={() => void onDelete(variant)}
             className="flex h-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 text-red-600 disabled:opacity-50"
-            title="Eliminar tamaño"
+            title="Eliminar tamaÃ±o"
           >
             <Trash2 className="h-4 w-4" />
           </button>
