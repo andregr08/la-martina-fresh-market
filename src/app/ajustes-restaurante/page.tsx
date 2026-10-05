@@ -441,62 +441,64 @@ export default function AjustesRestaurantePage() {
   async function saveAllVariantPrices() {
     clearMessages()
 
-    if (!selectedDishId) {
-      setError("Selecciona un platillo.")
-      return
-    }
+    if (!selectedDishId) return
 
-    if (dishVariants.length === 0) {
-      setError("Este platillo no tiene tamaÃ±os configurados.")
-      return
-    }
-
-    const inputs = Array.from(
+    const priceInputs = Array.from(
       document.querySelectorAll<HTMLInputElement>(
         '[data-restaurant-variant-price="true"]',
       ),
     )
 
-    const updates = inputs.map((input) => ({
-      id: input.dataset.variantId ?? "",
-      sale_price: Number(input.value),
-    }))
-
-    const invalid = updates.find(
-      (item) =>
-        !item.id ||
-        !Number.isFinite(item.sale_price) ||
-        item.sale_price < 0,
+    const nameInputs = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        '[data-restaurant-variant-name="true"]',
+      ),
     )
-
-    if (invalid) {
-      setError("Revisa los precios. Todos deben ser nÃºmeros vÃ¡lidos.")
-      return
-    }
 
     setSaving(true)
 
-    for (const item of updates) {
-      const { error: priceError } = await supabase
+    for (const variant of dishVariants) {
+      const priceInput = priceInputs.find(
+        (input) => input.dataset.variantId === variant.id,
+      )
+
+      const nameInput = nameInputs.find(
+        (input) => input.dataset.variantId === variant.id,
+      )
+
+      const price = Number(priceInput?.value ?? variant.sale_price)
+      const name = (nameInput?.value ?? variant.name).trim()
+
+      if (!name) {
+        setError("El nombre del tamaño no puede estar vacío.")
+        setSaving(false)
+        return
+      }
+
+      if (!Number.isFinite(price) || price < 0) {
+        setError(`Precio inválido para ${name}.`)
+        setSaving(false)
+        return
+      }
+
+      const { error: updateError } = await supabase
         .from("restaurant_variants")
         .update({
-          sale_price: item.sale_price,
+          name,
+          sale_price: price,
         })
-        .eq("id", item.id)
+        .eq("id", variant.id)
 
-      if (priceError) {
-        setError(priceError.message)
+      if (updateError) {
+        setError(updateError.message)
         setSaving(false)
         return
       }
     }
 
+    setMessage("Tamaños y precios actualizados correctamente.")
+
     await loadData()
-
-    setMessage(
-      "Precios guardados correctamente. Ya aparecen en Restaurante.",
-    )
-
     setSaving(false)
   }
 
@@ -1105,9 +1107,13 @@ export default function AjustesRestaurantePage() {
                             TamaÃ±o
                           </p>
 
-                          <div className="flex h-11 items-center rounded-xl border border-[#dce2d9] bg-[#f7f8f5] px-4 text-sm font-semibold text-[#172018]">
-                            {variant.name}
-                          </div>
+                          <input
+                            type="text"
+                            defaultValue={variant.name}
+                            data-restaurant-variant-name="true"
+                            data-variant-id={variant.id}
+                            className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white px-4 text-sm font-semibold text-[#172018] outline-none focus:border-[#1f6a3a]"
+                          />
                         </div>
 
                         <div>
@@ -1602,3 +1608,4 @@ function VariantRow({
     </div>
   )
 }
+
