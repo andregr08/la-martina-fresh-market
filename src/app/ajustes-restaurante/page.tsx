@@ -285,7 +285,7 @@ export default function AjustesRestaurantePage() {
     }
 
     if (!category) {
-      setError("Escribe la categorÃ­a del platillo.")
+      setError("Escribe la categoría del platillo.")
       return
     }
 
@@ -350,7 +350,7 @@ export default function AjustesRestaurantePage() {
     if (!selectedDishId || !selectedDish) return
 
     const confirmed = window.confirm(
-      `Â¿Deseas desactivar "${selectedDish.name}"?`,
+      `¿Deseas desactivar "${selectedDish.name}"?`,
     )
 
     if (!confirmed) return
@@ -390,12 +390,12 @@ export default function AjustesRestaurantePage() {
     const price = Number(newVariantPrice)
 
     if (!name) {
-      setError("Escribe el nombre del tamaÃ±o.")
+      setError("Escribe el nombre del tamaño.")
       return
     }
 
     if (!Number.isFinite(price) || price < 0) {
-      setError("Escribe un precio vÃ¡lido.")
+      setError("Escribe un precio válido.")
       return
     }
 
@@ -433,7 +433,7 @@ export default function AjustesRestaurantePage() {
 
     await loadData()
 
-    setMessage("TamaÃ±o agregado correctamente.")
+    setMessage("Tamaño agregado correctamente.")
     setSaving(false)
   }
 
@@ -511,12 +511,12 @@ export default function AjustesRestaurantePage() {
     clearMessages()
 
     if (!name.trim()) {
-      setError("El tamaÃ±o necesita un nombre.")
+      setError("El tamaño necesita un nombre.")
       return
     }
 
     if (!Number.isFinite(price) || price < 0) {
-      setError("El precio no es vÃ¡lido.")
+      setError("El precio no es válido.")
       return
     }
 
@@ -539,13 +539,13 @@ export default function AjustesRestaurantePage() {
 
     await loadData()
 
-    setMessage("TamaÃ±o actualizado.")
+    setMessage("Tamaño actualizado.")
     setSaving(false)
   }
 
   async function deleteVariant(variant: RestaurantVariant) {
     const confirmed = window.confirm(
-      `Â¿Eliminar el tamaÃ±o "${variant.name}" y su receta?`,
+      `¿Eliminar el tamaño "${variant.name}" y su receta?`,
     )
 
     if (!confirmed) return
@@ -570,7 +570,7 @@ export default function AjustesRestaurantePage() {
 
     await loadData()
 
-    setMessage("TamaÃ±o eliminado.")
+    setMessage("Tamaño eliminado.")
     setSaving(false)
   }
 
@@ -659,7 +659,7 @@ export default function AjustesRestaurantePage() {
     clearMessages()
 
     if (!selectedVariantId) {
-      setError("Selecciona un tamaÃ±o.")
+      setError("Selecciona un tamaño.")
       return
     }
 
@@ -689,7 +689,7 @@ export default function AjustesRestaurantePage() {
       stockQuantity <= 0
     ) {
       setError(
-        "Indica cuÃ¡nto debe descontarse realmente del inventario.",
+        "Indica cuánto debe descontarse realmente del inventario.",
       )
       return
     }
@@ -765,7 +765,7 @@ export default function AjustesRestaurantePage() {
     )
 
     const confirmed = window.confirm(
-      `Â¿Quitar "${product?.name ?? "ingrediente"}" de esta receta?`,
+      `¿Quitar "${product?.name ?? "ingrediente"}" de esta receta?`,
     )
 
     if (!confirmed) return
@@ -794,7 +794,7 @@ export default function AjustesRestaurantePage() {
     return (
       <AppShell
         title="Ajustes de restaurante"
-        description="Platillos, tamaÃ±os, precios y recetas"
+        description="Platillos, tamaños, precios y recetas"
       >
         <div className="flex min-h-72 items-center justify-center">
           <Loader2 className="h-7 w-7 animate-spin text-[#1f6a3a]" />
@@ -806,7 +806,7 @@ export default function AjustesRestaurantePage() {
   return (
     <AppShell
       title="Ajustes de restaurante"
-      description="Platillos, tamaÃ±os, precios y recetas"
+      description="Platillos, tamaños, precios y recetas"
     >
       <div className="mb-5 flex flex-wrap gap-2">
         <a
@@ -922,14 +922,14 @@ export default function AjustesRestaurantePage() {
                   onChange={(event) =>
                     setDishName(event.target.value)
                   }
-                  placeholder="Ej. Ensalada CÃ©sar"
+                  placeholder="Ej. Ensalada César"
                   className="h-11 w-full rounded-xl border border-[#dce2d9] px-3 text-sm outline-none focus:border-[#1f6a3a]"
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500">
-                  CategorÃ­a
+                  Categoría
                 </label>
 
                 <input
@@ -944,7 +944,7 @@ export default function AjustesRestaurantePage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500">
-                  DescripciÃ³n
+                  Descripción
                 </label>
 
                 <textarea
@@ -953,7 +953,7 @@ export default function AjustesRestaurantePage() {
                     setDishDescription(event.target.value)
                   }
                   rows={3}
-                  placeholder="DescripciÃ³n opcional"
+                  placeholder="Descripción opcional"
                   className="w-full resize-none rounded-xl border border-[#dce2d9] p-3 text-sm outline-none focus:border-[#1f6a3a]"
                 />
               </div>
@@ -1021,7 +1021,7 @@ export default function AjustesRestaurantePage() {
               </h2>
 
               <p className="mt-2 max-w-md text-sm text-slate-500">
-                DespuÃ©s podrÃ¡s configurar tamaÃ±os, precios e ingredientes diferentes para cada presentaciÃ³n.
+                Después podrás configurar tamaños, precios e ingredientes diferentes para cada presentación.
               </p>
             </article>
           ) : (
@@ -1029,7 +1029,7 @@ export default function AjustesRestaurantePage() {
               <article className="rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
                 <div>
                   <h2 className="text-lg font-semibold">
-                    TamaÃ±os y precios
+                    Tamaños y precios
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
@@ -1104,7 +1104,7 @@ export default function AjustesRestaurantePage() {
                       <div className="grid gap-3 sm:grid-cols-[1fr_220px] sm:items-end">
                         <div>
                           <p className="mb-1 text-xs font-medium text-slate-400">
-                            TamaÃ±o
+                            Tamaño
                           </p>
 
                           <input
@@ -1155,7 +1155,7 @@ export default function AjustesRestaurantePage() {
 
                   {dishVariants.length === 0 && (
                     <div className="rounded-xl bg-[#f5f7f3] px-4 py-4 text-sm text-slate-500">
-                      Este platillo todavÃ­a no tiene tamaÃ±os.
+                      Este platillo todavía no tiene tamaños.
                     </div>
                   )}
 
@@ -1188,8 +1188,8 @@ export default function AjustesRestaurantePage() {
 
                     <p className="mt-1 text-sm text-slate-500">
                       {selectedVariant
-                        ? `${selectedDish?.name} Â· ${selectedVariant.name}`
-                        : "Selecciona un tamaÃ±o arriba."}
+                        ? `${selectedDish?.name} · ${selectedVariant.name}`
+                        : "Selecciona un tamaño arriba."}
                     </p>
                   </div>
 
@@ -1202,7 +1202,7 @@ export default function AjustesRestaurantePage() {
 
                 {!selectedVariant ? (
                   <div className="mt-5 rounded-xl bg-[#f5f7f3] p-5 text-sm text-slate-500">
-                    Selecciona uno de los tamaÃ±os para editar su receta.
+                    Selecciona uno de los tamaños para editar su receta.
                   </div>
                 ) : (
                   <>
@@ -1290,7 +1290,7 @@ export default function AjustesRestaurantePage() {
                                 colSpan={5}
                                 className="px-4 py-10 text-center text-sm text-slate-400"
                               >
-                                TodavÃ­a no hay ingredientes en esta receta.
+                                Todavía no hay ingredientes en esta receta.
                               </td>
                             </tr>
                           )}
@@ -1319,7 +1319,7 @@ export default function AjustesRestaurantePage() {
                               )
                               setIngredientProductId("")
                             }}
-                            placeholder="Buscar lechuga, pollo, limÃ³n..."
+                            placeholder="Buscar lechuga, pollo, limón..."
                             className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white pl-10 pr-3 text-sm outline-none focus:border-[#1f6a3a]"
                           />
                         </div>
@@ -1527,7 +1527,7 @@ function VariantRow({
           className="min-w-0 text-left"
         >
           <p className="text-xs font-medium text-slate-400">
-            TamaÃ±o
+            Tamaño
           </p>
 
           <input
@@ -1566,7 +1566,7 @@ function VariantRow({
               )
             }
             className="flex h-10 items-center justify-center rounded-lg bg-[#102019] px-3 text-white disabled:opacity-50"
-            title="Guardar tamaÃ±o"
+            title="Guardar tamaño"
           >
             <Save className="h-4 w-4" />
           </button>
@@ -1576,7 +1576,7 @@ function VariantRow({
             disabled={saving}
             onClick={() => void onDelete(variant)}
             className="flex h-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 text-red-600 disabled:opacity-50"
-            title="Eliminar tamaÃ±o"
+            title="Eliminar tamaño"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -1608,4 +1608,6 @@ function VariantRow({
     </div>
   )
 }
+
+
 
