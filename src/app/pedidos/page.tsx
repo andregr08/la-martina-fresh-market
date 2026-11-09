@@ -325,10 +325,13 @@ export default function PedidosPage() {
     setError("")
 
     const { error: updateError } =
-      await supabase
-        .from("restaurant_orders")
-        .update({ status })
-        .eq("id", orderId)
+      await supabase.rpc(
+        "update_restaurant_order_status",
+        {
+          p_order_id: orderId,
+          p_status: status,
+        },
+      )
 
     if (updateError) {
       setError(
@@ -437,18 +440,16 @@ export default function PedidosPage() {
 
     const {
       error: orderUpdateError,
-    } = await supabase
-      .from("restaurant_orders")
-      .update({
-        status: "paid",
-        payment_method:
+    } = await supabase.rpc(
+      "close_restaurant_orders",
+      {
+        p_order_ids: orderIds,
+        p_payment_method:
           paymentMethod,
-        paid_at:
-          new Date().toISOString(),
-        sale_id:
+        p_sale_id:
           sale.sale_id,
-      })
-      .in("id", orderIds)
+      },
+    )
 
     if (orderUpdateError) {
       setError(
@@ -675,20 +676,7 @@ export default function PedidosPage() {
                               </button>
                             )}
 
-                            {order.status === "ready" && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  void updateStatus(
-                                    order.id,
-                                    "delivered",
-                                  )
-                                }
-                                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"
-                              >
-                                Entregado
-                              </button>
-                            )}
+
                           </div>
                         </div>
                       ),
@@ -764,6 +752,12 @@ export default function PedidosPage() {
                 )}
               </span>
             </div>
+
+            {error && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">
               Método de pago
