@@ -660,20 +660,6 @@ export default function RestaurantePage() {
             </div>
 
             <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
-              <button
-                type="button"
-                onClick={() =>
-                  setCategory("")
-                }
-                className={`inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 text-[13px] font-medium ${
-                  category === ""
-                    ? "bg-[#102019] text-white"
-                    : "border border-[#dce2d9] bg-white text-slate-600"
-                }`}
-              >
-                Todos
-              </button>
-
               {categories.map(
                 (item) => (
                   <button

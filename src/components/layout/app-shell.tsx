@@ -69,7 +69,7 @@ const menu: MenuItem[] = [
     section: "General",
   },
   {
-    name: "Punto de venta",
+    name: "Verdulería",
     href: "/punto-de-venta",
     icon: CircleDollarSign,
     roles: ["admin", "cashier"],
@@ -83,7 +83,7 @@ const menu: MenuItem[] = [
     section: "Ventas",
   },
   {
-    name: "Ventas",
+    name: "Resumen de ventas",
     href: "/ventas",
     icon: ReceiptText,
     roles: ["admin", "cashier", "finance", "partner"],
