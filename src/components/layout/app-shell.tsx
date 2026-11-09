@@ -1,5 +1,7 @@
 ﻿"use client"
 
+import { OrderNotificationBadge } from "@/components/orders/order-notification-badge"
+
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
@@ -427,7 +429,12 @@ export function AppShell({
                       />
 
                       <span className="flex-1">
-                        {item.name}
+                        <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                        <span className="truncate">{item.name}</span>
+                        {item.href === "/pedidos" && (
+                          <OrderNotificationBadge />
+                        )}
+                      </span>
                       </span>
 
                       {active && (
