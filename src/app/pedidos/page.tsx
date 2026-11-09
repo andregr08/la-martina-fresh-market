@@ -179,33 +179,11 @@ export default function PedidosPage() {
       setError("")
 
       const {
-        data: ordersData,
+        data,
         error: ordersError,
-      } = await supabase
-        .from("restaurant_orders")
-        .select(`
-          id,
-          order_number,
-          order_type,
-          table_number,
-          notes,
-          status,
-          subtotal,
-          total,
-          payment_method,
-          paid_at,
-          sale_id,
-          created_at,
-          updated_at
-        `)
-        .not(
-          "status",
-          "in",
-          '("paid","cancelled")',
-        )
-        .order("created_at", {
-          ascending: true,
-        })
+      } = await supabase.rpc(
+        "get_restaurant_active_orders",
+      )
 
       if (ordersError) {
         setError(ordersError.message)
@@ -215,52 +193,9 @@ export default function PedidosPage() {
       }
 
       const rawOrders =
-        (ordersData ?? []) as Omit<
-          RestaurantOrder,
-          "items"
-        >[]
-
-      if (rawOrders.length === 0) {
-        setOrders([])
-        setLoading(false)
-        setRefreshing(false)
-        return
-      }
-
-      const orderIds =
-        rawOrders.map(
-          (order) => order.id,
-        )
-
-      const {
-        data: itemsData,
-        error: itemsError,
-      } = await supabase
-        .from("restaurant_order_items")
-        .select(`
-          id,
-          order_id,
-          product_id,
-          variant_id,
-          product_name,
-          variant_name,
-          quantity,
-          unit_price,
-          line_total,
-          fruit_selections
-        `)
-        .in("order_id", orderIds)
-        .order("created_at")
-
-      if (itemsError) {
-        setError(itemsError.message)
-        setLoading(false)
-        setRefreshing(false)
-        return
-      }
-
-      const rawItems =
-        (itemsData ?? []) as OrderItem[]
+        Array.isArray(data)
+          ? (data as RestaurantOrder[])
+          : []
 
       const normalized =
         rawOrders.map((order) => ({
@@ -269,33 +204,30 @@ export default function PedidosPage() {
             Number(order.subtotal || 0),
           total:
             Number(order.total || 0),
-          items: rawItems
-            .filter(
-              (item) =>
-                item.order_id ===
-                order.id,
-            )
-            .map((item) => ({
-              ...item,
-              quantity:
-                Number(
-                  item.quantity || 0,
-                ),
-              unit_price:
-                Number(
-                  item.unit_price || 0,
-                ),
-              line_total:
-                Number(
-                  item.line_total || 0,
-                ),
-              fruit_selections:
-                Array.isArray(
-                  item.fruit_selections,
-                )
-                  ? item.fruit_selections
-                  : [],
-            })),
+          items:
+            Array.isArray(order.items)
+              ? order.items.map((item) => ({
+                  ...item,
+                  quantity:
+                    Number(
+                      item.quantity || 0,
+                    ),
+                  unit_price:
+                    Number(
+                      item.unit_price || 0,
+                    ),
+                  line_total:
+                    Number(
+                      item.line_total || 0,
+                    ),
+                  fruit_selections:
+                    Array.isArray(
+                      item.fruit_selections,
+                    )
+                      ? item.fruit_selections
+                      : [],
+                }))
+              : [],
         }))
 
       setOrders(normalized)

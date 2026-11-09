@@ -15,19 +15,11 @@ export function OrderNotificationBadge() {
 
   const loadCount = useCallback(async () => {
     const {
-      count: pendingCount,
+      data,
       error,
-    } = await supabase
-      .from("restaurant_orders")
-      .select("id", {
-        count: "exact",
-        head: true,
-      })
-      .not(
-        "status",
-        "in",
-        '("paid","cancelled")',
-      )
+    } = await supabase.rpc(
+      "get_restaurant_active_orders",
+    )
 
     if (error) {
       console.error(
@@ -37,7 +29,12 @@ export function OrderNotificationBadge() {
       return
     }
 
-    setCount(pendingCount ?? 0)
+    const activeOrders =
+      Array.isArray(data)
+        ? data
+        : []
+
+    setCount(activeOrders.length)
   }, [supabase])
 
   useEffect(() => {
