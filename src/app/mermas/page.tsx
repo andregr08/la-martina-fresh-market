@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   useCallback,
@@ -46,15 +46,15 @@ type WasteRecord = {
 
 const reasons = [
   ["spoiled", "Producto echado a perder"],
-  ["damaged", "Producto golpeado o dañado"],
-  ["overripe", "Maduración excesiva"],
+  ["damaged", "Producto golpeado o daÃ±ado"],
+  ["overripe", "MaduraciÃ³n excesiva"],
   ["theft", "Robo"],
   ["weighing_error", "Error de pesaje"],
   ["internal_use", "Consumo interno"],
   ["gift", "Regalo"],
   ["inventory_adjustment", "Ajuste de inventario"],
-  ["reception_difference", "Diferencia en recepción"],
-  ["customer_return", "Devolución"],
+  ["reception_difference", "Diferencia en recepciÃ³n"],
+  ["customer_return", "DevoluciÃ³n"],
   ["other", "Otro"],
 ]
 
@@ -245,7 +245,7 @@ export default function MermasPage() {
     setMessage(
       `Merma registrada: ${result.quantity ?? numericQuantity} de ${
         result.product ?? "producto"
-      }. Pérdida: ${money(Number(result.total_loss ?? 0))}.`,
+      }. Valor estimado: ${money(Number(result.total_loss ?? 0))}.`,
     )
 
     setProductId("")
@@ -260,7 +260,7 @@ export default function MermasPage() {
   return (
     <AppShell
       title="Mermas"
-      description="Control de pérdidas, caducidad y producto dañado."
+      description="Control de mermas, caducidad y producto dañado."
     >
       {error && (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -329,7 +329,7 @@ export default function MermasPage() {
           </div>
 
           <p className="mt-3 text-xs font-medium uppercase tracking-wide text-red-700">
-            Pérdida acumulada
+            PÃ©rdida acumulada
           </p>
 
           <p className="mt-1 text-[24px] font-semibold tracking-tight text-red-950">
@@ -384,7 +384,7 @@ export default function MermasPage() {
                     key={product.id}
                     value={product.id}
                   >
-                    {product.sku ? `${product.sku} — ` : ""}
+                    {product.sku ? `${product.sku} â€” ` : ""}
                     {product.name}
                   </option>
                 ))}
@@ -518,7 +518,7 @@ export default function MermasPage() {
                     <th className="px-5 py-3.5">Producto</th>
                     <th className="px-5 py-3.5">Cantidad</th>
                     <th className="px-5 py-3.5">Motivo</th>
-                    <th className="px-5 py-3.5">Pérdida</th>
+                    <th className="px-5 py-3.5">PÃ©rdida</th>
                     <th className="px-5 py-3.5">Notas</th>
                   </tr>
                 </thead>
@@ -558,7 +558,7 @@ export default function MermasPage() {
                       </td>
 
                       <td className="px-6 py-4 text-sm text-slate-500">
-                        {record.notes ?? "—"}
+                        {record.notes ?? "â€”"}
                       </td>
                     </tr>
                   ))}
@@ -586,3 +586,4 @@ export default function MermasPage() {
     </AppShell>
   )
 }
+

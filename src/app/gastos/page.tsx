@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   useCallback,
@@ -44,6 +44,51 @@ type Expense = {
   } | null
 }
 
+type RecurringExpense = {
+  id: string
+  amount: number
+  description: string
+  payment_method: string
+  frequency_type: string
+  last_paid_date: string
+  next_due_date: string
+  notes: string | null
+  active: boolean
+  category: {
+    name: string
+  } | null
+}
+
+const frequencyLabels: Record<string, string> = {
+  weekly: "Semanal",
+  biweekly: "Quincenal",
+  monthly: "Mensual",
+  bimonthly: "Bimestral",
+  quarterly: "Trimestral",
+  semiannual: "Semestral",
+  annual: "Anual",
+}
+
+function formatDate(value: string) {
+  if (!value) return "—"
+
+  const [year, month, day] = value.slice(0, 10).split("-").map(Number)
+
+  return new Intl.DateTimeFormat("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day))
+}
+
+function recurringStatus(nextDueDate: string) {
+  const today = new Date().toISOString().slice(0, 10)
+
+  if (nextDueDate < today) return "Vencido"
+  if (nextDueDate === today) return "Pagar hoy"
+  return "Al corriente"
+}
+
 function money(value: number) {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
@@ -80,6 +125,7 @@ export default function GastosPage() {
 
   const [categories, setCategories] = useState<ExpenseCategory[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([])
 
   const [categoryId, setCategoryId] = useState("")
   const [amount, setAmount] = useState("")
@@ -89,6 +135,8 @@ export default function GastosPage() {
     new Date().toISOString().slice(0, 10),
   )
   const [notes, setNotes] = useState("")
+  const [expenseType, setExpenseType] = useState<"single" | "recurring">("single")
+  const [frequencyType, setFrequencyType] = useState("monthly")
 
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("Todas")
@@ -96,6 +144,7 @@ export default function GastosPage() {
 
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [payingRecurringId, setPayingRecurringId] = useState("")
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
@@ -165,6 +214,40 @@ export default function GastosPage() {
     return () => window.clearTimeout(timer)
   }, [loadData])
 
+
+  const loadRecurringExpenses = useCallback(async () => {
+    const { data, error: recurringError } = await supabase
+      .from("recurring_expenses")
+      .select(`
+        id,
+        amount,
+        description,
+        payment_method,
+        frequency_type,
+        last_paid_date,
+        next_due_date,
+        notes,
+        active,
+        category:expense_categories (
+          name
+        )
+      `)
+      .eq("active", true)
+      .order("next_due_date", { ascending: true })
+
+    if (recurringError) {
+      setError(recurringError.message)
+      return
+    }
+
+    setRecurringExpenses(
+      (data ?? []) as unknown as RecurringExpense[],
+    )
+  }, [supabase])
+
+  useEffect(() => {
+    void loadRecurringExpenses()
+  }, [loadRecurringExpenses])
   const filteredExpenses = useMemo(() => {
     const value = search.trim().toLowerCase()
 
@@ -216,7 +299,6 @@ export default function GastosPage() {
       },
     )
   }, [filteredExpenses])
-
   async function registerExpense() {
     setError("")
     setMessage("")
@@ -240,49 +322,111 @@ export default function GastosPage() {
 
     setSubmitting(true)
 
-    const dateValue = new Date(
-      `${expenseDate}T12:00:00`,
-    ).toISOString()
+    if (expenseType === "recurring") {
+      const { data, error: recurringError } = await supabase.rpc(
+        "register_recurring_expense",
+        {
+          p_category_id: categoryId,
+          p_amount: numericAmount,
+          p_payment_method: paymentMethod,
+          p_description: description.trim(),
+          p_frequency_type: frequencyType,
+          p_last_paid_date: expenseDate,
+          p_notes: notes.trim() || null,
+        },
+      )
 
-    const { data, error: rpcError } = await supabase.rpc(
-      "register_expense",
-      {
-        p_category_id: categoryId,
-        p_amount: numericAmount,
-        p_description: description.trim(),
-        p_payment_method: paymentMethod,
-        p_notes: notes.trim() || null,
-        p_expense_date: dateValue,
-      },
-    )
+      if (recurringError) {
+        setError(recurringError.message)
+        setSubmitting(false)
+        return
+      }
 
-    if (rpcError) {
-      setError(rpcError.message)
-      setSubmitting(false)
-      return
+      const result = data as { next_due_date?: string }
+
+      setMessage(
+        `Gasto recurrente registrado. Próximo pago: ${formatDate(
+          result.next_due_date ?? "",
+        )}.`,
+      )
+    } else {
+      const dateValue = new Date(
+        `${expenseDate}T12:00:00`,
+      ).toISOString()
+
+      const { data, error: rpcError } = await supabase.rpc(
+        "register_expense",
+        {
+          p_category_id: categoryId,
+          p_amount: numericAmount,
+          p_description: description.trim(),
+          p_payment_method: paymentMethod,
+          p_notes: notes.trim() || null,
+          p_expense_date: dateValue,
+        },
+      )
+
+      if (rpcError) {
+        setError(rpcError.message)
+        setSubmitting(false)
+        return
+      }
+
+      const result = data as {
+        description?: string
+        amount?: number
+      }
+
+      setMessage(
+        `Gasto ${result.description ?? description} registrado por ${money(
+          Number(result.amount ?? numericAmount),
+        )}.`,
+      )
     }
-
-    const result = data as {
-      description?: string
-      amount?: number
-    }
-
-    setMessage(
-      `Gasto ${
-        result.description ?? description
-      } registrado por ${money(
-        Number(result.amount ?? numericAmount),
-      )}.`,
-    )
 
     setAmount("")
     setDescription("")
     setPaymentMethod("cash")
     setExpenseDate(new Date().toISOString().slice(0, 10))
     setNotes("")
+    setExpenseType("single")
+    setFrequencyType("monthly")
 
     await loadData()
+    await loadRecurringExpenses()
     setSubmitting(false)
+  }
+
+  async function payRecurringExpense(item: RecurringExpense) {
+    setError("")
+    setMessage("")
+    setPayingRecurringId(item.id)
+
+    const { data, error: rpcError } = await supabase.rpc(
+      "pay_recurring_expense",
+      {
+        p_recurring_expense_id: item.id,
+        p_payment_date: new Date().toISOString().slice(0, 10),
+      },
+    )
+
+    if (rpcError) {
+      setError(rpcError.message)
+      setPayingRecurringId("")
+      return
+    }
+
+    const result = data as { next_due_date?: string }
+
+    setMessage(
+      `${item.description} pagado. Próximo pago: ${formatDate(
+        result.next_due_date ?? "",
+      )}.`,
+    )
+
+    await loadData()
+    await loadRecurringExpenses()
+    setPayingRecurringId("")
   }
 
   return (
@@ -389,7 +533,23 @@ export default function GastosPage() {
           <div className="mt-6 space-y-5">
             <div>
               <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Categoría
+                Tipo de gasto
+              </p>
+
+              <select
+                value={expenseType}
+                onChange={(event) =>
+                  setExpenseType(event.target.value as "single" | "recurring")
+                }
+                className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
+              >
+                <option value="single">Único</option>
+                <option value="recurring">Recurrente</option>
+              </select>
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-slate-500">
+                CategorÃ­a
               </p>
 
               <select
@@ -400,7 +560,7 @@ export default function GastosPage() {
                 className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
               >
                 <option value="">
-                  Selecciona una categoría
+                  Selecciona una categorÃ­a
                 </option>
 
                 {categories.map((category) => (
@@ -416,7 +576,7 @@ export default function GastosPage() {
 
             <div>
               <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Descripción
+                DescripciÃ³n
               </p>
 
               <Input
@@ -449,7 +609,7 @@ export default function GastosPage() {
 
             <div>
               <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Método de pago
+                MÃ©todo de pago
               </p>
 
               <select
@@ -468,9 +628,35 @@ export default function GastosPage() {
             </div>
 
             <div>
-              <p className="mb-1.5 text-xs font-medium text-slate-500">
-                Fecha
-              </p>
+              {expenseType === "recurring" && (
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-slate-500">
+                  Cada cuánto se paga
+                </p>
+
+                <select
+                  value={frequencyType}
+                  onChange={(event) =>
+                    setFrequencyType(event.target.value)
+                  }
+                  className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
+                >
+                  <option value="weekly">Semanal</option>
+                  <option value="biweekly">Quincenal</option>
+                  <option value="monthly">Mensual</option>
+                  <option value="bimonthly">Bimestral</option>
+                  <option value="quarterly">Trimestral</option>
+                  <option value="semiannual">Semestral</option>
+                  <option value="annual">Anual</option>
+                </select>
+              </div>
+            )}
+
+            <p className="mb-1.5 text-xs font-medium text-slate-500">
+              {expenseType === "recurring"
+                ? "Última vez pagado"
+                : "Fecha"}
+            </p>
 
               <Input
                 type="date"
@@ -536,7 +722,7 @@ export default function GastosPage() {
                     onChange={(event) =>
                       setSearch(event.target.value)
                     }
-                    placeholder="Buscar descripción o categoría"
+                    placeholder="Buscar descripciÃ³n o categorÃ­a"
                     className="h-10 w-full rounded-xl border border-[#dce2d9] bg-[#f8f9f6] pl-9 pr-3 text-sm outline-none"
                   />
                 </div>
@@ -549,7 +735,7 @@ export default function GastosPage() {
                   className="h-10 rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
                 >
                   <option value="Todas">
-                    Todas las categorías
+                    Todas las categorÃ­as
                   </option>
 
                   {categories.map((category) => (
@@ -570,7 +756,7 @@ export default function GastosPage() {
                   className="h-10 rounded-xl border border-[#dce2d9] bg-white px-3 text-sm"
                 >
                   <option value="Todos">
-                    Todos los métodos
+                    Todos los mÃ©todos
                   </option>
                   <option value="cash">Efectivo</option>
                   <option value="card">Tarjeta</option>
@@ -592,9 +778,9 @@ export default function GastosPage() {
                 <thead className="sticky top-0 z-10 bg-[#f8f9f6] text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                   <tr>
                     <th className="px-5 py-3.5">Fecha</th>
-                    <th className="px-5 py-3.5">Descripción</th>
-                    <th className="px-5 py-3.5">Categoría</th>
-                    <th className="px-5 py-3.5">Método</th>
+                    <th className="px-5 py-3.5">DescripciÃ³n</th>
+                    <th className="px-5 py-3.5">CategorÃ­a</th>
+                    <th className="px-5 py-3.5">MÃ©todo</th>
                     <th className="px-5 py-3.5">Usuario</th>
                     <th className="px-5 py-3.5">Notas</th>
                     <th className="px-6 py-4 text-right">
@@ -621,7 +807,7 @@ export default function GastosPage() {
 
                       <td className="px-6 py-4 text-sm">
                         {expense.category?.name ??
-                          "Sin categoría"}
+                          "Sin categorÃ­a"}
                       </td>
 
                       <td className="px-5 py-3.5">
@@ -641,7 +827,7 @@ export default function GastosPage() {
                       </td>
 
                       <td className="px-6 py-4 text-sm text-slate-500">
-                        {expense.notes ?? "—"}
+                        {expense.notes ?? "â€”"}
                       </td>
 
                       <td className="px-6 py-4 text-right font-semibold text-red-700">
@@ -666,6 +852,61 @@ export default function GastosPage() {
           )}
         </article>
       </section>
+
+      <section className="mt-4 rounded-2xl border border-[#dde2da] bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold">
+          Gastos recurrentes
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          Pagos que el negocio debe cubrir periódicamente.
+        </p>
+
+        <div className="mt-5 space-y-3">
+          {recurringExpenses.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              No hay gastos recurrentes registrados.
+            </p>
+          ) : (
+            recurringExpenses.map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col gap-3 rounded-2xl border border-[#e4e8e1] bg-[#fbfcfa] p-4 lg:flex-row lg:items-center lg:justify-between"
+              >
+                <div>
+                  <p className="font-semibold">
+                    {item.description}
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    {money(item.amount)} ·{" "}
+                    {frequencyLabels[item.frequency_type] ??
+                      item.frequency_type}
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    Último pago: {formatDate(item.last_paid_date)} · Próximo:{" "}
+                    {formatDate(item.next_due_date)} ·{" "}
+                    {recurringStatus(item.next_due_date)}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => void payRecurringExpense(item)}
+                  disabled={payingRecurringId === item.id}
+                  className="h-10 rounded-xl bg-[#102019] px-4 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {payingRecurringId === item.id
+                    ? "Registrando..."
+                    : "Registrar pago"}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
     </AppShell>
   )
 }
+

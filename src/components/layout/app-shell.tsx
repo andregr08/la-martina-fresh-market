@@ -88,6 +88,13 @@ const menu: MenuItem[] = [
     section: "Ventas",
   },
   {
+    name: "Pedidos",
+    href: "/pedidos",
+    icon: ReceiptText,
+    roles: ["admin", "cashier", "finance", "partner"],
+    section: "Ventas",
+  },
+  {
     name: "Caja",
     href: "/caja",
     icon: WalletCards,
