@@ -241,6 +241,43 @@ export default function RestaurantePage() {
     [cart],
   )
 
+  function decrementVariant(
+    variantId: string,
+  ) {
+    setCart((current) => {
+      const matchingItems =
+        current.filter(
+          (item) =>
+            item.variant_id === variantId,
+        )
+
+      if (matchingItems.length === 0) {
+        return current
+      }
+
+      const itemToChange =
+        matchingItems[
+          matchingItems.length - 1
+        ]
+
+      return current
+        .map((item) =>
+          item.cart_key ===
+          itemToChange.cart_key
+            ? {
+                ...item,
+                quantity:
+                  item.quantity - 1,
+              }
+            : item,
+        )
+        .filter(
+          (item) =>
+            item.quantity > 0,
+        )
+    })
+  }
+
   function variantQuantity(
     variantId: string,
   ) {
@@ -715,9 +752,37 @@ export default function RestaurantePage() {
                               </span>
 
                               {variantQuantity(variant.id) > 0 && (
-                                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1f6a3a] px-1.5 text-xs font-bold text-white">
-                                  {variantQuantity(variant.id)}
-                                </span>
+                                <>
+                                  <span
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      decrementVariant(
+                                        variant.id,
+                                      )
+                                    }}
+                                    onKeyDown={(event) => {
+                                      if (
+                                        event.key === "Enter" ||
+                                        event.key === " "
+                                      ) {
+                                        event.preventDefault()
+                                        event.stopPropagation()
+                                        decrementVariant(
+                                          variant.id,
+                                        )
+                                      }
+                                    }}
+                                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[#dce2d9] bg-white text-lg font-semibold text-[#172018]"
+                                  >
+                                    −
+                                  </span>
+
+                                  <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-[#1f6a3a] px-1.5 text-xs font-bold text-white">
+                                    {variantQuantity(variant.id)}
+                                  </span>
+                                </>
                               )}
 
                               <Plus className="h-4 w-4" />
