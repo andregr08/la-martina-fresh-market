@@ -96,7 +96,7 @@ export default function RestaurantePage() {
     useState<string[]>([])
 
   const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("")
+  const [category, setCategory] = useState("Baguettes")
 
   const [tableNumber, setTableNumber] = useState("")
   const [takeaway, setTakeaway] = useState(false)
@@ -174,19 +174,34 @@ export default function RestaurantePage() {
   }, [loadProducts])
 
   const categories = useMemo(() => {
-    return [
-      ...Array.from(
-        new Set(
-          products
-            .map((product) =>
-              product.category.trim(),
-            )
-            .filter(Boolean),
-        ),
-      ).sort((a, b) =>
-        a.localeCompare(b, "es"),
+    const availableCategories = Array.from(
+      new Set(
+        products
+          .map((product) =>
+            product.category.trim(),
+          )
+          .filter(Boolean),
       ),
+    )
+
+    const preferredOrder = [
+      "Baguettes",
+      "Wraps",
+      "Ensaladas",
+      "Toast",
+      "Jugos",
+      "Smoothies",
+      "Inmune Shot",
+      "helados",
+      "Fruta picada",
     ]
+
+    return preferredOrder.filter(
+      (categoryName) =>
+        availableCategories.includes(
+          categoryName,
+        ),
+    )
   }, [products])
 
   const filteredProducts = useMemo(() => {
@@ -225,6 +240,21 @@ export default function RestaurantePage() {
       ),
     [cart],
   )
+
+  function variantQuantity(
+    variantId: string,
+  ) {
+    return cart
+      .filter(
+        (item) =>
+          item.variant_id === variantId,
+      )
+      .reduce(
+        (total, item) =>
+          total + item.quantity,
+        0,
+      )
+  }
 
   function addVariant(
     product: RestaurantProduct,
@@ -683,6 +713,13 @@ export default function RestaurantePage() {
                                   variant.sale_price,
                                 )}
                               </span>
+
+                              {variantQuantity(variant.id) > 0 && (
+                                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1f6a3a] px-1.5 text-xs font-bold text-white">
+                                  {variantQuantity(variant.id)}
+                                </span>
+                              )}
+
                               <Plus className="h-4 w-4" />
                             </div>
                           </button>
