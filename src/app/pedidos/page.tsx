@@ -473,6 +473,7 @@ export default function PedidosPage() {
       title="Pedidos"
       description="Pedidos del restaurante, mesas y cobros"
     >
+      <WaiterRequests />
       <div className="space-y-5">
         <div className="flex flex-col gap-3 rounded-[24px] border border-[#dfe4dc] bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -876,4 +877,5 @@ export default function PedidosPage() {
     </AppShell>
   )
 }
+
 
