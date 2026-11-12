@@ -22,6 +22,7 @@ import {
 
 import { AppShell } from "@/components/layout/app-shell"
 import { createClient } from "@/lib/supabase/client"
+import WaiterRequests from "@/components/orders/waiter-requests"
 
 type OrderStatus =
   | "pending"
@@ -875,3 +876,4 @@ export default function PedidosPage() {
     </AppShell>
   )
 }
+

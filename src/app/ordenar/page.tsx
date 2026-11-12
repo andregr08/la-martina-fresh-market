@@ -104,10 +104,52 @@ export default function RestaurantePage() {
 
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [callingWaiter, setCallingWaiter] = useState(false)
+  const [waiterMessage, setWaiterMessage] = useState("")
 
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
+  const callWaiter = async () => {
+    if (!tableNumber.trim()) {
+      setWaiterMessage("Escribe tu número de mesa.")
+      return
+    }
+
+    setCallingWaiter(true)
+    setWaiterMessage("")
+
+    const { data, error: waiterError } =
+      await supabase.rpc("call_waiter", {
+        p_table_number: tableNumber.trim(),
+      })
+
+    if (waiterError) {
+      setWaiterMessage(
+        "No se pudo enviar la solicitud. Intenta de nuevo.",
+      )
+      setCallingWaiter(false)
+      return
+    }
+
+    const result = data as {
+      success?: boolean
+      already_pending?: boolean
+      table_number?: string
+    }
+
+    if (result?.already_pending) {
+      setWaiterMessage(
+        "Ya hay una solicitud activa para tu mesa.",
+      )
+    } else {
+      setWaiterMessage(
+        "Solicitud enviada. Enseguida te atendemos.",
+      )
+    }
+
+    setCallingWaiter(false)
+  }
   const loadProducts = useCallback(async () => {
     setLoading(true)
     setError("")
@@ -925,14 +967,37 @@ export default function RestaurantePage() {
 
                   <input
                     value={tableNumber}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setTableNumber(
                         event.target.value,
                       )
-                    }
+                      setWaiterMessage("")
+                    }}
                     placeholder="Ej. 3"
                     className="mt-2 h-11 w-full rounded-xl border border-[#dce2d9] px-3"
                   />
+
+                  <button
+                    type="button"
+                    disabled={
+                      callingWaiter ||
+                      !tableNumber.trim()
+                    }
+                    onClick={() =>
+                      void callWaiter()
+                    }
+                    className="mt-3 flex h-12 w-full items-center justify-center rounded-xl border border-[#102019] bg-white font-semibold text-[#102019] transition hover:bg-[#f3f6f2] disabled:opacity-40"
+                  >
+                    {callingWaiter
+                      ? "Enviando solicitud..."
+                      : "🔔 Llamar al mesero"}
+                  </button>
+
+                  {waiterMessage && (
+                    <p className="mt-2 text-sm font-medium text-[#41584c]">
+                      {waiterMessage}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -1036,3 +1101,4 @@ export default function RestaurantePage() {
     </main>
   )
 }
+
