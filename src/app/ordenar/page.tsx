@@ -11,7 +11,6 @@ import {
   Loader2,
   Minus,
   Plus,
-  Search,
   ShoppingCart,
   Trash2,
   UtensilsCrossed,
@@ -96,7 +95,6 @@ export default function RestaurantePage() {
   const [selectedFruitIds, setSelectedFruitIds] =
     useState<string[]>([])
 
-  const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Baguettes")
 
   const [tableNumber, setTableNumber] = useState("")
@@ -111,24 +109,36 @@ export default function RestaurantePage() {
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
-  const callWaiter = async () => {
-    if (!tableNumber.trim()) {
-      setWaiterMessage("Escribe tu número de mesa.")
+  const callWaiter = async (
+    tableOverride?: string,
+  ) => {
+    const requestedTable = (
+      tableOverride ?? tableNumber
+    ).trim()
+
+    if (!requestedTable) {
+      setWaiterMessage(
+        "Escribe tu número de mesa.",
+      )
       return
     }
 
     setCallingWaiter(true)
     setWaiterMessage("")
+    setMessage("")
+    setError("")
 
     const { data, error: waiterError } =
       await supabase.rpc("call_waiter", {
-        p_table_number: tableNumber.trim(),
+        p_table_number: requestedTable,
       })
 
     if (waiterError) {
-      setWaiterMessage(
-        "No se pudo enviar la solicitud. Intenta de nuevo.",
-      )
+      const text =
+        "No se pudo enviar la solicitud. Intenta de nuevo."
+
+      setWaiterMessage(text)
+      setError(text)
       setCallingWaiter(false)
       return
     }
@@ -139,17 +149,32 @@ export default function RestaurantePage() {
       table_number?: string
     }
 
-    if (result?.already_pending) {
-      setWaiterMessage(
-        "Ya hay una solicitud activa para tu mesa.",
-      )
-    } else {
-      setWaiterMessage(
-        "Solicitud enviada. Enseguida te atendemos.",
-      )
+    const text =
+      result?.already_pending
+        ? `Ya hay una solicitud activa para la Mesa ${requestedTable}.`
+        : `Solicitud enviada. Enseguida atendemos la Mesa ${requestedTable}.`
+
+    setWaiterMessage(text)
+    setMessage(text)
+    setCallingWaiter(false)
+  }
+
+  const callWaiterFromMenu = () => {
+    let requestedTable =
+      tableNumber.trim()
+
+    if (!requestedTable) {
+      requestedTable =
+        window.prompt(
+          "¿Cuál es tu número de mesa?",
+        )?.trim() ?? ""
     }
 
-    setCallingWaiter(false)
+    if (!requestedTable) return
+
+    setTableNumber(requestedTable)
+
+    void callWaiter(requestedTable)
   }
   const loadProducts = useCallback(async () => {
     setLoading(true)
@@ -247,30 +272,15 @@ export default function RestaurantePage() {
     )
   }, [products])
 
-  const filteredProducts = useMemo(() => {
-    const term = search
-      .trim()
-      .toLowerCase()
-
-    return products.filter((product) => {
-      const categoryMatches =
-        !category || product.category === category
-
-      const textMatches =
-        !term ||
-        product.name
-          .toLowerCase()
-          .includes(term) ||
-        product.category
-          .toLowerCase()
-          .includes(term) ||
-        (product.description ?? "")
-          .toLowerCase()
-          .includes(term)
-
-      return categoryMatches && textMatches
-    })
-  }, [products, search, category])
+  const filteredProducts = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          !category ||
+          product.category === category,
+      ),
+    [products, category],
+  )
 
   const total = useMemo(
     () =>
@@ -721,20 +731,16 @@ export default function RestaurantePage() {
                 </button>
               </div>
 
-              <div className="relative w-full lg:max-w-sm">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-                <input
-                  value={search}
-                  onChange={(event) =>
-                    setSearch(
-                      event.target.value,
-                    )
-                  }
-                  placeholder="Buscar platillo..."
-                  className="h-11 w-full rounded-xl border border-[#dce2d9] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[#1f6a3a]"
-                />
-              </div>
+              <button
+                type="button"
+                disabled={callingWaiter}
+                onClick={callWaiterFromMenu}
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-[#102019] bg-white px-4 text-sm font-semibold text-[#102019] transition hover:bg-[#f3f6f2] disabled:opacity-50 lg:max-w-sm"
+              >
+                {callingWaiter
+                  ? "Enviando solicitud..."
+                  : "🔔 Llamar al mesero"}
+              </button>
             </div>
 
             <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
@@ -875,7 +881,7 @@ export default function RestaurantePage() {
             onClick={() => setCartOpen(false)}
           >
             <div
-              className="max-h-[92vh] w-full overflow-hidden rounded-t-[24px] border border-[#dfe4dc] bg-white shadow-xl sm:max-w-lg sm:rounded-[24px]"
+              className="max-h-[92vh] w-full overflow-y-auto overscroll-contain rounded-t-[24px] border border-[#dfe4dc] bg-white shadow-xl sm:max-w-lg sm:rounded-[24px]"
               onClick={(event) =>
                 event.stopPropagation()
               }
@@ -921,7 +927,7 @@ export default function RestaurantePage() {
               </div>
             </div>
 
-            <div className="max-h-[38vh] overflow-y-auto">
+            <div className="max-h-[34vh] overflow-y-auto">
               {cart.map((item) => (
                 <div
                   key={item.cart_key}
@@ -1029,27 +1035,7 @@ export default function RestaurantePage() {
                     className="mt-2 h-11 w-full rounded-xl border border-[#dce2d9] px-3"
                   />
 
-                  <button
-                    type="button"
-                    disabled={
-                      callingWaiter ||
-                      !tableNumber.trim()
-                    }
-                    onClick={() =>
-                      void callWaiter()
-                    }
-                    className="mt-3 flex h-12 w-full items-center justify-center rounded-xl border border-[#102019] bg-white font-semibold text-[#102019] transition hover:bg-[#f3f6f2] disabled:opacity-40"
-                  >
-                    {callingWaiter
-                      ? "Enviando solicitud..."
-                      : "🔔 Llamar al mesero"}
-                  </button>
 
-                  {waiterMessage && (
-                    <p className="mt-2 text-sm font-medium text-[#41584c]">
-                      {waiterMessage}
-                    </p>
-                  )}
                 </div>
               )}
 
@@ -1154,5 +1140,6 @@ export default function RestaurantePage() {
     </main>
   )
 }
+
 
 
