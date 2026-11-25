@@ -50,6 +50,51 @@ type FruitSelection = {
   grams: number
 }
 
+type SaladCustomization = {
+  base: string
+  protein: string[]
+  ingredients: string[]
+  toppings: string[]
+  dressing: string
+}
+
+const SALAD_BASES = [
+  "Lechuga",
+  "Lechuga romana",
+  "Mix de hojas",
+  "Espinaca",
+]
+
+const SALAD_PROTEINS = [
+  "Pollo",
+]
+
+const SALAD_INGREDIENTS = [
+  "Aguacate",
+  "Cebolla morada",
+  "Elote",
+  "Jitomate",
+  "Jitomate cherry",
+  "Pepino",
+  "Perejil",
+]
+
+const SALAD_TOPPINGS = [
+  "Fresa",
+  "Manzana",
+  "Zarzamora",
+]
+
+const SALAD_DRESSINGS = [
+  "Aderezo César",
+  "Aderezo cilantro limón",
+  "Aderezo italiano",
+  "Vinagreta miel limón",
+  "Vinagreta limón orégano",
+  "Vinagreta de hierbas",
+  "Aderezo chipotle",
+]
+
 type CartItem = {
   cart_key: string
   variant_id: string
@@ -59,6 +104,7 @@ type CartItem = {
   quantity: number
   unit_price: number
   fruit_selections: FruitSelection[]
+  customization: SaladCustomization | null
 }
 
 function money(value: number) {
@@ -94,6 +140,26 @@ export default function RestaurantePage() {
 
   const [selectedFruitIds, setSelectedFruitIds] =
     useState<string[]>([])
+
+  const [saladModal, setSaladModal] = useState<{
+    product: RestaurantProduct
+    variant: RestaurantVariant
+  } | null>(null)
+
+  const [saladBase, setSaladBase] =
+    useState("")
+
+  const [saladProtein, setSaladProtein] =
+    useState<string[]>([])
+
+  const [saladIngredients, setSaladIngredients] =
+    useState<string[]>([])
+
+  const [saladToppings, setSaladToppings] =
+    useState<string[]>([])
+
+  const [saladDressing, setSaladDressing] =
+    useState("")
 
   const [category, setCategory] = useState("Baguettes")
 
@@ -365,6 +431,24 @@ export default function RestaurantePage() {
     setMessage("")
 
     if (
+      product.name
+        .trim()
+        .toLowerCase() === "arma tu ensalada"
+    ) {
+      setSaladModal({
+        product,
+        variant,
+      })
+
+      setSaladBase("")
+      setSaladProtein([])
+      setSaladIngredients([])
+      setSaladToppings([])
+      setSaladDressing("")
+      return
+    }
+
+    if (
       product.category
         .trim()
         .toLowerCase() === "fruta picada"
@@ -406,16 +490,26 @@ export default function RestaurantePage() {
     product: RestaurantProduct,
     variant: RestaurantVariant,
     fruitSelections: FruitSelection[],
+    customization: SaladCustomization | null = null,
   ) {
     const selectionKey =
       fruitSelections
         .map((fruit) => fruit.product_id)
         .join("-")
 
+    const customizationKey =
+      customization
+        ? JSON.stringify(customization)
+        : ""
+
     const cartKey =
-      selectionKey
-        ? `${variant.id}:${selectionKey}`
-        : variant.id
+      [
+        variant.id,
+        selectionKey,
+        customizationKey,
+      ]
+        .filter(Boolean)
+        .join(":")
 
     setCart((current) => {
       const existing =
@@ -451,9 +545,75 @@ export default function RestaurantePage() {
           ),
           fruit_selections:
             fruitSelections,
+          customization,
         },
       ]
     })
+  }
+
+  function toggleProtein(value: string) {
+    setSaladProtein((current) =>
+      current.includes(value)
+        ? current.filter(
+            (item) => item !== value,
+          )
+        : [...current, value],
+    )
+  }
+
+  function toggleIngredient(value: string) {
+    setSaladIngredients((current) =>
+      current.includes(value)
+        ? current.filter(
+            (item) => item !== value,
+          )
+        : [...current, value],
+    )
+  }
+
+  function toggleTopping(value: string) {
+    setSaladToppings((current) =>
+      current.includes(value)
+        ? current.filter(
+            (item) => item !== value,
+          )
+        : [...current, value],
+    )
+  }
+
+  function confirmSalad() {
+    if (!saladModal) return
+
+    if (!saladBase) {
+      setError("Selecciona una base.")
+      return
+    }
+
+    if (!saladDressing) {
+      setError("Selecciona un aderezo.")
+      return
+    }
+
+    addCartItem(
+      saladModal.product,
+      saladModal.variant,
+      [],
+      {
+        base: saladBase,
+        protein: saladProtein,
+        ingredients: saladIngredients,
+        toppings: saladToppings,
+        dressing: saladDressing,
+      },
+    )
+
+    setSaladModal(null)
+    setSaladBase("")
+    setSaladProtein([])
+    setSaladIngredients([])
+    setSaladToppings([])
+    setSaladDressing("")
+    setError("")
   }
 
   function toggleFruit(productId: string) {
@@ -662,6 +822,8 @@ export default function RestaurantePage() {
                       fruit.grams,
                   }),
                 ),
+              customization:
+                item.customization,
             })),
         },
       )
@@ -942,6 +1104,36 @@ export default function RestaurantePage() {
                       <p className="text-xs text-slate-500">
                         {item.variant_name}
                       </p>
+
+                      {item.customization && (
+                        <div className="mt-2 text-xs text-[#1f6a3a]">
+                          <p>
+                            Base: {item.customization.base}
+                          </p>
+
+                          {item.customization.protein.length > 0 && (
+                            <p>
+                              Proteína: {item.customization.protein.join(", ")}
+                            </p>
+                          )}
+
+                          {item.customization.ingredients.length > 0 && (
+                            <p>
+                              Ingredientes: {item.customization.ingredients.join(", ")}
+                            </p>
+                          )}
+
+                          {item.customization.toppings.length > 0 && (
+                            <p>
+                              Toppings: {item.customization.toppings.join(", ")}
+                            </p>
+                          )}
+
+                          <p>
+                            Aderezo: {item.customization.dressing}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <button
@@ -1082,6 +1274,175 @@ export default function RestaurantePage() {
           </div>
         )}
       </div>
+
+      {saladModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[24px] bg-white p-5 shadow-2xl">
+
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-[#172018]">
+                  Arma tu ensalada
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  {saladModal.variant.name} · {money(saladModal.variant.sale_price)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSaladModal(null)
+                }
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dce2d9]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <section className="mt-6">
+              <h3 className="mb-3 font-semibold">
+                1. Elige tu base
+              </h3>
+
+              <div className="grid grid-cols-2 gap-2">
+                {SALAD_BASES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      setSaladBase(item)
+                    }
+                    className={
+                      saladBase === item
+                        ? "rounded-xl border border-[#1f6a3a] bg-[#eef3ed] p-3 text-sm font-semibold text-[#1f6a3a]"
+                        : "rounded-xl border border-[#dce2d9] p-3 text-sm"
+                    }
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-6">
+              <h3 className="mb-3 font-semibold">
+                2. Proteína
+              </h3>
+
+              <div className="grid grid-cols-2 gap-2">
+                {SALAD_PROTEINS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      toggleProtein(item)
+                    }
+                    className={
+                      saladProtein.includes(item)
+                        ? "rounded-xl border border-[#1f6a3a] bg-[#eef3ed] p-3 text-sm font-semibold text-[#1f6a3a]"
+                        : "rounded-xl border border-[#dce2d9] p-3 text-sm"
+                    }
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-6">
+              <h3 className="mb-3 font-semibold">
+                3. Ingredientes
+              </h3>
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {SALAD_INGREDIENTS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      toggleIngredient(item)
+                    }
+                    className={
+                      saladIngredients.includes(item)
+                        ? "rounded-xl border border-[#1f6a3a] bg-[#eef3ed] p-3 text-sm font-semibold text-[#1f6a3a]"
+                        : "rounded-xl border border-[#dce2d9] p-3 text-sm"
+                    }
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-6">
+              <h3 className="mb-3 font-semibold">
+                4. Toppings
+              </h3>
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {SALAD_TOPPINGS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      toggleTopping(item)
+                    }
+                    className={
+                      saladToppings.includes(item)
+                        ? "rounded-xl border border-[#1f6a3a] bg-[#eef3ed] p-3 text-sm font-semibold text-[#1f6a3a]"
+                        : "rounded-xl border border-[#dce2d9] p-3 text-sm"
+                    }
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-6">
+              <h3 className="mb-3 font-semibold">
+                5. Aderezo
+              </h3>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {SALAD_DRESSINGS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      setSaladDressing(item)
+                    }
+                    className={
+                      saladDressing === item
+                        ? "rounded-xl border border-[#1f6a3a] bg-[#eef3ed] p-3 text-sm font-semibold text-[#1f6a3a]"
+                        : "rounded-xl border border-[#dce2d9] p-3 text-sm"
+                    }
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {error && (
+              <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={confirmSalad}
+              className="mt-6 h-14 w-full rounded-xl bg-[#102019] font-semibold text-white"
+            >
+              Agregar al pedido
+            </button>
+
+          </div>
+        </div>
+      )}
 
       {fruitModal && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4">
