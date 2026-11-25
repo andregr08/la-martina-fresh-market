@@ -254,6 +254,7 @@ export default function RestaurantePage() {
 
     const preferredOrder = [
       "Baguettes",
+      "Sandwiches",
       "Wraps",
       "Ensaladas",
       "Toast",
@@ -1140,6 +1141,7 @@ export default function RestaurantePage() {
     </main>
   )
 }
+
 
 
 
