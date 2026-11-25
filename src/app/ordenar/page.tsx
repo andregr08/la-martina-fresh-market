@@ -67,6 +67,9 @@ const SALAD_BASES = [
 
 const SALAD_PROTEINS = [
   "Pollo",
+  "Queso de cabra",
+  "Queso parmesano",
+  "Queso feta",
 ]
 
 const SALAD_INGREDIENTS = [
@@ -75,14 +78,17 @@ const SALAD_INGREDIENTS = [
   "Elote",
   "Jitomate",
   "Jitomate cherry",
-  "Pepino",
-  "Perejil",
+  "Aceitunas",
+  "Nuez",
+  "Ajonjolí",
+  "Frijol negro",
 ]
 
 const SALAD_TOPPINGS = [
   "Fresa",
   "Manzana",
   "Zarzamora",
+  "Pepino",
 ]
 
 const SALAD_DRESSINGS = [
@@ -90,8 +96,6 @@ const SALAD_DRESSINGS = [
   "Aderezo cilantro limón",
   "Aderezo italiano",
   "Vinagreta miel limón",
-  "Vinagreta limón orégano",
-  "Vinagreta de hierbas",
   "Aderezo chipotle",
 ]
 
@@ -569,9 +573,17 @@ export default function RestaurantePage() {
         )
       }
 
-      if (current.length >= 3) {
+      const isLarge =
+        saladModal?.variant.name
+          .toLowerCase()
+          .includes("grande")
+
+      const maxIngredients =
+        isLarge ? 5 : 3
+
+      if (current.length >= maxIngredients) {
         setError(
-          "Solo puedes elegir hasta 3 ingredientes.",
+          `Solo puedes elegir hasta ${maxIngredients} ingredientes en este tamaño.`,
         )
         return current
       }
@@ -589,9 +601,17 @@ export default function RestaurantePage() {
         )
       }
 
-      if (current.length >= 2) {
+      const isLarge =
+        saladModal?.variant.name
+          .toLowerCase()
+          .includes("grande")
+
+      const maxToppings =
+        isLarge ? 3 : 2
+
+      if (current.length >= maxToppings) {
         setError(
-          "Solo puedes elegir hasta 2 toppings.",
+          `Solo puedes elegir hasta ${maxToppings} toppings en este tamaño.`,
         )
         return current
       }
