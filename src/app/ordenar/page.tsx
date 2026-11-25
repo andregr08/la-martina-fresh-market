@@ -562,23 +562,43 @@ export default function RestaurantePage() {
   }
 
   function toggleIngredient(value: string) {
-    setSaladIngredients((current) =>
-      current.includes(value)
-        ? current.filter(
-            (item) => item !== value,
-          )
-        : [...current, value],
-    )
+    setSaladIngredients((current) => {
+      if (current.includes(value)) {
+        return current.filter(
+          (item) => item !== value,
+        )
+      }
+
+      if (current.length >= 3) {
+        setError(
+          "Solo puedes elegir hasta 3 ingredientes.",
+        )
+        return current
+      }
+
+      setError("")
+      return [...current, value]
+    })
   }
 
   function toggleTopping(value: string) {
-    setSaladToppings((current) =>
-      current.includes(value)
-        ? current.filter(
-            (item) => item !== value,
-          )
-        : [...current, value],
-    )
+    setSaladToppings((current) => {
+      if (current.includes(value)) {
+        return current.filter(
+          (item) => item !== value,
+        )
+      }
+
+      if (current.length >= 2) {
+        setError(
+          "Solo puedes elegir hasta 2 toppings.",
+        )
+        return current
+      }
+
+      setError("")
+      return [...current, value]
+    })
   }
 
   function confirmSalad() {
