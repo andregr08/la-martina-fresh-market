@@ -12,7 +12,7 @@ import {
   Minus,
   Plus,
   Search,
-  ShoppingBag,
+  ShoppingCart,
   Trash2,
   UtensilsCrossed,
   X,
@@ -83,6 +83,7 @@ export default function RestaurantePage() {
 
   const [products, setProducts] = useState<RestaurantProduct[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
+  const [cartOpen, setCartOpen] = useState(false)
 
   const [fruitOptions, setFruitOptions] =
     useState<FruitOption[]>([])
@@ -278,6 +279,16 @@ export default function RestaurantePage() {
           sum +
           item.quantity *
             item.unit_price,
+        0,
+      ),
+    [cart],
+  )
+
+  const cartItemCount = useMemo(
+    () =>
+      cart.reduce(
+        (sum, item) =>
+          sum + item.quantity,
         0,
       ),
     [cart],
@@ -665,16 +676,17 @@ export default function RestaurantePage() {
       `Pedido #${result.order_number} enviado correctamente.`,
     )
 
+    setCartOpen(false)
     setSubmitting(false)
   }
 
   return (
     <main className="min-h-screen bg-[#f4f5f1] p-4 sm:p-6 lg:p-8">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="grid gap-6">
         <section className="min-w-0 space-y-5">
           <div className="rounded-[24px] border border-[#dfe4dc] bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eef3ed] text-[#1f6a3a]">
                     <UtensilsCrossed className="h-5 w-5" />
@@ -690,6 +702,23 @@ export default function RestaurantePage() {
                     </p>
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setCartOpen(true)}
+                  aria-label="Abrir carrito"
+                  className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#dce2d9] bg-white text-[#102019] shadow-sm"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+
+                  {cartItemCount > 0 && (
+                    <span className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1f6a3a] px-1.5 text-xs font-bold text-white">
+                      {cartItemCount > 99
+                        ? "99+"
+                        : cartItemCount}
+                    </span>
+                  )}
+                </button>
               </div>
 
               <div className="relative w-full lg:max-w-sm">
@@ -840,8 +869,17 @@ export default function RestaurantePage() {
           )}
         </section>
 
-        <aside>
-          <div className="sticky top-[102px] overflow-hidden rounded-[24px] border border-[#dfe4dc] bg-white shadow-sm">
+        {cartOpen && (
+          <div
+            className="fixed inset-0 z-[90] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
+            onClick={() => setCartOpen(false)}
+          >
+            <div
+              className="max-h-[92vh] w-full overflow-hidden rounded-t-[24px] border border-[#dfe4dc] bg-white shadow-xl sm:max-w-lg sm:rounded-[24px]"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
             <div className="border-b border-[#e4e8e1] p-5">
               <div className="flex items-center justify-between">
                 <div>
@@ -858,18 +896,32 @@ export default function RestaurantePage() {
                   </p>
                 </div>
 
-                {cart.length > 0 && (
+                <div className="flex items-center gap-3">
+                  {cart.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearOrder}
+                      aria-label="Vaciar pedido"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+
                   <button
                     type="button"
-                    onClick={clearOrder}
+                    onClick={() =>
+                      setCartOpen(false)
+                    }
+                    aria-label="Cerrar carrito"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dce2d9]"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </button>
-                )}
+                </div>
               </div>
             </div>
 
-            <div className="max-h-[350px] overflow-y-auto">
+            <div className="max-h-[38vh] overflow-y-auto">
               {cart.map((item) => (
                 <div
                   key={item.cart_key}
@@ -1039,8 +1091,9 @@ export default function RestaurantePage() {
                   : `Hacer pedido ${money(total)}`}
               </button>
             </div>
+            </div>
           </div>
-        </aside>
+        )}
       </div>
 
       {fruitModal && (
@@ -1101,4 +1154,5 @@ export default function RestaurantePage() {
     </main>
   )
 }
+
 
