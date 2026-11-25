@@ -556,13 +556,23 @@ export default function RestaurantePage() {
   }
 
   function toggleProtein(value: string) {
-    setSaladProtein((current) =>
-      current.includes(value)
-        ? current.filter(
-            (item) => item !== value,
-          )
-        : [...current, value],
-    )
+    setSaladProtein((current) => {
+      if (current.includes(value)) {
+        return current.filter(
+          (item) => item !== value,
+        )
+      }
+
+      if (current.length >= 2) {
+        setError(
+          "Solo puedes elegir hasta 2 proteínas.",
+        )
+        return current
+      }
+
+      setError("")
+      return [...current, value]
+    })
   }
 
   function toggleIngredient(value: string) {
