@@ -312,6 +312,7 @@ export default function RestaurantePage() {
       "fresa",
       "frambuesa",
       "durazno",
+      "zarzamora",
     ])
 
     const combinedFruitOptions = [
