@@ -674,9 +674,14 @@ export default function RestaurantePage() {
         )
       }
 
-      if (current.length >= 4) {
+      if (current.length >= 3) {
+        setError(
+          "Solo puedes elegir hasta 3 frutas.",
+        )
         return current
       }
+
+      setError("")
 
       return [
         ...current,
@@ -722,10 +727,10 @@ export default function RestaurantePage() {
 
     if (
       selectedFruitIds.length < 1 ||
-      selectedFruitIds.length > 4
+      selectedFruitIds.length > 3
     ) {
       setError(
-        "Selecciona entre 1 y 4 frutas.",
+        "Selecciona entre 1 y 3 frutas.",
       )
       return
     }
@@ -1495,57 +1500,89 @@ export default function RestaurantePage() {
       )}
 
       {fruitModal && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-[24px] bg-white p-5">
-            <div className="flex justify-between">
-              <h2 className="text-xl font-semibold">
-                Selecciona las frutas
-              </h2>
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/45 sm:items-center sm:p-4">
+          <div className="flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-[26px] bg-white shadow-2xl sm:max-w-2xl sm:rounded-[24px]">
+            <div className="shrink-0 border-b border-[#e5e9e2] bg-white px-5 py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-[#172018]">
+                    Elige tus frutas
+                  </h2>
 
+                  <p className="mt-1 text-sm text-slate-500">
+                    Selecciona hasta 3 frutas
+                  </p>
+
+                  <p className="mt-1 text-xs font-medium text-[#1f6a3a]">
+                    {selectedFruitIds.length} de 3 seleccionadas
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFruitModal(null)
+                    setSelectedFruitIds([])
+                    setError("")
+                  }}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#dce2d9]"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+              <div className="grid gap-2 sm:grid-cols-2">
+                {fruitOptions.map((fruit) => {
+                  const selected =
+                    selectedFruitIds.includes(
+                      fruit.id,
+                    )
+
+                  const disabled =
+                    !selected &&
+                    selectedFruitIds.length >= 3
+
+                  return (
+                    <button
+                      key={fruit.id}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() =>
+                        toggleFruit(fruit.id)
+                      }
+                      className={
+                        selected
+                          ? "flex min-h-14 items-center justify-between rounded-2xl border-2 border-[#1f6a3a] bg-[#eef3ed] px-4 py-3 text-left font-semibold text-[#172018]"
+                          : disabled
+                            ? "flex min-h-14 items-center rounded-2xl border border-[#e1e5df] bg-slate-50 px-4 py-3 text-left text-slate-300"
+                            : "flex min-h-14 items-center rounded-2xl border border-[#dce2d9] bg-white px-4 py-3 text-left text-[#172018]"
+                      }
+                    >
+                      <span>{fruit.name}</span>
+
+                      {selected && (
+                        <span className="ml-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#1f6a3a] text-xs text-white">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="shrink-0 border-t border-[#e5e9e2] bg-white p-4">
               <button
                 type="button"
-                onClick={() => {
-                  setFruitModal(null)
-                  setSelectedFruitIds([])
-                }}
+                disabled={selectedFruitIds.length === 0}
+                onClick={confirmFruitSelection}
+                className="h-12 w-full rounded-xl bg-[#102019] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <X className="h-5 w-5" />
+                Agregar al pedido
               </button>
             </div>
-
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              {fruitOptions.map((fruit) => {
-                const selected =
-                  selectedFruitIds.includes(
-                    fruit.id,
-                  )
-
-                return (
-                  <button
-                    key={fruit.id}
-                    type="button"
-                    onClick={() =>
-                      toggleFruit(fruit.id)
-                    }
-                    className={
-                      selected
-                        ? "rounded-xl border border-[#1f6a3a] bg-[#eef3ed] px-4 py-3 text-left"
-                        : "rounded-xl border px-4 py-3 text-left"
-                    }
-                  >
-                    {fruit.name}
-                  </button>
-                )
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={confirmFruitSelection}
-              className="mt-5 h-12 w-full rounded-xl bg-[#102019] font-semibold text-white"
-            >
-              Agregar al pedido
-            </button>
           </div>
         </div>
       )}
