@@ -311,6 +311,7 @@ export default function RestaurantePage() {
       "manzana",
       "fresa",
       "frambuesa",
+      "durazno",
     ])
 
     const combinedFruitOptions = [
