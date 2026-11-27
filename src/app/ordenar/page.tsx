@@ -294,11 +294,58 @@ export default function RestaurantePage() {
         : [],
     )
 
-    setFruitOptions(
+    const baseFruitOptions =
       Array.isArray(menu?.fruit_options)
         ? menu.fruit_options
-        : [],
+        : []
+
+    const {
+      data: extraFruitOptions,
+    } = await supabase.rpc(
+      "get_fresh_cup_extra_options",
     )
+
+    const excludedNames = new Set([
+      "pera",
+      "manzana roja",
+      "manzana",
+      "fresa",
+      "frambuesa",
+    ])
+
+    const combinedFruitOptions = [
+      ...baseFruitOptions,
+      ...(Array.isArray(extraFruitOptions)
+        ? extraFruitOptions
+        : []),
+    ]
+
+    const uniqueFruitOptions =
+      combinedFruitOptions.filter(
+        (fruit, index, array) => {
+          const normalizedName =
+            fruit.name
+              .trim()
+              .toLowerCase()
+
+          if (
+            excludedNames.has(
+              normalizedName,
+            )
+          ) {
+            return false
+          }
+
+          return (
+            array.findIndex(
+              (item) =>
+                item.id === fruit.id,
+            ) === index
+          )
+        },
+      )
+
+    setFruitOptions(uniqueFruitOptions)
 
     setLoading(false)
   }, [supabase])
