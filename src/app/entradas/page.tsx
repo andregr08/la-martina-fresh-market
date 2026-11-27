@@ -205,11 +205,29 @@ export default function EntradasPage() {
     setMessage("")
   }
 
-  function addDraftProduct() {
+  async function addDraftProduct() {
     setError("")
     setMessage("")
 
-    const product =
+    const quantity = Number(draftQuantity)
+    const unitCost = Number(draftCost)
+
+    if (!search.trim()) {
+      setError("Escribe el nombre del producto.")
+      return
+    }
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setError("Escribe una cantidad válida de kilos.")
+      return
+    }
+
+    if (!Number.isFinite(unitCost) || unitCost < 0) {
+      setError("Escribe un costo válido por kilo.")
+      return
+    }
+
+    let product =
       products.find(
         (item) => item.id === selectedProductId,
       ) ??
@@ -220,12 +238,95 @@ export default function EntradasPage() {
       )
 
     if (!product) {
-      setError("Selecciona un producto de la lista.")
-      return
-    }
+      const newProductName = search.trim()
 
-    const quantity = Number(draftQuantity)
-    const unitCost = Number(draftCost)
+      const confirmed = window.confirm(
+        `"${newProductName}" no existe todavía. ¿Quieres crearlo y agregar esta entrada?`,
+      )
+
+      if (!confirmed) {
+        return
+      }
+
+      const {
+        data: categories,
+        error: categoriesError,
+      } = await supabase
+        .from("categories")
+        .select("id, name")
+        .order("name")
+
+      if (categoriesError) {
+        setError(categoriesError.message)
+        return
+      }
+
+      const produceCategory =
+        (categories ?? []).find((category) => {
+          const name = normalizeText(category.name)
+
+          return (
+            name.includes("verd") ||
+            name.includes("frut") ||
+            name.includes("produce")
+          )
+        }) ?? null
+
+      const {
+        data: createdProduct,
+        error: createError,
+      } = await supabase
+        .from("products")
+        .insert({
+          sku: null,
+          name: newProductName,
+          unit: "kg",
+          category_id:
+            produceCategory?.id ?? null,
+          purchase_price: unitCost,
+          sale_price: 0,
+          current_stock: 0,
+          minimum_stock: 0,
+          ideal_stock: 0,
+          shelf_life_days: null,
+          refrigerated: true,
+          active: true,
+          updated_at: new Date().toISOString(),
+        })
+        .select(`
+          id,
+          sku,
+          name,
+          unit,
+          purchase_price,
+          category:categories (
+            name
+          )
+        `)
+        .single()
+
+      if (createError || !createdProduct) {
+        setError(
+          createError?.message ??
+            "No se pudo crear el producto.",
+        )
+        return
+      }
+
+      product =
+        createdProduct as unknown as Product
+
+      setProducts((current) =>
+        [...current, product as Product].sort(
+          (a, b) =>
+            a.name.localeCompare(b.name),
+        ),
+      )
+
+      setMessage(
+        `"${newProductName}" se creó como producto nuevo.`,
+      )
+    }
 
     if (!Number.isFinite(quantity) || quantity <= 0) {
       setError("Escribe una cantidad válida de kilos.")
@@ -522,7 +623,7 @@ export default function EntradasPage() {
                 }
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
-                    addDraftProduct()
+                    void addDraftProduct()
                   }
                 }}
                 placeholder="0.00"
@@ -533,7 +634,9 @@ export default function EntradasPage() {
             <div className="flex items-end">
               <button
                 type="button"
-                onClick={addDraftProduct}
+                onClick={() =>
+                  void addDraftProduct()
+                }
                 className="h-11 w-full rounded-xl bg-[#102019] text-sm font-semibold text-white hover:bg-[#174f2d]"
               >
                 Agregar
