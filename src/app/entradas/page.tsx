@@ -273,37 +273,20 @@ export default function EntradasPage() {
         }) ?? null
 
       const {
-        data: createdProduct,
+        data: createdRows,
         error: createError,
-      } = await supabase
-        .from("products")
-        .insert({
-          sku: null,
-          name: newProductName,
-          unit: "kg",
-          category_id:
-            produceCategory?.id ?? null,
-          purchase_price: unitCost,
-          sale_price: 0,
-          current_stock: 0,
-          minimum_stock: 0,
-          ideal_stock: 0,
-          shelf_life_days: null,
-          refrigerated: true,
-          active: true,
-          updated_at: new Date().toISOString(),
-        })
-        .select(`
-          id,
-          sku,
-          name,
-          unit,
-          purchase_price,
-          category:categories (
-            name
-          )
-        `)
-        .single()
+      } = await supabase.rpc(
+        "create_product_from_entry",
+        {
+          p_name: newProductName,
+          p_purchase_price: unitCost,
+        },
+      )
+
+      const createdProduct =
+        Array.isArray(createdRows)
+          ? createdRows[0]
+          : null
 
       if (createError || !createdProduct) {
         setError(
@@ -313,8 +296,19 @@ export default function EntradasPage() {
         return
       }
 
-      product =
-        createdProduct as unknown as Product
+      product = {
+        id: createdProduct.id,
+        sku: createdProduct.sku,
+        name: createdProduct.name,
+        unit: createdProduct.unit,
+        purchase_price:
+          Number(createdProduct.purchase_price || 0),
+        category: createdProduct.category_name
+          ? {
+              name: createdProduct.category_name,
+            }
+          : null,
+      } as Product
 
       setProducts((current) =>
         [...current, product as Product].sort(
